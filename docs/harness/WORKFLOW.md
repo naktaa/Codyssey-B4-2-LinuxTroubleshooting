@@ -1,0 +1,182 @@
+# Harness v1 운영
+
+## 목적과 역할
+
+여러 교육 미션과 개인 프로젝트에서 재사용하는 수동 orchestration 환경입니다. 장기 기억은 채팅이 아니라 repository 문서와 코드에 남깁니다. 세션 생성과 인계는 사용자가 직접 합니다.
+자동 subagent, Agents API orchestration, 자동 review loop·worktree·retry, Test/Verifier Agent, bootstrap·init_harness.py·자동 템플릿 복사·architecture linter·대규모 shell automation은 만들지 않습니다. 사용자가 템플릿을 직접 배치합니다.
+
+| 역할 | 담당 | 변경 권한 |
+| --- | --- | --- |
+| PM — GPT-6 Astra | 분석, 한 Step 제안, TASK·모델 추천, Review 판단·Triage, 상태 갱신 | 미션 상태 문서, 승인된 README·설명용 diagram. 공통 Harness 규칙 변경은 별도 사용자 승인. 기능 source 구현 금지 |
+| Implementer | 코드 분석, 계획 제시, 승인된 구현·수정, 설명·테스트 안내 | 사용자가 승인한 TASK와 계획 범위 |
+| Reviewer | 독립 정적 검토, 근거 있는 Findings | 지정 리뷰 문서의 Critical/Major/Minor/Good. source 수정 금지 |
+| 사용자 | 세션·모델 선택, 인계, 범위·계획 승인, 실제 실행·테스트 | 최종 결정 |
+
+## 한 Step 진행 순서
+
+1. PM이 미션 전체와 현재 코드를 분석해 Roadmap과 README 구성·시각화 필요성을 제안합니다. README 골격은 사용자 승인 후 만들고 다음 기능 단위 Step을 논의합니다.
+2. 사용자가 Step을 승인하면 PM이 TASK 파일을 작성하고 난이도·모델·reasoning과 Implementer 시작 프롬프트를 제공합니다.
+3. 사용자가 새 Implementer 세션을 만들고 프롬프트와 TASK 경로를 전달합니다.
+4. Implementer가 기존 코드와 변경 상태를 읽고 수정 파일·함수·방향·영향을 설명한 뒤 **STOP**합니다.
+5. 사용자가 계획을 명시적으로 승인하면 Implementer가 승인 범위만 수정합니다.
+6. Implementer가 정적 self-check와 코드 위치를 연결한 설명을 제공합니다. 사용자가 결과를 PM에 전달하면 PM은 실제 파일·diff와 TASK를 대조하고 항상 Review Decision을 출력합니다.
+7. REQUIRED이면 반드시, RECOMMENDED이면 사용자 선택에 따라 새 Reviewer 세션을 생성하고 TASK·변경 범위·리뷰 저장 경로를 전달합니다. Reviewer는 독립적으로 검토해 Findings만 기록합니다.
+8. 사용자가 리뷰 경로를 PM에 전달합니다. PM은 각 finding을 ACCEPT / DEFER / REJECT로 분류하고 이유와 수정안을 제시합니다.
+9. 사용자가 수정 범위를 승인합니다. Implementer가 구체적인 수정 계획을 보여주고 그 계획에 대한 승인 후 수정합니다. PM 제안에 이미 동일한 구체적 계획이 포함되어 사용자가 명시적으로 승인했다면 그 승인 내용을 인계하여 중복 승인을 생략할 수 있습니다. 범위 승인만으로 계획 승인까지 추정하지 않습니다.
+10. 사용자가 직접 실행·테스트하고 실제 결과를 알려줍니다. 미확인·실패 항목은 남겨 둡니다. 실패로 source를 다시 고칠 때도 계획 승인 절차를 따릅니다.
+11. PM이 REQUIREMENTS → STATUS → WORKLOG → README 순서로 갱신 필요성을 확인하고 실제 변경이 필요한 문서만 갱신한 뒤 다음 Step을 제안합니다. 필수 구현·사용자 테스트 완료 후에는 Mission Close-out으로 마무리합니다.
+
+SKIP 또는 RECOMMENDED에서 사용자가 생략을 선택한 경우 7~9를 건너뛰고 사용자 테스트로 갑니다. REQUIRED 리뷰가 남아 있으면 완료 처리하지 않습니다. 리뷰 수정 후에도 self-check·코드 설명과 PM의 Review Decision을 반복합니다. 이미 완료된 리뷰와 수정 범위를 대조해 추가 검토 필요성을 판단하며 무한 리뷰 반복을 만들지 않습니다.
+
+## 기능 단위 Step
+
+사용자가 독립적으로 이해하고 하나의 실행 흐름으로 설명할 수 있는 기능을 TASK로 묶습니다. 관련성이 높은 기능은 함께 묶고 서로 다른 관심사는 분리합니다. 한 번에 너무 많은 파일·책임을 바꾸지 않습니다. 전체 프로그램 통째 구현이나 함수·변수 하나씩의 기계적 분할을 피합니다.
+예: 데이터 모델+기본 저장 구조 → add+list → edit+delete → search → summary/report. 실제 미션에 맞게 조정합니다.
+
+PM은 What + Boundary + Acceptance Criteria를 정하고 Implementer는 실제 코드에 맞는 How를 제안합니다. TASK는 Goal·Context·Requirements·Constraints·Scope·Out of Scope·Acceptance Criteria·Relevant Files·Implementation Notes를 사용합니다. Notes는 특별한 학습 요소·필수 참고가 있을 때만 채웁니다.
+결과와 경계는 명확히 하되 함수 이름·내부 호출 순서·API 옵션을 과도하게 지정하지 않습니다. 원문이 요구한 generator·decorator·dataclass·async/await 등은 반드시 포함합니다. 실제 코드와 TASK가 충돌하면 Implementer는 문제·영향·대안을 보고하고 사용자 결정과 PM의 범위 정리를 기다립니다.
+
+## Review 판단 기준
+
+PM은 구현 결과를 받을 때마다 다음 셋 중 하나를 출력합니다. Step 제안 시 예상 판정도 같은 용어를 쓰되 실제 변경 후 다시 판단합니다. 해당 기준이 겹치면 더 엄격한 등급을 적용합니다.
+
+| 결정 | 적용 기준 | 다음 행동 |
+| --- | --- | --- |
+| REQUIRED | HIGH, 프로그램의 파일 저장·수정·삭제 기능, 데이터 무결성·손실 위험, 핵심 API 요청/응답, 인증·권한, 여러 module 영향, architecture 변경, 복잡한 refactoring·원인 복잡 bug, 중요한 pointer/ownership/lifetime, 오류 영향이 큰 평가 핵심 기능 | 새 독립 Reviewer 세션 → PM Triage → 필요한 수정 승인·반영 → 사용자 테스트 |
+| RECOMMENDED | REQUIRED에 해당하지 않는 MEDIUM 기능, 검색·필터·정렬·데이터 변환, 복합 validation, 중요한 UI 상태, 새로운 문법·구조가 많은 구현, 영향이 제한적인 평가 핵심 기능 | 추천 이유와 Reviewer 시작 지시 제공 → 사용자에게 진행/생략 선택 → 선택을 기록 |
+| SKIP | 핵심 로직 영향이 없는 문구·작은 README/CSS/UI 수정, 영향이 명확한 LOW 변경 | self-check 확인 → 사용자 직접 테스트·확인 → PM 완료 판단 |
+
+파일 관련 REQUIRED 기준은 프로그램의 저장 동작과 데이터 위험을 뜻합니다. 모든 source·문서 편집을 일괄 REQUIRED로 분류하지 않습니다.
+PM은 파일 저장/덮어쓰기/삭제, 사용자 데이터 변경, ownership/lifetime, 데이터 손실 가능성, 실행만으로 드러나지 않는 내부 로직, 외부 API/비동기 상태를 확인합니다. 중요한 위험이 있으면 REQUIRED로 판단합니다.
+모델·reasoning은 난이도와 위험으로 별도 추천합니다. REQUIRED라고 가장 강한 모델을 무조건 선택하지 않습니다.
+
+## 안전성 검토 기준
+
+Implementer는 계획·self-check에서, Reviewer는 독립 검토에서 아래 중 관련 항목을 확인합니다. 미적용은 이유를 짧게 적고, 정적 확인만으로 안전을 보증하지 않습니다. 필수 학습 개념을 지키면서 위험에 비례한 가장 단순한 방식을 선택합니다.
+
+- **File Safety / Data Integrity**: 기존 내용 확인, 원본 보존, overwrite 이유, 관련 없는 삭제·초기화 금지, 임시 파일 충돌·정리, 실패 중간 상태, encoding·newline·path, binary와 text 및 생성물과 source 구분.
+- **파일 저장 기능**: 파일 없음·빈 파일·잘못된 형식·읽기/쓰기 실패·부분 저장·잘못된 데이터·기존 데이터 보존을 검토합니다. 파싱 실패를 빈 데이터로 취급해 덮어쓰지 않습니다. 필요하면 임시 파일 후 교체 등 단순한 원본 보호 방식을 고려하되 환경·미션에 맞지 않는 enterprise-grade 계층을 추가하지 않습니다.
+- **C/C++ Memory Safety**: null/dangling/uninitialized pointer, array bounds, buffer overflow, use-after-free, double free, leak, ownership/lifetime, pointer arithmetic, 동적 메모리 해제 누락. 불필요한 raw allocation은 피하되 pointer·malloc/free·new/delete 학습 미션에서는 문법을 회피하지 않고 올바른 사용·해제를 보여줍니다.
+- **Python**: file handle과 context manager, mutable shared state, 예상 밖 None·type, 파일 손상.
+- **JavaScript**: null/undefined, DOM 존재, async error, stale state, localStorage parsing, API 실패, event listener 중복. 언어에 맞지 않는 메모리 검사를 강요하지 않습니다.
+- **Destructive Operation Safety / Secret/Credential Safety**: [AGENTS.md](../../AGENTS.md)의 명시적 요청·영향 확인·secret 비노출 규칙을 따릅니다. 사용자 테스트 안내도 실제 데이터 대신 별도 예제·임시 데이터를 우선합니다.
+
+예상 밖 위험이 생기면 임의로 계속하지 않습니다. `위험 / 영향 / 대안 A·B / 권장 / 어떤 방식으로 진행할까요?`로 보고하고 변경 승인을 기다립니다.
+
+## 승인 경계
+
+- `진행`, `수정해`, `적용해` 등 제시된 구체적 계획을 승인하는 사용자 응답을 근거로 삼습니다. 질문·토론·TASK 수신은 승인이 아닙니다.
+- 최초 구현과 리뷰 후 수정 모두 실제 source 수정 전 승인이 필요합니다. 실행 설정·dependency·테스트 코드처럼 동작에 영향을 주는 변경도 계획에 포함합니다.
+- 한 번 승인된 계획 안에서는 파일마다 반복 승인받지 않습니다. Scope·영향·복잡도가 실질적으로 커지면 대안과 권장안을 제시하고 멈춥니다.
+- 읽기·정적 분석, 승인된 Step의 TASK 작성, 실제 결과를 반영한 상태 문서 관리는 source 수정 승인과 구분합니다.
+- 세션 재개 시 승인 내역과 현재 변경이 일치하는지 확인합니다. 기록이 없거나 범위가 불명확하면 승인되었다고 추정하지 않습니다.
+
+## 수동 인계
+
+같은 repository의 저장된 파일이 기준입니다. 채팅은 자동으로 다른 세션에 전달되지 않습니다. 한 번에 하나의 구현 세션만 파일을 수정하도록 운영합니다.
+
+| 전달 | 사용자가 전달할 최소 정보 |
+| --- | --- |
+| PM → Implementer | 역할 프롬프트 경로, TASK 경로, 모델·reasoning |
+| Implementer → PM | TASK 경로, 완료 보고, 변경 파일·기준점, 미검증·남은 문제 |
+| PM → Reviewer | 역할 프롬프트 경로, TASK 경로, 변경 기준점·파일 범위, 리뷰 저장 경로 |
+| Reviewer → PM | 리뷰 문서 경로 |
+| PM → Implementer 수정 | TASK·리뷰 경로, ACCEPT ID, 사용자 승인 범위와 계획 승인 여부 |
+| 사용자 → PM | 실제 실행 명령·입력·환경·관찰 결과·실패 내용 |
+
+PM은 인계 결과와 중요한 결정을 문서에 남깁니다. 구현 완료 보고만으로 기능 완료 체크하지 않습니다.
+Reviewer에게 구현자의 대화·의도를 정답처럼 전달하지 않습니다. diff 기준이 불명확하면 먼저 범위를 확인합니다. git diff에 나타나지 않는 신규 파일과 기존 사용자 변경도 구분합니다. 이를 위해 자동 commit이나 branch 생성을 하지 않습니다.
+
+## 테스트·기록·README
+
+실제 실행과 테스트는 사용자가 담당합니다. AI는 명령·입력·화면·edge case와 기대 결과를 안내하되 실행했다고 기록하지 않습니다. 사용자 확인만 실행 검증 근거로 쓰고 정적 확인은 구분합니다.
+PM은 사용자 테스트 결과를 받은 뒤 REQUIREMENTS → STATUS → WORKLOG → README 순서로 실제 갱신 필요성을 판단합니다. 항상 네 문서를 전부 수정하지 않습니다. 그 전에도 재개용 결정·진행 상태는 기록할 수 있지만 완료로 표시하지 않습니다. WORKLOG에는 Review 등급·실시/생략 이유·Findings·PM 결정·수정·남은 문제를 남깁니다.
+
+### Progressive README
+
+미션 분석과 Roadmap 단계에서 README 예상 목차와 시각화 필요성을 먼저 제안하고 사용자 승인 후 골격을 만듭니다. 기존 README는 읽고 필요한 부분만 병합합니다. 이 템플릿에는 실제 미션이 없으므로 프로젝트 README를 미리 만들지 않습니다.
+형식 우선순위는 **미션 원문에서 요구한 README Template → 기존 repository README 구조 → 아래 기본 Codyssey 스타일**입니다. 필수 항목을 기본 스타일 때문에 누락하지 않습니다.
+
+기본 스타일은 사용자가 설명한 B1-1 Portfolio README의 방향을 따릅니다. 원본을 직접 확인하지 않았다면 정확히 복제했다고 주장하지 않습니다. 필요한 항목만 선택합니다:
+
+- 프로젝트 소개: 짧고 명확한 목적.
+- 프로젝트 구조: 실제 directory tree. 계획한 파일을 이미 존재하는 것처럼 넣지 않음.
+- 동작 구조 / Architecture, 핵심 흐름: module·상태·데이터·요청 흐름을 설명하고 필요한 표나 그림을 연결.
+- 사용 기술: 실제 사용 기술만 간결하게.
+- 주요 기능: 완료된 기능을 bullet로 정리.
+- 구현 핵심 / 기능별 상세 설명: 어떻게 동작하는지, 평가에 필요한 핵심 개념·직접 확인 방법.
+- 실행 방법: 실제 검증된 명령과 환경. 미확인 방법을 검증된 것으로 쓰지 않음.
+- 배포: 실제 배포가 있을 때만 URL·방식.
+- 스크린샷 / 결과: UI나 결과 이해에 도움이 될 때 실제 자료 사용.
+
+구현 전에는 필요한 곳에만 '구현 완료된 기능부터 순차적으로 정리합니다' 같은 최소 placeholder를 둡니다. 예정 기능을 완료된 것처럼 쓰지 않습니다. Step 완료·사용자 확인 후 새 기능·구조·흐름·실행 방법 등 새로 반영할 사실이 있는지 반드시 확인하고 해당 부분만 갱신합니다.
+README는 개발 일지나 강의 노트가 아닙니다. 상세 작업은 WORKLOG, 별도 학습 설명은 필요할 때만 note로 분리합니다. 단순 기능 나열보다 프로젝트가 어떻게 동작하는지 보여줍니다.
+
+### Architecture / Flow Documentation
+
+PM은 module 관계, 요청/응답, event/state/render, 데이터 pipeline, 저장 구조, 시스템 구성을 시각화하는 것이 실제 이해에 도움이 되는지 판단합니다. 단순한 프로젝트에 억지 diagram을 넣지 않습니다.
+초기 구조가 명확하고 사용자 승인을 받았다면 시작 단계에서 준비할 수 있습니다. 아직 구현 전이면 '설계안 · 구현 전'으로 표시하고 완료된 구조처럼 표현하지 않습니다. 구조가 불확실하면 Architecture 섹션만 계획하고 관련 Step 후 실제 코드 기준으로 생성합니다.
+SVG가 적합하면 `images/<mission>-architecture.svg`를 사용하고, GitHub에서 읽을 수 있는 Mermaid도 고려합니다. 실제 그림이 필요할 때만 디렉터리를 만듭니다. 흰 배경의 깔끔한 구조, 핵심 이름 위주의 박스, 명확한 화살표·짧은 설명을 기본으로 하고 긴 문장·장식을 피합니다. Mermaid에서는 렌더러 테마를 고려합니다.
+그림은 README 설명을 보완합니다. 관련 구조가 바뀌면 함께 갱신하고 Close-out에서 실제 코드와 비교합니다. 초기에 CLI→Service→Repository 같은 구조를 모든 미션에 강제하지 않습니다.
+
+## 중요한 결정과 반복 피드백
+
+### Decision Log
+
+향후 TASK·프로젝트 이해에 영향을 주는 중요한 결정만 WORKLOG에 `Decision / Reason / Alternative / Why not`으로 기록합니다. 별도 Decision 파일은 만들지 않습니다. 변수명·사소한 함수명·CSS 값·일반 syntax 선택은 기록하지 않습니다. STATUS에는 현재 중요한 결정의 요약이나 WORKLOG 참조만 둡니다.
+
+### Feedback Promotion
+
+같은 종류의 Review finding이나 사용자 수정 요청이 반복되면 PM은 관련 TASK·리뷰 근거를 비교해 공통 지침의 문제인지 판단합니다. 한 번의 문제는 즉시 공통 규칙으로 만들지 않습니다.
+반복 원인과 적용 범위, 기존 규칙으로 해결할 수 없는 이유, 최소 수정안을 사용자에게 제시합니다. 승인 후 AGENTS / 역할 프롬프트 / WORKFLOW 중 책임이 맞는 한 곳을 우선 수정하고 다른 곳은 참조합니다. 중복·충돌·오래된 지침은 통합해 instruction drift를 막습니다. 이번 TASK의 수정 승인만으로 공통 Harness 변경까지 승인받았다고 가정하지 않습니다.
+예: 반복된 무관한 refactoring은 구현 경계 규칙에 통합하고, 반복된 비동기 설명 누락은 Code Walkthrough 규칙에 통합합니다. 향후 custom Skill은 반복 절차·명확한 trigger·재사용 가치가 확인될 때 후보로만 제안합니다.
+사용자 승인 없이 다른 repository나 원본 템플릿에 개선을 전파하지 않습니다. 승인된 개선과 대상 경로만 WORKLOG에 짧게 남깁니다.
+
+## Mission Close-out
+
+모든 필수 요구사항 구현과 사용자 테스트가 완료되면 PM이 가볍게 한 번 점검합니다. 새로운 기능 개발이나 대규모 refactoring 단계가 아닙니다.
+
+- **Requirements**: Required의 실제 완료·검증 근거, Optional/Bonus의 완료·미채택·미완료 구분, 잘못된 완료 표시, REQUIRED 리뷰 완료 여부.
+- **Status / Worklog**: 오래된 In Progress, 실제 작업과 기록 불일치, 필요한 주요 Decision 누락.
+- **Code**: 명백한 dead code·중복·임시 코드·작은 기술 부채를 정적으로 확인해 제안만 합니다. PM이 직접 source를 수정하지 않습니다. 수정이 필요하면 범위를 정해 사용자 승인 → Implementer 계획 승인·수정 → 관련 확인 절차를 따릅니다.
+- **README / Diagram**: 실제 코드·directory tree·기술 목록·검증된 실행 방법·미션 요구 항목·그림의 일치, 스크린샷 필요 여부, 미구현 내용을 완료로 표현했는지 확인.
+- **Harness Feedback**: 반복된 리뷰·사용자 피드백 중 다음 미션에도 유효한 개선을 제안합니다. 공통 규칙 변경은 별도 사용자 승인 후 진행합니다.
+
+미검증·필수 누락을 발견하면 종료로 표시하지 않고 남은 항목과 다음 행동을 알립니다. 점검 결과와 남은 선택 항목은 WORKLOG에 간단히 남기고 STATUS를 실제 상태로 동기화합니다. 제출·commit·push·배포를 자동으로 수행하지 않습니다.
+
+## 새 미션과 세션 복구
+
+1. 사용자가 이 템플릿의 [AGENTS.md](../../AGENTS.md)와 docs/harness/를 새 repository에 직접 복사합니다. 같은 목적의 기존 파일이 있으면 먼저 읽고 병합하며 덮어쓰거나 중복 구조를 만들지 않습니다.
+2. [MISSION.md](MISSION.md) 입력 영역에 원문의 내용·요구사항·계층을 보존하고 Markdown formatting만 정리해 저장합니다. 프로젝트별 기술 스택·추가 규칙이 필요하면 [AGENTS.md](../../AGENTS.md)에 짧게 추가합니다.
+3. GPT-6 Astra PM 세션에서 [prompts/PM.md](prompts/PM.md)를 사용합니다. PM은 원문 분석 → REQUIREMENTS 초기 작성 → 실제 repository 확인 → STATUS 초기화 → Roadmap·README 구성·시각화 필요성 제안 → 승인된 README 골격 작성 → 첫 Step 제안을 진행합니다.
+4. 새 PM 세션은 [AGENTS.md](../../AGENTS.md), PM 프롬프트, MISSION, REQUIREMENTS, STATUS를 읽고 필요한 현재 TASK·최근 WORKLOG·코드를 확인합니다. 채팅 복원 대신 실제 repository 상태로 재개합니다.
+
+새 미션에서는 MISSION / REQUIREMENTS / STATUS / WORKLOG와 tasks·reviews의 실제 기록만 새로 시작합니다. [TASK_TEMPLATE.md](tasks/TASK_TEMPLATE.md)와 [REVIEW_TEMPLATE.md](reviews/REVIEW_TEMPLATE.md)는 보존합니다. AGENTS / WORKFLOW / MODEL_POLICY / prompts는 재사용합니다. 기존 프로젝트 기록을 지우라는 의미가 아니며, 진행 중 프로젝트는 병합하고 다른 미션은 새 repository나 별도 복사본에서 시작합니다.
+
+미션마다 템플릿을 다시 설계하지 않습니다. 기존 프로젝트에 재사용할 때 이전 미션의 원문·TASK·리뷰·기록을 섞지 않습니다. 사용자 Git 저장 이후에는 다른 PC에서 clone하여 문서로 재개할 수 있습니다.
+
+## Git·Skill 정책
+
+Git 쓰기 작업은 [AGENTS.md](../../AGENTS.md)의 명시적 요청 규칙을 따릅니다. PM이 실제 diff·진행 상태·변경 목적을 보고 커밋 단위와 시점을 판단합니다. TASK 하나당 하나, TASK 작성·구현·리뷰마다 하나처럼 획일적으로 나누지 않습니다.
+- 함께 이해하고 되돌릴 수 있는 응집된 변경을 묶습니다. 관련 source·TASK·리뷰·문서 변경을 포함할 수 있으며, 서로 무관한 변경·사용자 작업·secret·생성물을 묶지 않습니다. 작은 관련 TASK는 묶고 큰 TASK는 독립적인 변경으로 나눌 수 있습니다. 문서·설정·bug fix도 별도 의미가 있으면 독립 단위입니다.
+- PM은 구현 결과 인계, 사용자 테스트·문서 갱신 후, 작업 중단·전환 시 커밋 필요성을 판단합니다. 기본적으로 필요한 리뷰·수정·사용자 확인을 마친 안정된 단위를 권합니다. 긴 작업의 중간 보존이 필요하면 미완료·미검증 상태를 명시한 checkpoint를 제안할 수 있으며 TASK 완료로 처리하지 않습니다.
+- 커밋할 시점이면 `커밋 권장 — <대상 범위>: <타입: 메시지>` 한 줄을 반드시 남깁니다. 아직 묶을 시점이 아니면 인계·완료 보고에서 `커밋 보류 — <이유/다음 기준>` 한 줄로 알리고, 매 대화마다 반복하지 않습니다. 예: `커밋 권장 — 거래 추가·조회 및 관련 문서: Feat: 거래 추가 및 조회 기능 구현`.
+- 기존 commit convention이 우선이며 없으면 Chore / Feat / Fix / Refactor / Docs / Test 계열을 사용합니다. 메시지는 실제 변경을 설명하며 테스트 성공을 추정하지 않습니다.
+- 추천은 commit 실행 승인이 아닙니다. 사용자가 직접 하거나 명시적으로 요청했을 때만 실행합니다. 실제 실행 전 현재 staged/unstaged·신규 파일과 대상 범위를 확인하고 무관한 변경을 포함하지 않습니다. 실행하지 않은 commit·SHA를 기록하지 않습니다. 보류된 범위는 필요하면 STATUS에 짧게 남겨 재개 시 확인합니다.
+
+custom Skill은 v1에서 만들지 않습니다. 일반 계획·구현·리뷰를 Skill로 중복하지 않습니다. 여러 프로젝트에서 반복되고 절차가 일정하며 명확한 trigger와 재사용 가치가 확인되면 공식 Skill Creator를 활용해 `.agents/skills/<skill-name>/SKILL.md`를 고려합니다. 예: 미션 원문에서 필수·선택·보너스와 평가 포인트를 추출하는 반복 절차. Skill 수를 늘리는 것이 목표가 아닙니다.
+
+## 자연어로 시작하기
+
+[AGENTS.md](../../AGENTS.md)에 요청 의도별 역할 선택과 지침 확인 규칙이 있습니다. 파일 경로를 매번 입력할 필요는 없습니다.
+
+| 상황 | 사용자 요청 예시 |
+| --- | --- |
+| 새 PM 세션 | 미션 시작하고 분석해 줘. 원문은 아래야. |
+| PM 재개 | 미션 이어서 진행하자. |
+| 새 구현 세션 | TASK-001 구현해 줘. |
+| 새 독립 리뷰 세션 | TASK-001 리뷰해 줘. |
+| 대상이 분명한 기존 세션 | 이 작업 이어서 해 줘. |
+
+세션은 실제로 읽은 문서와 역할·대상·다음 행동을 공통 확인문구로 알립니다. 예: `지침 확인 완료 | 역할: Implementer | 확인: [AGENTS.md](../../AGENTS.md), [IMPLEMENTER.md](prompts/IMPLEMENTER.md), TASK-001.md | 대상: TASK-001 | 다음: 계획 제시 후 승인 대기`.
+대상이 불명확하면 확인 질문을 하며, 자연어 구현 요청만으로 수정 계획 승인까지 받은 것으로 간주하지 않습니다. 역할 선택은 수동 세션·모델 선택과 승인 절차를 대체하지 않습니다.
