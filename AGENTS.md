@@ -25,6 +25,8 @@
 - Implementer는 수정 후 정적 self-check와 실제 코드 위치를 연결한 설명을 제공한다. 위치는 실제 확인한 파일·라인 또는 함수/클래스로 안내하고 라인을 추정하지 않는다.
 - PM은 구현 결과를 받을 때마다 Review Decision을 REQUIRED / RECOMMENDED / SKIP 중 하나로 명시한다. 구체적 기준과 다음 행동은 WORKFLOW.md를 따른다.
 
+- 각 TASK 구현 후 Implementer는 단일 `docs/study-note.md`의 해당 TASK 절을 반드시 추가하고 코드 수정 후 갱신한다. PM은 전체 학습 순서와 미션 목표·제약·평가 항목의 설명 누락을 확인한다. 상세 기준은 [WORKFLOW.md](docs/harness/WORKFLOW.md)의 TASK 학습 문서 절을 따른다.
+
 ## 자연어 요청과 지침 확인
 
 사용자에게 특정 문구나 파일 경로 입력을 강제하지 않는다. 표현의 정확한 일치보다 요청 의도와 현재 세션 맥락을 기준으로 아래 역할 지침을 먼저 읽는다.
@@ -33,11 +35,14 @@
 | --- | --- |
 | 미션/프로젝트 시작·분석·이어가기, 다음 단계 제안 | PM → [docs/harness/prompts/PM.md](docs/harness/prompts/PM.md) |
 | 특정 TASK/기능 구현·수정, 승인된 리뷰 수정 반영 | Implementer → [docs/harness/prompts/IMPLEMENTER.md](docs/harness/prompts/IMPLEMENTER.md) |
+| 특정 TASK 코드 설명·어려운 문법 학습·학습 문서 작성/보완 | Implementer → [IMPLEMENTER.md](docs/harness/prompts/IMPLEMENTER.md) |
+| 미션 전체 학습 순서·동료평가 준비·목표별 설명 누락 점검 | PM → [PM.md](docs/harness/prompts/PM.md) |
 | 특정 TASK/변경 사항 독립 리뷰·코드 검토 | Reviewer → [docs/harness/prompts/REVIEWER.md](docs/harness/prompts/REVIEWER.md) |
 
 - 명시적으로 지정한 역할을 우선한다. 같은 세션의 짧은 후속 요청은 기존 역할·대상을 유지한다. PM과 구현 방향을 논의하는 말을 역할 전환으로 오해하지 않는다.
 - TASK 경로는 요청의 ID·기능명, 현재 세션 맥락, STATUS의 Current Task와 실제 tasks 파일을 대조해 찾는다. 하나로 특정되면 경로를 묻지 않는다. 후보가 여러 개이거나 TASK가 없으면 필요한 부분만 질문한다. TASK_TEMPLATE은 실제 TASK가 아니다.
 - 역할이 불명확한 새 프로젝트 요청은 PM 분석부터 시작한다. 독립 리뷰 요청은 새 Reviewer 세션에서 수행하며 기존 구현 세션을 독립 리뷰로 가장하지 않는다.
+- 학습 질문이나 문서 보완 요청은 source 수정 승인이 아니다. 기존 구현 세션이 없어도 새 Implementer가 TASK·학습 문서·현재 코드를 읽어 설명을 이어간다.
 - 자연어 역할 선택은 모델 변경이나 새 세션 생성을 자동 수행한다는 뜻이 아니다. 모델 정책과 실제 수정 전 승인 규칙은 그대로 적용한다.
 - 새 세션 시작·역할/TASK 전환·지침 변경 시 필요한 문서를 실제로 읽은 뒤 아래 확인문구를 한 번 남기고 이어서 분석한다. 동일 맥락의 매 응답마다 반복하지 않는다.
 - 확인문구: **지침 확인 완료 | 역할: <역할> | 확인: <실제로 읽은 문서> | 대상: <미션 또는 TASK> | 다음: <분석 / 계획 제시 후 승인 대기 / 읽기 전용 리뷰>**

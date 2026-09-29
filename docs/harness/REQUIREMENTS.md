@@ -1,12 +1,12 @@
 # Requirements
 
-기준: [MISSION.md](MISSION.md). 원문과 해석이 충돌하면 원문을 우선합니다. 모든 실행 결과는 사용자 검증 전입니다.
+기준: [MISSION.md](MISSION.md). 원문과 해석이 충돌하면 원문을 우선합니다. 실행 확인 범위는 [WORKLOG](WORKLOG.md)에 기록하며 장애별 비교 실험 완료와 구분합니다.
 
 ## Required
 
 | 상태 | ID | 원문 위치 | 요구사항 및 완료 기준 |
 | --- | --- | --- | --- |
-| 미완료 | REQ-001 | §4 사전 준비 | 일반 사용자로 실행하고 환경변수·디렉터리·시험용 키 파일·포트 조건을 모두 충족하여 부트 성공을 사용자 확인한다. |
+| 완료 | REQ-001 | §4 사전 준비 | 일반 사용자로 실행하고 환경변수·디렉터리·시험용 키 파일·포트 조건을 모두 충족하여 부트 성공을 사용자 확인한다. |
 | 미완료 | REQ-002 | §2, §4 메모리 | monitor.sh로 물리 메모리 증가를 관측하고 종료 직전/직후 로그에서 MemoryGuard 임계치 초과와 자체 종료 근거를 식별한다. MEMORY_LIMIT 변경 전후 최소 2회 실행하여 생존 시간 증가와 수치를 비교한다. |
 | 미완료 | REQ-003 | §2, §4 CPU | 대상 프로세스의 CPU 급상승을 top/ps/관제로 확보하고 Watchdog 종료 로그로 보호 조치를 설명한다. CPU_MAX_OCCUPY 변경 전후 종료 여부 또는 생존 시간 변화를 비교한다. |
 | 미완료 | REQ-004 | §2, §4 교착상태 | PID 존재, CPU/MEM 변화 정체(top -H 또는 ps -L), 마지막 WAITING/BLOCKED 로그를 확보한다. 스레드 간 자원 대기를 근거로 교착상태를 추론하고 MULTI_THREAD_ENABLE 변경 전후 재현/회피를 비교한다. |
@@ -34,8 +34,8 @@
 
 ## Notes
 
-- 제공 파일: [x86 바이너리](../../agent-app-leak/agent-leak-app-x86), [arm64 바이너리](../../agent-app-leak/agent-leak-app-arm64). 실행 및 내부 분석은 하지 않았다.
-- monitor.sh는 현재 저장소에 없다. 별도 제공 여부를 확인하고 없다면 최소 관제 스크립트 작성 범위를 승인받는다.
+- 제공 파일: [x86 바이너리](../../agent-app-leak/agent-leak-app-x86), [arm64 바이너리](../../agent-app-leak/agent-leak-app-arm64). 사용자가 x86 바이너리 실행을 검증했다. AI는 실행 및 내부 분석을 하지 않았다.
+- 2026-09-29 사용자 확인: monitor.sh 별도 제공본 없음. [TASK-001](tasks/TASK-001.md)에서 최소 스크립트를 작성한다. 실행 환경은 macOS 호스트의 OrbStack Linux 머신이며 Docker를 사용하지 않는다.
 - OOM 명칭과 별개로 필수 분석 대상은 MemoryGuard에 의한 자체 종료다. OS OOM Killer 작동이나 종료 신호는 실제 증거 없이 단정하지 않는다.
 - §8의 수치·시간·원인 설명은 참고 예시이며 실제 실행 증거로 사용하지 않는다.
 - 실제 GitHub Issue 게시를 필수로 확대하지 않는다.

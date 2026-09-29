@@ -22,3 +22,104 @@ Review:
 - monitor.sh 제공 여부와 실제 실행 환경 확인.
 - README 골격·첫 Step 승인 후 TASK 작성 및 수동 인계.
 - 초기 문서 구성 확정 후 커밋 묶음 판단. 실제 commit/push 없음.
+
+## 2026-09-29
+
+### TASK-001 준비 및 인계
+
+- 사용자 확인: macOS 호스트의 OrbStack Linux 머신 사용, Docker 미사용, monitor.sh 별도 제공본 없음.
+- “문제없다면 다음 스텝” 요청에 따라 앞서 제안한 단계 진행을 승인으로 기록하고 [TASK-001](tasks/TASK-001.md)과 [README](../../README.md) 초기 골격을 작성했다. 구현 계획은 미승인이다.
+- [REQUIREMENTS](REQUIREMENTS.md)와 [STATUS](STATUS.md)에 확정된 실행 환경과 현재 단계를 반영했다.
+- 정적 확인: 작업 전 Git HEAD는 047aeb2bdc77e40fc7f8923ebfce8cc6813634a1, 작업 트리는 clean이었다. source 수정·바이너리 실행·테스트는 하지 않았다.
+- Review 예상: REQUIRED(관제 로그 저장 동작). 실제 구현 후 PM이 재평가한다.
+- 다음: GPT-6 Sol / Medium Implementer 세션에서 수정 계획 제시 후 사용자 승인. 실행 검증은 사용자 담당.
+- 커밋 보류: TASK-001 구현·리뷰·사용자 확인 후 관련 문서를 함께 묶는 시점을 판단한다.
+
+### TASK-001 구현 인계 및 저장 형식 검토
+
+- 사용자가 TASK-001 완료를 보고했다. PM은 [monitor.sh](../../monitor.sh), [prepare-env.sh](../../prepare-env.sh), [README](../../README.md), [.gitignore](../../.gitignore), TASK 승인 내역을 읽었다. AI 실행·테스트는 하지 않았다.
+- 저장된 사용자 실행 증거 정적 확인: runs/run-2026-09-29_18-13-28-iL0cSU/app.log에서 부트 검사 통과·Agent READY·PID 7108 MemoryGuard 종료 확인. monitor.log에서 RSS 18,528 → 274,568 KiB 및 18:14:01 EXITED 확인. 기존 CSV 실행도 EXITED 행을 포함했다. runs는 Git 제외 대상이므로 증거가 저장소 제출에 자동 포함되지 않는다.
+- PM 권장: CSV를 관제 원본으로 저장하고 column으로 화면 정렬. 앱 로그는 원문 유지. 수치 비교·추출과 CPU 지표 의미가 드러나는 헤더에 적합하다. 새 패키지는 관제 필수 의존성으로 추가하지 않는다.
+- 변경 제안 범위는 monitor.sh 출력 형식과 README 조회 안내다. 기존 증거 변환·삭제 없이 보존한다. 수정 승인 대기이며 source는 수정하지 않았다.
+- Review Decision: REQUIRED. 이유: 실행 준비의 파일 생성·앱 시작과 관제 증거 저장. 대상: monitor.sh, prepare-env.sh, .gitignore, README 및 TASK 승인 범위. GPT-6 Sol / Medium 독립 리뷰 대기.
+- 부트·관제 정상 경로의 증거는 확보했지만 덮어쓰기 방지·오류 처리·관제 중단 확인과 REQUIRED 리뷰가 남아 있으므로 TASK 최종 완료로 처리하지 않는다.
+- Implementer의 정적 self-check·코드 위치를 연결한 완료 보고는 이번 인계에 없어 독립 리뷰 전 보완이 필요하다.
+- 커밋 보류: 저장 형식 확정·독립 리뷰·남은 사용자 확인 후 판단.
+
+### CSV 복원 승인 및 수정 인계
+
+- 사용자 승인: CSV 저장으로 복원하고 필요한 column 패키지를 준비하여 정렬 조회한다.
+- [TASK-001](tasks/TASK-001.md)에 monitor.sh의 CSV 헤더·행 복원, README의 monitor.csv 경로·column 조회·설치 안내 범위를 기록했다. 해당 범위는 구체적 수정 계획 승인으로 인계하며 반복 승인을 요구하지 않는다.
+- 배포판과 column 설치 여부에 맞는 패키지 안내 후 실제 설치·검증은 사용자가 수행한다. 관제 자동 설치·필수 의존성은 추가하지 않는다.
+- PM은 TASK·STATUS·WORKLOG만 갱신했다. source 수정이나 패키지 설치·실행은 하지 않았다.
+- 다음: Implementer 반영·self-check 및 코드 설명 → REQUIRED 독립 리뷰 → 남은 사용자 확인 → PM 완료 판단.
+
+### CSV 복원 완료 보고 확인
+
+- 사용자 수정 완료 보고 후 [monitor.sh](../../monitor.sh)와 [README](../../README.md)를 정적으로 확인했다. 7열 CSV 출력과 EXITED 행, column 화면 조회 안내가 반영되어 있고 관제 필수 의존성에 column은 추가되지 않았다.
+- 실제 수정본 실행·설치 결과는 확인하지 않았으며 AI 테스트는 수행하지 않았다.
+- Review Decision: REQUIRED 유지. GPT-6 Sol / Medium 새 Reviewer 세션으로 TASK-001 전체 변경 검토를 인계한다. 신규 미추적 파일을 diff 누락 없이 읽도록 안내한다.
+- TASK·STATUS를 독립 리뷰 대기로 갱신했다. source는 수정하지 않았다. 커밋은 리뷰와 남은 사용자 확인 후 판단한다.
+
+### TASK-001 독립 리뷰 PM 판정
+
+- [REVIEW-TASK-001](reviews/REVIEW-TASK-001.md)을 source·README와 대조했다. Critical/Major 없음, Minor-1 1건.
+- PM Disposition: Minor-1 ACCEPT. 재준비 실패 후 이전 셸 변수를 새 실행 정보로 오인할 수 있다.
+- 최소 수정 제안: prepare-env.sh 최종 실패 분기의 안내 출력 및 README의 실패 후 관제·조회 중단 안내. 앱 시작 후 실패도 가능함을 반영하고 PID·경로·증거·프로세스 동작은 보존한다. 사용자 승인 전 source·README는 변경하지 않았다.
+- REQUIRED 독립 리뷰는 완료. 지적 사항 처리 및 사용자 검증이 남아 TASK는 완료하지 않는다. DEFER/REJECT 없음.
+- 다음: 사용자 수정 승인 → Implementer 반영 → PM 재확인 및 추가 리뷰 필요성 판단 → 사용자 검증. 커밋 보류.
+
+### Minor-1 수정 계획 승인 및 인계
+
+- 사용자가 “그럼 보완하는걸로 해보자”로 실패 안내 출력과 README 설명 보완 계획을 승인했다.
+- [TASK-001](tasks/TASK-001.md)에 구체적 수정 범위·보존 경계·완료 기준을 기록하고 [리뷰 PM Disposition](reviews/REVIEW-TASK-001.md)과 [STATUS](STATUS.md)를 갱신했다.
+- 기존 Implementer 세션에서 동일 범위 재승인 없이 반영하도록 인계한다. PM은 source·README를 수정하지 않았다.
+- 다음: 수정 인계 확인 및 추가 리뷰 필요성 판단, 사용자 검증. TASK 완료 및 실제 테스트 성공으로 기록하지 않는다.
+
+### Minor-1 수정 확인 및 사용자 검증
+
+- 정적 확인: prepare-env.sh 최종 실패 분기에 stderr 안내 추가, README에 실패 후 다음 단계 중단·이전 변수 오인 방지·앱 시작 후 실패 가능성 설명 반영.
+- 사용자 실행: 서브셸에서 app_pid=99999999, launcher_pid=99999998, run_dir=/tmp/previous-run, MEMORY_LIMIT=49를 설정하고 source 실행.
+- 실제 결과: MEMORY_LIMIT 범위 오류와 추가 실패 안내 출력, 반환값 1, app_pid=99999999 및 run_dir=/tmp/previous-run 유지. Minor-1의 해당 확인 시나리오 통과. 이 결과를 정상 실행·모든 실패 경로의 검증으로 확대하지 않는다.
+- Review Decision: 추가 리뷰 SKIP. 기존 REQUIRED 독립 리뷰는 완료되어 있으며 이번 수정은 실패 안내와 문서에 한정된다. 추천 Reviewer/Reasoning: 해당 없음.
+- 다음: 최신 CSV 관제·column 조회 및 로그 보존·저장 실패·관제 중단 확인, Implementer self-check·코드 설명 인계 확인 후 TASK 완료 판단.
+
+### CSV 관제 및 column 사용자 검증
+
+- 사용자 실행: `source ./prepare-env.sh && bash ./monitor.sh "$app_pid" "$run_dir/monitor.csv"`, 이후 `column -s, -t "$run_dir/monitor.csv"`.
+- 실행 디렉터리: runs/run-2026-09-29_22-14-43-kL9j5B. launcher PID 12153, 관제 PID 12158, x86 바이너리 선택 출력 확인.
+- 실제 출력: 22:14:44~22:15:15 RUNNING, RSS 18,504 → 274,544 KiB 증가, 22:15:16 수치 필드가 빈 EXITED 행. Monitoring ended 및 column 7열 정렬 확인.
+- 셸 Killed 메시지가 있으나 이번 실행 app.log는 아직 확인 전이므로 종료 원인을 확정하지 않는다.
+- 최신 CSV 정상 수집·종료 감지·column 조회 검증 완료. 기존 증거 보존·저장 실패·관제 중단 확인은 별개로 남는다. AI 실행 없음.
+
+### 동일 실행의 MemoryGuard 종료 증거 확인
+
+- 사용자 제공 `tail -n 15 "$run_dir/app.log"` 결과에서 22:15:15.801 Heap 275MB, 임계치 256MB 초과, 22:15:15.802 PID 12158 자체 종료 로그를 확인했다.
+- 동일 PID의 CSV는 22:15:16 EXITED를 기록했다. 앱 로그와 관제 기록의 대상·시각 연결을 사용자 출력으로 확인했다. MemoryGuard 자체 종료 근거이며 OS OOM Killer 동작으로 해석하지 않는다.
+- 앱의 Heap(MB) 기록과 관제 RSS(KiB)는 다른 지표이므로 수치가 같아야 한다고 판단하지 않는다. MEMORY_LIMIT 변경 전후 비교는 아직 미완료다.
+- 다음: 앱 재실행 없이 기존 CSV 덮어쓰기 방지와 생성 실패 처리 확인. 이후 관제 중단 확인이 남는다.
+
+### 관제 파일 보존 및 생성 실패 사용자 검증
+
+- 사용자가 현재 셸 PID를 대상으로 기존 monitor.csv 경로에 관제를 시도했다. cannot overwrite existing file / Cannot create new monitor log 출력과 반환값 1을 확인했다.
+- 시도 전후 SHA-256은 모두 51706e87bc2816f69266585cbe966ca78729fc03b98c173a467e7e71e204a8c0으로 동일했다. 해당 CSV 원본 보존 확인.
+- /dev/null/monitor.csv 대상 시도는 Not a directory / Cannot create new monitor log 및 반환값 1로 종료됐다. 파일 생성 실패 처리 확인이며 수집 도중 디스크 부족 등 모든 쓰기 실패 경로를 실행 검증한 것은 아니다.
+- 다음: 관제를 Ctrl+C로 중단한 직후 앱 PID가 살아 있는지 사용자 확인. AI 실행 없음.
+
+### 관제 중단 사용자 검증 및 기능 확인 정리
+
+- 사용자 실행: 새 실행 run-2026-09-29_22-23-00-AHFAYW, launcher PID 12736, app PID 12741. 관제 중 Ctrl+C 후 ps 결과는 PID 12741, STAT SN, ELAPSED 00:11이었다.
+- 관제 중단 후 앱 생존 확인 완료. 안내한 기능 검증 종료. 앱의 그 이후 종료 시점이나 현재 생존은 추정하지 않는다.
+- REQUIREMENTS의 REQ-001 완료, TASK의 기능 완료 기준과 STATUS 및 README의 확인 범위를 갱신했다. 필수 장애별 비교 실험·보고서는 미완료다.
+- REQUIRED 리뷰 실시 및 Minor-1 검증 완료. 추가 리뷰 SKIP 유지. Implementer self-check·코드 위치 설명 완료 보고는 아직 PM에 미전달이므로 해당 인계 기준은 미체크 유지한다.
+- 커밋 권장 범위: monitor.sh, prepare-env.sh, .gitignore, README, 미션 상태·TASK·리뷰 문서. 메시지: Feat: Linux 실행 환경 준비 및 CSV 관제 도구 추가. 실제 commit/push 없음.
+
+### 하네스 갱신 및 TASK-001 학습 보완·마감
+
+- 사용자 요청에 따라 제공된 codex-harness-v1 (2) 템플릿을 현재 파일과 비교했다. 변경된 AGENTS, WORKFLOW, PM·IMPLEMENTER 프롬프트, TASK_TEMPLATE과 신규 LEARNING_TEMPLATE을 원문 그대로 반영했다. MODEL_POLICY·Reviewer 지침·Review 템플릿은 동일하여 변경하지 않았다.
+- 템플릿의 빈 MISSION·REQUIREMENTS·STATUS·WORKLOG는 복사하지 않았다. 기존 미션 상태와 실행 증거·승인·리뷰 이력을 보존했다.
+- 사용자가 별도 Implementer 완료 보고는 없고 검증 명령 안내로 끝났다고 확인했다. 재전달 요구를 종료하고 사용자 요청으로 [study-note.md](../study-note.md)에 TASK-001의 상세 코드 흐름·문법·설계 이유·검증 한계·연습 질문을 보완했다. 과거 Implementer 보고가 있었다고 소급 기록하지 않는다.
+- 정적 확인: 현재 monitor.sh 및 prepare-env.sh의 행 번호와 함수 흐름을 읽어 설명과 연결했다. 이전 독립 리뷰·Minor-1 처리 및 사용자 검증을 근거로 TASK-001 완료 처리. 학습 문서 생성은 사용자 이해 완료와 구분한다.
+- 학습 보완 순서: 셸·환경변수 → 실행·PID → 관제·CSV·파일 보호 → 로그·실패 → 연습 질문. 현재 실제 TASK는 001뿐이며 후속 메모리·CPU·Deadlock 설명은 앞으로 같은 파일에 추가한다.
+- Review Decision: 이번 지침 동기화·학습 문서 작업은 SKIP(기능 source 변경 없음). 기존 TASK-001 REQUIRED 리뷰와 Minor-1 검증 완료 상태는 유지한다.
+- 커밋 권장: 실행·관제 기능 및 TASK 관련 문서, 하네스 갱신과 학습 노트. 실제 commit/push 또는 테스트 실행은 하지 않았다.
