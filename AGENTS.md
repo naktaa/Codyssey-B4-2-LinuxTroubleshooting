@@ -25,7 +25,7 @@
 - Implementer는 수정 후 정적 self-check와 실제 코드 위치를 연결한 설명을 제공한다. 위치는 실제 확인한 파일·라인 또는 함수/클래스로 안내하고 라인을 추정하지 않는다.
 - PM은 구현 결과를 받을 때마다 Review Decision을 REQUIRED / RECOMMENDED / SKIP 중 하나로 명시한다. 구체적 기준과 다음 행동은 WORKFLOW.md를 따른다.
 
-- 각 TASK 구현 후 Implementer는 단일 `docs/study-note.md`의 해당 TASK 절을 반드시 추가하고 코드 수정 후 갱신한다. PM은 전체 학습 순서와 미션 목표·제약·평가 항목의 설명 누락을 확인한다. 상세 기준은 [WORKFLOW.md](docs/harness/WORKFLOW.md)의 TASK 학습 문서 절을 따른다.
+- 각 TASK의 구현·필요한 리뷰와 수정·사용자 검증이 끝나고 PM이 기능 완료를 확인한 뒤, Implementer는 단일 `docs/study-note.md`의 해당 TASK 절을 최종 코드 기준으로 한 번 작성·정리한다. 진행 중에는 구현·수정마다 학습 노트를 갱신하지 않는다. 완료 후 TASK가 재개되면 다시 마감할 때 반영하며, 사용자가 학습 문서 보완을 직접 요청한 경우에는 그 요청을 따른다. PM은 전체 학습 순서와 미션 목표·제약·평가 항목의 설명 누락을 확인한다. 상세 기준은 [WORKFLOW.md](docs/harness/WORKFLOW.md)의 TASK 학습 문서 절을 따른다.
 
 ## 자연어 요청과 지침 확인
 
