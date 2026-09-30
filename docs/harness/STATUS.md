@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-TASK-001 완료. 하네스 학습 규칙 갱신과 TASK-001 학습 자료 작성 완료. 다음 Step 전 학습 진행.
+TASK-001 완료. TASK-002 메모리 설정 전후 비교·보고서 Step 승인 및 TASK 작성 완료. Implementer의 구체적 작성 계획 제시 대기.
 
 ## Completed
 
@@ -16,12 +16,12 @@ TASK-001 완료. 하네스 학습 규칙 갱신과 TASK-001 학습 자료 작성
 
 ## In Progress
 
-[학습 노트](../study-note.md)를 실행 순서대로 읽고 질문을 보완한다. 사용자 이해 완료는 아직 확인하지 않았다.
+[TASK-002](tasks/TASK-002.md)의 수동 비교 실험 안내·OOM 보고서·학습 보완을 준비한다. 구현 계획은 아직 미승인이다. TASK-001 학습 자료는 작성 완료이며 사용자 이해 완료는 아직 확인하지 않았다.
 
 ## Next
 
-1. TASK-001 학습 순서: 셸·환경변수 → 실행·PID → CSV·지표·파일 보호 → 로그 연결·실패 → 연습 질문.
-2. 학습 후 사용자 요청에 따라 TASK-002 메모리 설정 전후 비교와 보고서 범위를 제안한다. 아직 TASK-002는 생성하지 않았다.
+1. GPT-6 Sol / Medium Implementer 세션에서 TASK-002의 수정 파일·방향·영향을 제시하고 사용자 계획 승인을 받는다.
+2. 승인 후 실험 안내·보고서 초안·학습 절 작성 → 사용자 최소 2회 비교 실행 → 실제 증거 반영 → PM Review Decision 및 완료 판단.
 
 ## Open Issues
 
@@ -33,12 +33,13 @@ TASK-001 완료. 하네스 학습 규칙 갱신과 TASK-001 학습 자료 작성
 
 - OrbStack Linux 머신, Docker 미사용. 사용자 실행·AI 정적 검토.
 - CSV 원본 저장 및 column 화면 조회. runs/ 원본은 Git 제외이므로 제출 증거는 후속 보고서에 별도 반영한다.
+- TASK-002는 기존 스크립트를 재사용하며 수동 실험·보고서·학습 문서가 중심이다. 스크립트 기능 변경은 별도 계획이 필요하다.
 
 ## Current Task
 
-[TASK-001](tasks/TASK-001.md) — 완료. 별도 Implementer 완료 보고가 없다는 사용자 설명을 반영하여 기존 검토·실행 증거와 요청된 학습 문서로 설명 누락을 보완했다.
-Review Decision: REQUIRED 실시 완료([리뷰](reviews/REVIEW-TASK-001.md)), Minor-1 처리 완료. 추가 리뷰 SKIP(안내 출력·문서 보완에 한정).
-커밋은 실행·관제 스크립트와 관련 문서를 묶어 권장하며 실제 Git 쓰기 작업은 하지 않았다.
+[TASK-002](tasks/TASK-002.md) — Step 승인·인계 준비 완료, 구현 계획 미승인. Review 예상: RECOMMENDED(증거·원인 해석 검토), 실제 Decision은 구현 인계 후 판정한다.
+
+이전 [TASK-001](tasks/TASK-001.md)은 완료이며 REQUIRED 독립 [리뷰](reviews/REVIEW-TASK-001.md)·Minor-1 처리 완료, 추가 리뷰 SKIP 상태를 유지한다. TASK-002 착수 전 작업 트리는 clean이고 HEAD는 `48438ce11b3e8c311b142d670515a50ac1f55e1a`였다. 이번 세션에서 Git 쓰기 작업은 하지 않았다.
 
 ## Harness Update
 
