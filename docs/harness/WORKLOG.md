@@ -184,3 +184,25 @@ Review:
 - 사용자 일회성 요청에 따라 PM이 [study-note.md](../study-note.md)의 TASK-002 초안을 현재 코드 기준으로 정리했다. TASK-001 본문은 보존하고 상단 읽기 순서·옛 대기 문구를 동기화했다. 로그 출처·키 파일·메모리 개념·실행 흐름·PIPESTATUS·리뷰 수정 이유·실험 수치·한계·연습 질문을 포함했다.
 - comparison-WLKX6w 정상 완료 로그 존재를 확인했지만 실행 코드 버전은 확정하지 않았다. 현재 수정본의 부트 표식 누락·before 저장 실패 시 after 미실행은 사용자 검증 대기다. TASK 전체 완료로 표시하지 않는다.
 - AI는 기능 source·보고서·원본을 수정하거나 앱·실패 테스트를 실행하지 않았다. 다음은 사용자 검증 결과 확인과 TASK 마감 판단이다. 커밋 보류: 수정본 사용자 확인 후 묶음을 결정한다.
+
+## 2026-10-08
+
+### 승인 기반 반자동 하네스 전환
+
+- 사용자 “진행해봐”로 파일별 전환 계획을 승인받았다. 대상은 [AGENTS.md](../../AGENTS.md), [WORKFLOW.md](WORKFLOW.md), [MODEL_POLICY.md](MODEL_POLICY.md), [PM](prompts/PM.md)·[Implementer](prompts/IMPLEMENTER.md)·[Reviewer](prompts/REVIEWER.md) 지침, [TASK 템플릿](tasks/TASK_TEMPLATE.md), [리뷰 템플릿](reviews/REVIEW_TEMPLATE.md), [STATUS](STATUS.md), 이 WORKLOG, [TASK-002](tasks/TASK-002.md)의 복구 상태다.
+- Decision: 사용자 승인·대화는 PM에 모으고 내장 하위 에이전트로 계획·구현·독립 리뷰를 위임한다. Reason: 수동 세션 생성·복사 전달을 줄이면서 수정 전 승인과 역할 분리를 유지한다. Alternative: 별도 API·에이전트 설정 파일·자동 실행 스크립트. Why not: 현재 도구가 명시적 모델·reasoning 지정과 결과 회수를 제공하므로 이번 범위에 필요하지 않다.
+- PM의 공통 하네스 문서 수정이며 기능 source 구현은 아니다. 기존 미션·요구사항·실험 기록·학습 본문을 보존한다. TASK-002의 사용자 검증 대기도 유지한다. 기존 기록의 수동 인계 표현은 당시 이력으로 보존한다.
+- 시작 HEAD: `d3ef9b91082df6f689e96c9bde012bd975bc1614`, 작업 트리 clean. CLI `0.162.0-alpha.2` 및 현재 채팅 도구 계약을 확인했다. 지원 모델·호출 인수와 확인 한계는 MODEL_POLICY에 기록했다. PM 실제 모델 ID는 조회 근거가 없어 미확인이다.
+- Review Decision: RECOMMENDED. 승인 경계·역할 인계의 문서 간 일관성을 읽기 전용 Reviewer로 확인한다. 사용자가 전환 후 Reviewer 위임 확인을 요청하고 계획을 승인했으므로 진행한다. 요청 모델은 `gpt-6-luna`, reasoning은 `medium`이다. 기능 실행 테스트와 구분한다.
+- 검증 계획: 문서 정적 확인 → `gpt-6-sol` / `medium` Implementer 읽기 전용 계획·후속 전달 확인 → 새 `gpt-6-luna` / `medium` Reviewer 독립 확인 → 결과·한계 기록. 실제 수행 결과는 아래에 구분한다.
+
+### 읽기 전용 위임 확인 결과
+
+- Implementer: `collaboration.spawn_agent`에 `model="gpt-6-sol"`, `reasoning_effort="medium"`, `fork_turns="none"`을 지정해 `/root/harness_plan_check`를 생성했다. 도구가 요청을 수락했고 계획 반환을 회수했다. [Implementer 계획 단계](prompts/IMPLEMENTER.md#계획-단계-읽기-전용-분석과-반환)에 따라 수정 예정 파일 없음, 구현 계획·파일 범위·제약·승인 근거 전달 전 구현 미착수, TASK-002 사용자 검증 대기 유지라는 결과였다.
+- 같은 Implementer에 `followup_task`로 추가 읽기 전용 지시를 전달했다. 기존 계획을 기억하며 구현 승인이 전달되지 않았으므로 수정하지 않는다는 후속 결과를 회수했다. 구현 단계의 쓰기 실행을 시험한 것은 아니다.
+- Reviewer: Implementer의 반환이 끝난 뒤 `model="gpt-6-luna"`, `reasoning_effort="medium"`, `fork_turns="none"`으로 별도 `/root/harness_review_check`를 생성했다. 구현 대화·결론을 전달하지 않고 사용자 요구사항·기준점·검토 파일을 전달했다. 도구가 요청을 수락했고 독립 정적 검토 결과와 근거 위치 보완 응답을 회수했다.
+- Reviewer 결과: Critical / Major / Minor 없음. Good 근거는 [WORKFLOW의 Step 흐름](WORKFLOW.md#한-step-진행-순서)과 [위임·복구](WORKFLOW.md#위임결과-회수복구), [TASK 템플릿 Execution State](tasks/TASK_TEMPLATE.md#execution-state), [TASK-002 복구 상태](tasks/TASK-002.md#execution-state)다. 승인 단계 분리·단일 작성자·독립 리뷰·실패 보고·복구 필드가 일관되며 기능 상태가 보존됨을 확인했다. PM Disposition: 수정할 finding 없음. Review Decision: RECOMMENDED 리뷰 실시 완료, 추가 리뷰 SKIP(후속 변경은 검증 결과 기록뿐).
+- PM 정적 확인: `git diff --check`에서 공백 오류 없음. 추가된 로컬 Markdown 링크의 대상 파일 존재를 확인했다. 추적 파일·Git 제외가 아닌 미추적 파일 28개의 SHA-256을 위임 직전과 Sol 응답 후, Luna 응답 후 비교해 내용·파일 목록 변화가 없음을 확인했다. 확인 중 PM도 파일을 수정하지 않았다. 제외된 runs/ 등 사용자 데이터 전체를 해시 검증한 것은 아니다.
+- 확인 한계: spawn 응답은 에이전트 식별자이며 실행 모델·reasoning 메타데이터를 제공하지 않았다. 에이전트 자기 보고를 실행 모델 검증으로 사용하지 않는다. 지정값 수락·역할 지침 준수·후속 전달·결과 회수는 확인했으나 부모 PM의 실제 Astra 여부 및 하위 모델의 독립 메타데이터 검증은 미확인이다. OS 읽기 전용 격리, 실제 기능 구현·사용자 테스트, 실패 주입·중단·세션 재시작 복구도 검증하지 않았다.
+- 기존 미션·기능 source·OOM 보고서·학습 본문·실험 원본은 이번 수정 대상에서 제외했다. TASK-002 기능 완료를 새로 선언하지 않는다. Skill·별도 API·설정 파일·스크립트 추가 및 commit/push는 하지 않았다.
+- 커밋 권장 — 이번 11개 하네스 문서 및 TASK-002 복구 상태: `Docs: 승인 기반 PM 위임 하네스로 전환`. 실제 커밋은 수행하지 않았다.

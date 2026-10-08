@@ -1,30 +1,30 @@
-# Harness v1 운영
+# 승인 기반 반자동 Harness 운영
 
 ## 목적과 역할
 
-여러 교육 미션과 개인 프로젝트에서 재사용하는 수동 orchestration 환경입니다. 장기 기억은 채팅이 아니라 repository 문서와 코드에 남깁니다. 세션 생성과 인계는 사용자가 직접 합니다.
-자동 subagent, Agents API orchestration, 자동 review loop·worktree·retry, Test/Verifier Agent, bootstrap·init_harness.py·자동 템플릿 복사·architecture linter·대규모 shell automation은 만들지 않습니다. 사용자가 템플릿을 직접 배치합니다.
+사용자는 PM 세션에서만 대화하고, PM은 내장 하위 에이전트로 Implementer/Reviewer에 작업을 위임하고 결과를 회수합니다. 장기 기억은 repository 문서와 코드에 남깁니다. 승인은 사용자가 하고 인계는 PM이 합니다.
+별도 Agents API, 자동 worktree/retry, 무한 리뷰 반복, Test/Verifier Agent, 자동 템플릿 복사·대규모 스크립트·custom Skill은 추가하지 않습니다. 기존 역할 프롬프트와 실제 제공된 위임 도구를 사용합니다.
 
 | 역할 | 담당 | 변경 권한 |
 | --- | --- | --- |
 | PM — GPT-6 Astra | 분석, 한 Step 제안, TASK·모델 추천, Review 판단·Triage, 상태 갱신 | 미션 상태 문서, 승인된 README·설명용 diagram. 공통 Harness 규칙 변경은 별도 사용자 승인. 기능 source 구현 금지 |
-| Implementer | 코드 분석, 계획 제시, 승인된 구현·수정, 설명·테스트 안내 | 사용자가 승인한 TASK와 계획 범위 |
+| Implementer | 계획 반환, 승인된 구현·수정, 상세 설명·테스트 안내 | 계획 단계는 읽기 전용. 구현 단계는 전달받은 사용자 승인 범위 |
 | Reviewer | 독립 정적 검토, 근거 있는 Findings | 지정 리뷰 문서의 Critical/Major/Minor/Good. source 수정 금지 |
-| 사용자 | 세션·모델 선택, 인계, 범위·계획 승인, 실제 실행·테스트 | 최종 결정 |
+| 사용자 | PM 세션에서 범위·계획·리뷰 수정 승인, 실제 실행·테스트 | 최종 결정. PM 세션의 모델 선택 |
 
 ## 한 Step 진행 순서
 
 1. PM이 미션 전체와 현재 코드를 분석해 Roadmap과 README 구성·시각화 필요성을 제안합니다. README 골격은 사용자 승인 후 만들고 다음 기능 단위 Step을 논의합니다.
-2. 사용자가 Step을 승인하면 PM이 TASK 파일을 작성하고 난이도·모델·reasoning과 Implementer 시작 프롬프트를 제공합니다.
-3. 사용자가 새 Implementer 세션을 만들고 프롬프트와 TASK 경로를 전달합니다.
-4. Implementer가 기존 코드와 변경 상태를 읽고 수정 파일·함수·방향·영향을 설명한 뒤 **STOP**합니다.
-5. 사용자가 계획을 명시적으로 승인하면 Implementer가 승인 범위만 수정합니다.
-6. Implementer가 정적 self-check와 코드 위치를 연결한 설명을 제공합니다. 학습 문서는 TASK 마감 시 작성하며 중간 인계에서는 작성 대기로 표시합니다. 사용자가 결과를 PM에 전달하면 PM은 실제 파일·diff와 TASK를 대조하고 항상 Review Decision을 출력합니다.
-7. REQUIRED이면 반드시, RECOMMENDED이면 사용자 선택에 따라 새 Reviewer 세션을 생성하고 TASK·변경 범위·리뷰 저장 경로를 전달합니다. Reviewer는 독립적으로 검토해 Findings만 기록합니다.
-8. 사용자가 리뷰 경로를 PM에 전달합니다. PM은 각 finding을 ACCEPT / DEFER / REJECT로 분류하고 이유와 수정안을 제시합니다.
-9. 사용자가 수정 범위를 승인합니다. Implementer가 구체적인 수정 계획을 보여주고 그 계획에 대한 승인 후 수정합니다. PM 제안에 이미 동일한 구체적 계획이 포함되어 사용자가 명시적으로 승인했다면 그 승인 내용을 인계하여 중복 승인을 생략할 수 있습니다. 범위 승인만으로 계획 승인까지 추정하지 않습니다.
+2. 사용자가 Step을 승인하면 PM이 TASK와 변경 기준점을 기록하고 [모델 정책](MODEL_POLICY.md)에 따라 모델·reasoning을 명시해 Implementer를 생성합니다.
+3. PM은 역할 지침·TASK·경계와 `계획 단계: 파일 변경 금지`를 전달합니다. Implementer는 기존 코드·변경 상태를 읽고 수정 파일·주요 함수·방향·영향·안전성을 계획으로 반환한 뒤 종료합니다.
+4. PM은 계획을 사용자에게 제시하고 **구현 계획 승인 대기** 상태를 기록합니다. 계획 반환이나 Step 승인을 구현 승인으로 취급하지 않습니다.
+5. 사용자 승인 후 PM이 승인된 계획·파일 범위·제약·승인 근거를 TASK에 기록하고 Implementer에 구현 단계를 지시합니다. 기존 에이전트가 없으면 새 에이전트에 저장된 승인 내역을 전달합니다.
+6. Implementer는 정적 self-check와 코드 위치를 연결한 상세 설명을 PM에 반환합니다. PM은 실제 파일·diff와 TASK를 대조하고 Review Decision을 출력하며 상세 설명도 사용자에게 전달합니다. 학습 문서는 마감 시 작성합니다.
+7. REQUIRED이면 PM이 새 Reviewer를 호출하고, RECOMMENDED이면 사용자 진행/생략 선택 후 호출합니다. TASK·변경 기준점·파일 범위·리뷰 경로를 전달하되 구현 대화를 상속하지 않습니다. Reviewer는 독립 검토하고 지정 리뷰 문서만 작성한 뒤 결과를 PM에 반환합니다.
+8. PM은 각 finding을 ACCEPT / DEFER / REJECT로 분류하고 이유를 기록합니다. 필요한 구체적 수정 계획은 Implementer에게 읽기 전용으로 요청해 사용자에게 제시합니다.
+9. 사용자 승인 후에만 PM이 수정 계획·ACCEPT ID·파일 범위·승인 근거를 전달합니다. 범위만 승인받았다면 구체적 계획 승인까지 추정하지 않습니다. 이미 동일한 구체적 계획을 승인받았다면 중복 승인을 요구하지 않습니다.
 10. 사용자가 직접 실행·테스트하고 실제 결과를 알려줍니다. 미확인·실패 항목은 남겨 둡니다. 실패로 source를 다시 고칠 때도 계획 승인 절차를 따릅니다.
-11. PM이 구현·필요한 리뷰와 수정·사용자 검증의 완료를 확인하면 Implementer가 최종 코드 기준으로 TASK 학습 문서를 한 번 작성·정리합니다. PM이 학습 자료를 확인하고 REQUIREMENTS → STATUS → WORKLOG → README 순서로 필요한 문서만 갱신한 뒤 TASK를 마감하고 다음 Step을 제안합니다. 기능 완료와 학습 정리 대기는 구분해 기록합니다. 필수 구현·사용자 테스트 완료 후에는 Mission Close-out으로 마무리합니다.
+11. PM이 구현·필요한 리뷰와 수정·사용자 검증의 완료를 확인하면 Implementer에 최종 학습 정리를 위임합니다. 학습 노트 작성이 끝난 뒤 PM이 이를 확인하고 REQUIREMENTS → STATUS → WORKLOG → README 순서로 필요한 문서만 갱신합니다. 기능 완료와 학습 정리 대기를 구분하고 TASK 마감 후 다음 Step을 제안합니다. 필수 구현·사용자 테스트 완료 후에는 Mission Close-out으로 마무리합니다.
 
 SKIP 또는 RECOMMENDED에서 사용자가 생략을 선택한 경우 7~9를 건너뛰고 사용자 테스트로 갑니다. REQUIRED 리뷰가 남아 있으면 완료 처리하지 않습니다. 리뷰 수정 후에도 self-check·코드 설명과 PM의 Review Decision을 반복합니다. 이미 완료된 리뷰와 수정 범위를 대조해 추가 검토 필요성을 판단하며 무한 리뷰 반복을 만들지 않습니다.
 
@@ -42,8 +42,8 @@ PM은 구현 결과를 받을 때마다 다음 셋 중 하나를 출력합니다
 
 | 결정 | 적용 기준 | 다음 행동 |
 | --- | --- | --- |
-| REQUIRED | HIGH, 프로그램의 파일 저장·수정·삭제 기능, 데이터 무결성·손실 위험, 핵심 API 요청/응답, 인증·권한, 여러 module 영향, architecture 변경, 복잡한 refactoring·원인 복잡 bug, 중요한 pointer/ownership/lifetime, 오류 영향이 큰 평가 핵심 기능 | 새 독립 Reviewer 세션 → PM Triage → 필요한 수정 승인·반영 → 사용자 테스트 |
-| RECOMMENDED | REQUIRED에 해당하지 않는 MEDIUM 기능, 검색·필터·정렬·데이터 변환, 복합 validation, 중요한 UI 상태, 새로운 문법·구조가 많은 구현, 영향이 제한적인 평가 핵심 기능 | 추천 이유와 Reviewer 시작 지시 제공 → 사용자에게 진행/생략 선택 → 선택을 기록 |
+| REQUIRED | HIGH, 프로그램의 파일 저장·수정·삭제 기능, 데이터 무결성·손실 위험, 핵심 API 요청/응답, 인증·권한, 여러 module 영향, architecture 변경, 복잡한 refactoring·원인 복잡 bug, 중요한 pointer/ownership/lifetime, 오류 영향이 큰 평가 핵심 기능 | PM이 새 독립 Reviewer 호출 → PM Triage → 필요한 수정 승인·반영 → 사용자 테스트 |
+| RECOMMENDED | REQUIRED에 해당하지 않는 MEDIUM 기능, 검색·필터·정렬·데이터 변환, 복합 validation, 중요한 UI 상태, 새로운 문법·구조가 많은 구현, 영향이 제한적인 평가 핵심 기능 | PM이 이유·모델 안내 → 사용자 진행/생략 선택 기록 → 진행이면 PM이 Reviewer 호출 |
 | SKIP | 핵심 로직 영향이 없는 문구·작은 README/CSS/UI 수정, 영향이 명확한 LOW 변경 | self-check 확인 → 사용자 직접 테스트·확인 → PM 완료 판단 |
 
 파일 관련 REQUIRED 기준은 프로그램의 저장 동작과 데이터 위험을 뜻합니다. 모든 source·문서 편집을 일괄 REQUIRED로 분류하지 않습니다.
@@ -61,7 +61,7 @@ Implementer는 계획·self-check에서, Reviewer는 독립 검토에서 아래 
 - **JavaScript**: null/undefined, DOM 존재, async error, stale state, localStorage parsing, API 실패, event listener 중복. 언어에 맞지 않는 메모리 검사를 강요하지 않습니다.
 - **Destructive Operation Safety / Secret/Credential Safety**: [AGENTS.md](../../AGENTS.md)의 명시적 요청·영향 확인·secret 비노출 규칙을 따릅니다. 사용자 테스트 안내도 실제 데이터 대신 별도 예제·임시 데이터를 우선합니다.
 
-예상 밖 위험이 생기면 임의로 계속하지 않습니다. `위험 / 영향 / 대안 A·B / 권장 / 어떤 방식으로 진행할까요?`로 보고하고 변경 승인을 기다립니다.
+예상 밖 위험이 생기면 해당 작업을 중단합니다. 하위 에이전트는 `위험 / 영향 / 대안 / 권장 / 현재 변경·미완료 범위`를 PM에 반환합니다. PM이 사용자에게 설명하고 변경 승인을 받은 뒤에만 후속 작업을 지시합니다.
 
 ## 승인 경계
 
@@ -71,21 +71,28 @@ Implementer는 계획·self-check에서, Reviewer는 독립 검토에서 아래 
 - 읽기·정적 분석, 승인된 Step의 TASK 작성, 실제 결과를 반영한 상태 문서 관리는 source 수정 승인과 구분합니다.
 - 세션 재개 시 승인 내역과 현재 변경이 일치하는지 확인합니다. 기록이 없거나 범위가 불명확하면 승인되었다고 추정하지 않습니다.
 
-## 수동 인계
+## 위임·결과 회수·복구
 
-같은 repository의 저장된 파일이 기준입니다. 채팅은 자동으로 다른 세션에 전달되지 않습니다. 한 번에 하나의 구현 세션만 파일을 수정하도록 운영합니다.
+같은 repository의 저장된 파일이 기준입니다. PM만 하위 에이전트를 생성하며 하위 에이전트의 재위임은 금지합니다. 모델·reasoning·대화 상속 설정은 [MODEL_POLICY.md](MODEL_POLICY.md)를 따릅니다. PM을 포함해 파일을 수정하는 주체는 한 번에 하나입니다. 작업 완료·중단을 확인하기 전 다른 작성자를 시작하지 않으며, 중단 요청만으로 쓰기가 끝났다고 가정하지 않습니다. 리뷰 문서·학습 노트·상태 문서에도 적용합니다.
 
-| 전달 | 사용자가 전달할 최소 정보 |
+| 전달 | PM이 전달·회수할 최소 정보 |
 | --- | --- |
-| PM → Implementer | 역할 프롬프트 경로, TASK 경로, 모델·reasoning |
+| PM → Implementer 계획 | 역할 지침·TASK·기준점·모델·reasoning, 읽기 전용 계획 단계, 목표·경계 |
+| PM → Implementer 구현 | 승인된 구체적 계획·파일 범위·제약·승인 근거, 결과 반환 형식 |
 | Implementer → PM | TASK 경로, 완료 보고, 변경 파일·기준점, 미검증·남은 문제 |
 | PM → Reviewer | 역할 프롬프트 경로, TASK 경로, 변경 기준점·파일 범위, 리뷰 저장 경로 |
-| Reviewer → PM | 리뷰 문서 경로 |
+| Reviewer → PM | 리뷰 문서 경로 또는 읽기 전용 결과, Findings·검토 범위·한계 |
 | PM → Implementer 수정 | TASK·리뷰 경로, ACCEPT ID, 사용자 승인 범위와 계획 승인 여부 |
-| 사용자 → Implementer / PM | 실행 완료 사실과 저장된 로그 경로. 같은 저장소에서 로그와 연결된 원본을 읽어 명령·입력·환경·관찰 결과·실패 내용을 확인하며, 파일에 없는 정보만 추가로 요청 |
+| 사용자 → PM | 실행 완료 사실과 저장된 로그 경로. 같은 저장소에서 로그와 연결된 원본을 읽어 확인하며, 파일에 없는 정보만 추가로 요청 |
 
 PM은 인계 결과와 중요한 결정을 문서에 남깁니다. 구현 완료 보고만으로 기능 완료 체크하지 않습니다.
 Reviewer에게 구현자의 대화·의도를 정답처럼 전달하지 않습니다. diff 기준이 불명확하면 먼저 범위를 확인합니다. git diff에 나타나지 않는 신규 파일과 기존 사용자 변경도 구분합니다. 이를 위해 자동 commit이나 branch 생성을 하지 않습니다.
+
+Implementer 계획 단계와 명시적 읽기 전용 검증에서는 문서까지 포함해 어떤 파일도 수정하지 않고 결과를 반환합니다. Reviewer는 일반 리뷰에서 지정 리뷰 문서만 작성할 수 있으나 읽기 전용 검증에서는 결과만 반환하고 PM이 기록합니다. 승인·질문·예상 밖 위험은 모두 PM으로 모읍니다. 플랫폼의 권한 승인 UI는 별개이며 PM이 사용자 대신 승인하거나 권한을 우회하지 않습니다.
+
+TASK의 `Execution State`에는 현재 단계, 승인된 계획·범위·근거, 지정 역할·모델·reasoning, 변경 기준점, 결과 위치, 차단 사유와 다음 행동을 최소한으로 기록합니다. 단계는 계획/계획 승인 대기/구현/리뷰/수정 승인 대기/사용자 검증 대기/학습 정리/완료/차단 중 현재 값만 둡니다. STATUS에는 현재 TASK·단계·승인 범위 요약·결과 링크·다음 행동을 남기고 상세 내용은 TASK를 참조합니다. 에이전트 식별자는 후속 지시에 쓸 수 있지만 영구 복구 근거로 의존하지 않습니다. 새 PM은 저장된 승인 내역과 실제 diff를 대조하고, 기록되지 않은 승인은 추정하지 않습니다.
+
+위임 도구·모델·reasoning이 없거나 호출 실패·중단·시간 초과가 발생하면 PM은 요청 설정, 관측된 오류, 실제 변경·결과의 유무와 다음 선택지를 보고합니다. 완료 보고가 없으면 미완료로 남깁니다. 동일 요청을 무한 재시도하거나 다른 모델·별도 API·수동 세션으로 조용히 우회하지 않습니다. 재시도·방식 변경이 필요하면 사유와 계획을 사용자에게 제시합니다. 실패한 작성자가 멈췄는지 확인하고 부분 변경을 보존한 상태에서 복구합니다.
 
 ## 테스트·기록·README
 
@@ -121,7 +128,7 @@ SVG가 적합하면 `images/<mission>-architecture.svg`를 사용하고, GitHub�
 
 ## TASK 학습 문서
 
-각 TASK의 구현·필요한 리뷰와 수정·사용자 검증이 끝나고 PM이 기능 완료를 확인한 뒤, Implementer는 별도 요청 없이 **하나의 `docs/study-note.md`에 최종 코드 기준으로 한 번 작성·정리합니다.** 구현 중이나 리뷰 수정 때마다 학습 노트를 갱신하지 않습니다. 중간 인계에서는 학습 정리 대기로 표시하며 노트 미작성만으로 구현 인계를 막지 않습니다. PM은 최종 학습 정리를 확인한 뒤 TASK를 마감합니다.
+각 TASK의 구현·필요한 리뷰와 수정·사용자 검증이 끝나고 PM이 기능 완료를 확인한 뒤, PM은 추가 사용자 요청을 기다리지 않고 Implementer에 학습 정리를 위임합니다. Implementer는 **하나의 `docs/study-note.md`에 최종 코드 기준으로 한 번 작성·정리합니다.** 구현 중이나 리뷰 수정 때마다 학습 노트를 갱신하지 않습니다. 중간 인계에서는 학습 정리 대기로 표시하며 노트 미작성만으로 구현 인계를 막지 않습니다. PM은 작성 완료 후 최종 학습 정리를 확인하고 TASK를 마감합니다.
 
 상단에는 전체 미션 목표·제약·학습 목차를 두고 본문에는 TASK별 절을 미션 진행 순서대로 추가합니다. 기존 내용과 사용자 메모·질문은 보존하며, 진행 중 이미 작성된 초안은 마감 시 최종 코드와 대조합니다. 완료된 TASK가 재개되면 다시 마감할 때 해당 절을 갱신합니다. 사용자가 학습 문서 작성·보완을 직접 요청한 경우에는 시점과 관계없이 그 요청을 따릅니다. 채팅의 코드 설명과 정적 self-check는 기존대로 각 구현 인계 때 제공합니다.
 
@@ -180,7 +187,7 @@ PM은 같은 `docs/study-note.md` 상단의 전체 미션 목표·제약과 학�
 1. 사용자가 이 템플릿의 [AGENTS.md](../../AGENTS.md)와 docs/harness/를 새 repository에 직접 복사합니다. 같은 목적의 기존 파일이 있으면 먼저 읽고 병합하며 덮어쓰거나 중복 구조를 만들지 않습니다.
 2. [MISSION.md](MISSION.md) 입력 영역에 원문의 내용·요구사항·계층을 보존하고 Markdown formatting만 정리해 저장합니다. 프로젝트별 기술 스택·추가 규칙이 필요하면 [AGENTS.md](../../AGENTS.md)에 짧게 추가합니다.
 3. GPT-6 Astra PM 세션에서 [prompts/PM.md](prompts/PM.md)를 사용합니다. PM은 원문 분석 → REQUIREMENTS 초기 작성 → 실제 repository 확인 → STATUS 초기화 → Roadmap·README 구성·시각화 필요성 제안 → 승인된 README 골격 작성 → 첫 Step 제안을 진행합니다.
-4. 새 PM 세션은 [AGENTS.md](../../AGENTS.md), PM 프롬프트, MISSION, REQUIREMENTS, STATUS를 읽고 필요한 현재 TASK·최근 WORKLOG·코드를 확인합니다. 채팅 복원 대신 실제 repository 상태로 재개합니다.
+4. 새 PM 세션은 [AGENTS.md](../../AGENTS.md), PM 프롬프트, MISSION, REQUIREMENTS, STATUS를 읽고 필요한 현재 TASK·최근 WORKLOG·코드를 확인합니다. 현재 위임 기능과 모델 지원을 확인하고 저장된 단계·승인 범위·결과 위치·다음 행동을 실제 diff와 대조해 재개합니다. 이전 에이전트의 생존이나 이전 실행의 성공을 추정하지 않습니다.
 
 새 미션에서는 이전 미션의 docs/study-note.md 내용도 가져오지 않고 새로 시작합니다. 진행 중인 미션의 학습 기록을 초기화하거나 삭제하지 않습니다. 공통 LEARNING_TEMPLATE은 재사용합니다.
 새 미션에서는 MISSION / REQUIREMENTS / STATUS / WORKLOG와 tasks·reviews의 실제 기록만 새로 시작합니다. [TASK_TEMPLATE.md](tasks/TASK_TEMPLATE.md)와 [REVIEW_TEMPLATE.md](reviews/REVIEW_TEMPLATE.md)는 보존합니다. AGENTS / WORKFLOW / MODEL_POLICY / prompts는 재사용합니다. 기존 프로젝트 기록을 지우라는 의미가 아니며, 진행 중 프로젝트는 병합하고 다른 미션은 새 repository나 별도 복사본에서 시작합니다.
@@ -196,7 +203,7 @@ Git 쓰기 작업은 [AGENTS.md](../../AGENTS.md)의 명시적 요청 규칙을 
 - 기존 commit convention이 우선이며 없으면 Chore / Feat / Fix / Refactor / Docs / Test 계열을 사용합니다. 메시지는 실제 변경을 설명하며 테스트 성공을 추정하지 않습니다.
 - 추천은 commit 실행 승인이 아닙니다. 사용자가 직접 하거나 명시적으로 요청했을 때만 실행합니다. 실제 실행 전 현재 staged/unstaged·신규 파일과 대상 범위를 확인하고 무관한 변경을 포함하지 않습니다. 실행하지 않은 commit·SHA를 기록하지 않습니다. 보류된 범위는 필요하면 STATUS에 짧게 남겨 재개 시 확인합니다.
 
-custom Skill은 v1에서 만들지 않습니다. 일반 계획·구현·리뷰를 Skill로 중복하지 않습니다. 여러 프로젝트에서 반복되고 절차가 일정하며 명확한 trigger와 재사용 가치가 확인되면 공식 Skill Creator를 활용해 `.agents/skills/<skill-name>/SKILL.md`를 고려합니다. 예: 미션 원문에서 필수·선택·보너스와 평가 포인트를 추출하는 반복 절차. Skill 수를 늘리는 것이 목표가 아닙니다.
+이번 구조에서는 custom Skill을 만들지 않습니다. 일반 계획·구현·리뷰를 Skill로 중복하지 않습니다. 향후 반복 절차의 재사용 가치가 확인되어도 별도 제안·사용자 승인 없이 추가하지 않습니다.
 
 ## 자연어로 시작하기
 
@@ -206,9 +213,9 @@ custom Skill은 v1에서 만들지 않습니다. 일반 계획·구현·리뷰�
 | --- | --- |
 | 새 PM 세션 | 미션 시작하고 분석해 줘. 원문은 아래야. |
 | PM 재개 | 미션 이어서 진행하자. |
-| 새 구현 세션 | TASK-001 구현해 줘. |
-| 새 독립 리뷰 세션 | TASK-001 리뷰해 줘. |
+| PM에 구현 위임 요청 | TASK-001 구현해 줘. |
+| PM에 독립 리뷰 위임 요청 | TASK-001 리뷰해 줘. |
 | 대상이 분명한 기존 세션 | 이 작업 이어서 해 줘. |
 
 세션은 실제로 읽은 문서와 역할·대상·다음 행동을 공통 확인문구로 알립니다. 예: `지침 확인 완료 | 역할: Implementer | 확인: [AGENTS.md](../../AGENTS.md), [IMPLEMENTER.md](prompts/IMPLEMENTER.md), TASK-001.md | 대상: TASK-001 | 다음: 계획 제시 후 승인 대기`.
-대상이 불명확하면 확인 질문을 하며, 자연어 구현 요청만으로 수정 계획 승인까지 받은 것으로 간주하지 않습니다. 역할 선택은 수동 세션·모델 선택과 승인 절차를 대체하지 않습니다.
+대상이 불명확하면 PM이 확인하며, 자연어 구현 요청만으로 수정 계획 승인까지 받은 것으로 간주하지 않습니다. 역할별 위임과 결과 회수는 PM이 수행하고 사용자 승인 절차를 유지합니다.
