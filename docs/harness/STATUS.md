@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-TASK-001 완료. TASK-002 REQUIRED 독립 리뷰 및 Major-1·Major-2·Minor-1 구현 반영 PM 확인 완료. 추가 독립 리뷰 SKIP. 사용자 요청으로 이번 한 번 PM이 학습 노트를 정리했으며 현재 수정본 정상 비교 확인 완료·실패 경로 사용자 검증 대기.
+TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 사용자 요청으로 생략하고 실행 미검증으로 남긴다. REQUIRED 리뷰·보완·정상 비교·학습 정리 완료, 추가 리뷰 SKIP. TASK-003 CPU 관측 사용자 실행 대기.
 
 ## Completed
 
@@ -14,20 +14,20 @@ TASK-001 완료. TASK-002 REQUIRED 독립 리뷰 및 Major-1·Major-2·Minor-1 �
 - 관제 Ctrl+C 이후 앱 PID 12741 생존(SN, 00:11) 확인.
 - REQUIRED 독립 리뷰 완료, Minor-1 반영 및 검증 완료. 추가 리뷰 SKIP.
 
-## In Progress
+## 이전 TASK 결과
 
 [TASK-002](tasks/TASK-002.md)의 [OOM 보고서](../reports/oom.md)를 비교 출력과 원본 CSV·앱 로그에 대조했다. 128/256MB 모두 MemoryGuard 자체 종료이며 첫 RUNNING→EXITED 관측은 17초→33초, 최고 RSS 표본은 146,520→274,628 KiB였다. 256/512MB는 서로 다른 작업·종료 경로로 별도 한계 사례를 유지한다.
 
 ## Next
 
-1. PM: 부트 성공 표식 누락·before 출력 저장 실패 시 after 미실행·비정상 종료를 확인할 별도 환경과 계획 제시. 승인 후 사용자 실행. 정상 비교는 확인 완료다.
-2. 결과와 로그 경로를 PM에 전달 → 실제 확인 범위 기록·남은 완료 기준 판단 → TASK 마감 및 커밋 범위 결정.
+1. 사용자: 기존 도구로 512MB / CPU 80% / 멀티스레드 false의 CPU 첫 관측을 수행하고 로그 경로 전달. CPU 재현은 아직 미확인이다.
+2. PM: CPU·앱 로그를 대조한 뒤 CPU_MAX_OCCUPY만 바꾸는 두 번째 실행 조건을 제시한다. [TASK-003](tasks/TASK-003.md) 참조.
 
 2026-10-08 재개: Implementer의 읽기 전용 안내를 회수했다. 정상 비교 comparison-B8CmgX의 원본 CSV·앱 로그 및 최종 종료 코드 0을 확인했다. 128/256MB 관측 시간은 18초/32초, 최고 RSS는 146,536/274,524 KiB다. 실패 주입은 별도 검증 환경과 구체적 계획 승인 후 진행하며 아직 수행하지 않았다. [재개 기록](WORKLOG.md#task-002-사용자-검증-안내-재개).
 
 ## Open Issues
 
-- 현재 수정본의 실패 경로 실행 검증은 미확인이다. 정상 비교 comparison-B8CmgX 확인 완료. 현재 Linux 저장소의 비교·준비·관제 스크립트는 이 작업 공간과 내용이 같으며, 별도 셸 종료 코드 출력은 전달받지 않았다.
+- TASK-002 부트 표식 누락·before 저장 실패 경로는 사용자 선택으로 실행 검증 생략(정적 확인만). 정상 비교 comparison-B8CmgX 확인 완료. 별도 셸 종료 코드 출력은 전달받지 않았다.
 - CPU·Deadlock 본 실험·보고서 및 전체 제출은 미완료다.
 - 512MB 실행의 작업 전환·CPU 임계치 판정 내부 이유는 미확인이다.
 - TASK-002 학습 노트 작성은 완료했으나 사용자 이해 완료는 별도로 확인한다.
@@ -42,7 +42,7 @@ TASK-001 완료. TASK-002 REQUIRED 독립 리뷰 및 Major-1·Major-2·Minor-1 �
 
 ## Current Task
 
-[TASK-002](tasks/TASK-002.md) — 리뷰 보완·학습 정리·정상 비교 확인 완료, 실패 경로 사용자 검증 대기. 추가 독립 리뷰 SKIP. 기존 보고서 증거는 유지한다.
+[TASK-003](tasks/TASK-003.md) — 기존 실행·관제 도구를 재사용하는 CPU 첫 관측 안내. source 수정 없음. TASK-002는 사용자 검증 생략 결정과 한계를 기록하고 마감했다.
 
 이전 [TASK-001](tasks/TASK-001.md)은 완료이며 REQUIRED 독립 [리뷰](reviews/REVIEW-TASK-001.md)·Minor-1 처리 완료, 추가 리뷰 SKIP 상태를 유지한다. TASK-002 착수 전 작업 트리는 clean이고 HEAD는 `48438ce11b3e8c311b142d670515a50ac1f55e1a`였다. 이번 세션에서 Git 쓰기 작업은 하지 않았다.
 

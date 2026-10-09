@@ -2,7 +2,7 @@
 
 제공된 `agent-leak-app`을 Linux에서 실행하고 메모리 누수, CPU 과점유, 교착상태를 관측하여 증거 기반 장애 보고서 3건을 작성하는 교육 미션입니다.
 
-실행·관제 도구의 기본 동작과 OOM 메모리 설정 비교를 사용자 실행으로 확인하고 [OOM 보고서](docs/reports/oom.md)를 작성했습니다. TASK-002 리뷰 지적을 처리 중이며 CPU·Deadlock 비교와 보고서는 대기 중입니다. [미션 원문](docs/harness/MISSION.md), [요구사항](docs/harness/REQUIREMENTS.md), [진행 상태](docs/harness/STATUS.md)를 기준으로 진행합니다.
+실행·관제 도구의 기본 동작과 OOM 메모리 설정 비교를 사용자 실행으로 확인하고 [OOM 보고서](docs/reports/oom.md)를 작성했습니다. TASK-002 리뷰 보완은 완료했으며 실패 경로 실행 검증은 사용자 선택으로 생략했습니다(정적 확인만). CPU 관측을 준비 중이며 Deadlock 비교와 보고서는 대기 중입니다. [미션 원문](docs/harness/MISSION.md), [요구사항](docs/harness/REQUIREMENTS.md), [진행 상태](docs/harness/STATUS.md)를 기준으로 진행합니다.
 
 ## 프로젝트 구조
 
