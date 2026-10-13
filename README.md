@@ -26,9 +26,17 @@ TASK-002 메모리 비교는 아래 [한 명령 실행 절](#메모리-설정-�
 source ./prepare-env.sh
 ```
 
+설정을 지정할 때는 위 명령 대신 세 값을 순서대로 전달합니다.
+
+```bash
+source ./prepare-env.sh 512 40 false
+```
+
 스크립트가 Linux·일반 사용자·필수 명령·포트 상태를 확인하고, 머신 아키텍처에 맞는 바이너리를 선택합니다. `AGENT_HOME`이 비어 있으면 `$HOME/agent-leak-lab`을 사용하며, 필수 디렉터리와 미션의 **공개 시험용** `secret.key`를 준비합니다. 기존 키는 덮어쓰지 않고 내용만 비교하며 실제 credential은 사용하지 않습니다. macOS 호스트에서 실행하거나 호스트 아키텍처로 바이너리를 고르지 마세요.
 
-`source`는 환경변수·`run_dir`·PID를 **현재 셸**에 남기기 위해 필요합니다. `bash ./prepare-env.sh`처럼 직접 실행하면 스크립트가 사용법을 출력하고 종료합니다. 스크립트는 `AGENT_PORT=15034`, `MEMORY_LIMIT=256` MB, `CPU_MAX_OCCUPY=80`%, `MULTI_THREAD_ENABLE=false`를 기본값으로 사용합니다. 후자의 세 값은 **관측 시작값**입니다. 이 설정으로 메모리 증가와 MemoryGuard 종료를 확인했으며 CPU·Deadlock 재현 설정으로 검증한 것은 아닙니다. 개별 실험에서는 `source` 전에 환경변수를 설정할 수 있고, 아래 메모리 비교에서는 [비교 스크립트](run-memory-comparison.sh) 상단의 값만 수정합니다. 전역 셸 설정 파일은 수정하지 않습니다.
+`source`는 환경변수·`run_dir`·PID를 **현재 셸**에 남기기 위해 필요합니다. `bash ./prepare-env.sh`처럼 직접 실행하면 스크립트가 사용법을 출력하고 종료합니다. 인자 방식은 `메모리 MB CPU % 멀티스레드` 순서로 정확히 세 값을 받으며, 이전 실행의 환경변수보다 이 값들이 우선합니다. 메모리는 50~512, CPU는 10~100이고 멀티스레드는 `true/false`, `1/0`, `yes/no`를 받습니다. 무인자이면 기존 환경변수 또는 `MEMORY_LIMIT=256` MB, `CPU_MAX_OCCUPY=80`%, `MULTI_THREAD_ENABLE=false` 기본값을 사용합니다. 기본값에서는 메모리 증가와 MemoryGuard 종료를 확인했으며 CPU·Deadlock 재현 설정으로 검증한 것은 아닙니다. 위치 인자가 있는 함수·스크립트에서 무인자로 `source`하면 그 인자가 전달될 수 있으므로 세 값을 명시하세요. `AGENT_PORT=15034`는 고정입니다.
+
+메모리 `128 80 false` → `256 80 false`, CPU `512 80 false` → `512 40 false`, 멀티스레드 `512 80 false` → `512 80 true`는 한 값씩 바꾸는 **입력 예시**입니다. 각 장애의 재현 조건이나 성공 결과로 검증된 값은 아닙니다. 개별 실험에서는 `source` 전에 환경변수를 설정할 수도 있고, 아래 메모리 비교에서는 [비교 스크립트](run-memory-comparison.sh) 상단의 값만 수정합니다. 전역 셸 설정 파일은 수정하지 않습니다.
 
 준비가 성공하면 스크립트가 저장소의 `runs/` 아래에 `run-년-월-일_시-분-초-XXXXXX` 형식의 새 `run_dir`을 만들고 바이너리를 시작합니다. 끝의 6자리는 실행 구분용 임의 문자입니다. `AGENT_HOME`의 키·업로드 경로는 그대로 두고, 실행별 `AGENT_LOG_DIR`만 새 디렉터리로 지정합니다. 기존 홈 디렉터리 로그는 이동하거나 삭제하지 않습니다. `runs/`는 Git에서 제외되므로 저장소를 복제할 때 이 원본 증거는 함께 전달되지 않습니다.
 
@@ -66,6 +74,8 @@ sudo apt install bsdextrautils
 ```bash
 source ./prepare-env.sh && bash ./monitor.sh "$app_pid" "$run_dir/monitor.csv"
 ```
+
+세 값을 지정할 때는 같은 명령에서 `source ./prepare-env.sh 512 40 false`로 바꾸면 됩니다. 관제 명령과 자식 PID 사용법은 동일합니다.
 
 위 명령이 성공했을 때만 같은 셸에서 이번 실행의 기록을 조회합니다.
 

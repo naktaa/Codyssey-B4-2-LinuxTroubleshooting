@@ -57,7 +57,7 @@ run_case() (
     printf '\n=== %s: MEMORY_LIMIT=%s MB, CPU_MAX_OCCUPY=%s%%, MULTI_THREAD_ENABLE=%s ===\n' \
         "$label" "$MEMORY_LIMIT" "$CPU_MAX_OCCUPY" "$MULTI_THREAD_ENABLE"
 
-    if ! source ./prepare-env.sh; then
+    if ! source ./prepare-env.sh "$MEMORY_LIMIT" "$CPU_MAX_OCCUPY" "$MULTI_THREAD_ENABLE"; then
         printf '%s setup failed; the next run will not start. Inspect any PID and log path printed above.\n' "$label" >&2
         return 1
     fi

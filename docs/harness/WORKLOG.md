@@ -235,3 +235,22 @@ Review:
 - 현재 Linux 저장소와 macOS 작업 공간의 비교·준비·관제 스크립트 바이트 일치를 확인했다. 비교 스크립트 SHA-256은 b296b4d25163e0df6ea87d10e0c839a5518b49aea3876ab5460639566e54758f다. 실행 시점의 별도 소스 해시 기록은 없으므로 이 확인은 현재 파일 대조다.
 - REQ-002는 기존 리뷰·보완 및 정상 실험 근거로 완료 처리했다. TASK-002의 부트 표식 누락·before 저장 실패 경로는 미검증으로 유지한다. 기존 OOM 보고서의 17초/33초는 이전 실험 수치이므로 덮어쓰지 않는다. README의 기존 실험 설명과 학습 본문은 유지한다.
 - Review Decision: SKIP. PM의 증거 대조·상태 문서 갱신이며 기능 source 수정 없음. 실제 앱·테스트를 AI가 실행하지 않았다. 다음은 별도 환경의 실패 검증 계획 제시다. 커밋 보류 — 실패 경로 검증과 TASK 마감 범위를 확인한 뒤 기록을 묶는다.
+
+## 2026-10-13
+
+### TASK-003 첫 CPU 관측 및 실행 인자화
+
+- 최신 사용자 실행 원본 `runs/run-2026-10-13_16-29-50-Ni7K0x`의 512/80/false, 부트 성공, PID 4910, 첫 RUNNING→EXITED 37초를 확인했다. 앱 Current Load 50.58%의 임계치 위반과 top 캡처 3.0%(사용자 관찰 약 5%)는 서로 같은 지표로 단정하지 않는다. Watchdog·SIGTERM 명시와 OS 과점유 입증은 미완료다.
+- 사용자 요청에 따라 앞으로 별도 지정이 없으면 최신 실행 디렉터리의 실제 설정·PID를 대조한다. 원본은 보존한다.
+- 사용자 “모든 필수기능을 수행할 때 저 인자 간편하게 설정 가능하다면 그렇게 수정.”으로 [TASK-003](tasks/TASK-003.md)의 세 파일 계획 승인. Implementer `gpt-6-sol` / `medium`이 [prepare-env.sh](../../prepare-env.sh)의 0/3개 인자 지원, [메모리 비교 스크립트](../../run-memory-comparison.sh)의 명시 인자 호출, [README](../../README.md) 사용법을 반영했다. 무인자 환경변수·기본값 방식과 기존 범위 검증을 유지한다.
+- Decision: 기존 준비 도구에 메모리·CPU·멀티스레드 세 위치 인자를 추가한다. Reason: 필수 장애별 비교에서 변경 변수와 고정 조건을 짧은 명령으로 명시한다. Alternative: 별도 CPU 실행기·env 파일·이름 있는 옵션. Why not: 현재 세 설정에는 추가 파일·파서 복잡도가 필요하지 않다.
+- Review Decision: REQUIRED. 공용 준비 도구와 메모리 비교 호출 관계 변경을 새 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`으로 독립 검토했다. [리뷰](reviews/REVIEW-TASK-003.md)에 Critical/Major/Minor 없음. PM diff 대조 완료, 수정할 finding 없음. 요청 설정 수락과 실제 실행 모델 메타데이터 검증은 구분한다.
+- Implementer 정적 self-check 및 diff 공백 검사 완료. AI는 실제 앱·테스트를 실행하지 않았다. 사용자 실행 검증, 512/40/false CPU 관측 및 기존 무인자·메모리 비교 회귀 확인은 대기다. CPU TASK와 학습 정리는 미완료로 유지한다.
+- 커밋 보류 — 인자화 사용자 실행 확인 후 실행 도구·README·관련 상태 및 리뷰 기록을 묶는다. commit/push는 수행하지 않았다.
+
+### 두 번째 CPU 관측 원본 확인
+
+- 사용자 top 약 8%·계속 실행 중 보고에 따라 최신 `run-2026-10-13_18-05-17-HzSxJx`를 읽었다. 512/40/false 적용·부트 통과·PID 7167 관제 수집을 확인했다. CSV 첫 RUNNING 18:05:18부터 읽은 마지막 18:07:09까지 111초 이상 생존이며 종료 시간은 아니다.
+- 앱의 Healthy System Monitoring 선택, Current Load 40%에서 cooldown·재상승, Heap 525MB에서 cleanup·MEMORY RECOVERED를 확인했다. 첫 실행과 작업 경로가 달라 동일 작업의 생존 시간 변화로 단정하지 않는다. top 사용자 관찰은 앱 지표와 구분하며 Watchdog 보호 종료 근거는 미확인이다.
+- Review Decision: SKIP — 사용자 원본 대조·상태 기록만 수행했다. 기존 인자화 REQUIRED 리뷰 완료 유지. 실제 앱·테스트·프로세스 종료는 AI가 수행하지 않았다. 인자 정상 경로는 사용자 확인, 나머지 회귀 검증·CPU 필수 증거·학습 정리는 대기다.
+- 사용자 “kill로 해서 종료했어” 확인 후 같은 CSV의 마지막 RUNNING 18:09:25와 EXITED 18:09:26을 읽었다. 첫 RUNNING 18:05:18부터 248초(4분 8초)는 수동 종료까지의 관측 간격이다. kill 옵션은 미확인이고 Watchdog 종료로 기록하지 않는다. CPU 40%의 cooldown·메모리 회복과 사용자 수동 종료를 80% 실행의 임계치 위반 직후 종료와 구분한다. 다음은 필수 증거의 부족과 보고서 계획 검토다.

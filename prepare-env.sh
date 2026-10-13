@@ -2,7 +2,7 @@
 
 # Sourcing keeps the app PID and evidence directory in the caller's shell.
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
-    printf 'Run this in the repository root with: source ./prepare-env.sh\n' >&2
+    printf 'Run this in the repository root with: source ./prepare-env.sh [MEMORY_LIMIT CPU_MAX_OCCUPY MULTI_THREAD_ENABLE]\n' >&2
     exit 2
 fi
 
@@ -10,6 +10,12 @@ codyssey_prepare_env() {
     local tool architecture selected_binary agent_home key_file listeners account_uid run_root
     local selected_memory selected_cpu selected_threads run_stamp new_run_dir launch_local
     local existing_pid children attempt
+
+    # A sourced file can inherit its caller's positional arguments, so require a complete setting set.
+    if (( $# != 0 && $# != 3 )); then
+        printf 'Usage: source ./prepare-env.sh [MEMORY_LIMIT CPU_MAX_OCCUPY MULTI_THREAD_ENABLE]\n' >&2
+        return 2
+    fi
 
     for tool in id uname ps date sleep mktemp ss cmp mkdir; do
         if ! command -v "$tool" >/dev/null; then
@@ -57,9 +63,15 @@ codyssey_prepare_env() {
         return 1
     fi
 
-    selected_memory=${MEMORY_LIMIT:-256}
-    selected_cpu=${CPU_MAX_OCCUPY:-80}
-    selected_threads=${MULTI_THREAD_ENABLE:-false}
+    if (( $# == 3 )); then
+        selected_memory=$1
+        selected_cpu=$2
+        selected_threads=$3
+    else
+        selected_memory=${MEMORY_LIMIT:-256}
+        selected_cpu=${CPU_MAX_OCCUPY:-80}
+        selected_threads=${MULTI_THREAD_ENABLE:-false}
+    fi
     if [[ ! $selected_memory =~ ^[0-9]{2,3}$ ]] || (( 10#$selected_memory < 50 || 10#$selected_memory > 512 )); then
         printf 'MEMORY_LIMIT must be an integer from 50 to 512 MB.\n' >&2
         return 1
@@ -154,7 +166,7 @@ codyssey_prepare_env() {
     return 1
 }
 
-if codyssey_prepare_env; then
+if codyssey_prepare_env "$@"; then
     unset -f codyssey_prepare_env
     return 0
 else
