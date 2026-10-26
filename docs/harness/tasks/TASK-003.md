@@ -14,11 +14,32 @@
 
 ## Execution State
 
-- 현재 단계: 사용자 검증 대기. 기존 실행 도구 인자화 구현 및 REQUIRED 독립 리뷰 완료.
+- 현재 단계: 사용자 검증 대기. CPU 보고서 초안 작성 및 RECOMMENDED 독립 리뷰 완료, 지적 없음. 기존 실행 도구 인자화 REQUIRED 독립 리뷰 완료. CPU 필수 증거와 나머지 회귀 검증은 미완료.
 - 승인 범위: [prepare-env.sh](../../../prepare-env.sh)의 메모리·CPU·멀티스레드 3개 위치 인자 지원, [메모리 비교 스크립트](../../../run-memory-comparison.sh)의 명시 인자 호출, [README](../../../README.md)의 사용법 반영. 무인자 환경변수·기본값 방식은 유지한다.
 - 위임: Implementer `gpt-6-sol` / `low` 기존 에이전트에 후속 읽기 전용 계획을 요청해 회수했다. 최초 실패 검증 설명에 사용한 설정이며 위 MEDIUM 추천과 구분한다. 실행 모델 메타데이터는 별도 확인하지 않았다.
 - 결과 위치: 이 TASK에 회수한 계획을 기록한다.
-- 다음 행동: 사용자 인자화 실행 검증 및 512/40/false CPU 비교 관측. CPU 보고서 작성 계획은 비교 증거 확인 후 제시한다.
+- 다음 행동: [CPU 보고서](../../reports/cpu.md) 사용자 확인과 남은 필수 증거 확보 방향 결정. [독립 리뷰](../reviews/REVIEW-TASK-003-CPU-REPORT.md)는 사용자 승인으로 완료했으며 수정 finding은 없다. 표시 모드 변경만을 위한 추가 실행은 하지 않는다. 필수 증거 부족을 완료로 처리하지 않는다.
+
+### 2026-10-26 CPU 보고서 초안 작성
+
+- 후속 사용자 “진행”으로 RECOMMENDED 독립 리뷰 실시. 새 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`의 [리뷰 결과](../reviews/REVIEW-TASK-003-CPU-REPORT.md)는 Critical/Major/Minor 없음. PM 원본·결과 대조 및 Disposition 완료. 추가 리뷰 SKIP(보고서 변경 없음). 실제 실행 모델 메타데이터는 별도 확인하지 않았다.
+
+- 사용자 “더 바꿔서 테스트할게 없으면 아까 기록한다는거 마무리”로 앞서 제시한 신규 CPU 보고서 한 파일 작성 계획을 승인했다. Implementer `gpt-6-sol` / `medium`에 승인 범위를 전달해 작성 결과를 회수했다. 직전 설명 위임은 모델 capacity 오류로 실패했고, 이번 사용자 요청 후 같은 에이전트·모델을 재호출했다. 임의 모델 대체 없음.
+- [CPU 보고서](../../reports/cpu.md)의 네 필수 절, 원본 발췌와 PID·시각·표본 수·누적 CPU 시간, 간접 근거인 과거 40% 수동 종료 기록을 정적으로 대조했다. 실제 앱 실행·테스트 및 source 수정 없음.
+- 사용자 제공 환경 출력: Linux 논리 CPU 6개(0~5), x86_64, KVM. 새 top에서 I 입력 시 Off이므로 현재 시작 모드는 Irix On. 과거 수집 모드는 소급 확정하지 않으며 OrbStack 환경이라고 단정하지 않는다. 표시 모드 전환은 수치를 바꾸지만 실제 CPU 사용량을 바꾸지 않는다.
+- Review Decision: RECOMMENDED — 평가 핵심 보고서의 증거·인과 해석 검토. 추천 Reviewer `gpt-6-sol` / `medium`. 사용자 진행/생략 결정 전 독립 리뷰 미실시. CPU 필수 증거 부족과 TASK 미완료 유지, 최종 학습 정리는 보류한다.
+
+### 2026-10-26 보완 관측 계획
+
+- 사용자 보완 실행 결과 확인: `runs/run-2026-10-26_16-01-54-2PYjC0` 원본이 현재 작업 공간에 존재하며 직접 대조했다. 512/80/false 부트 통과, 자식 PID 5286. 실행 기록 16:01:54 → CSV EXITED 16:02:28은 약 34초, 첫 CSV RUNNING 16:02:01 → EXITED는 27초다. 시작과 관제 사이 약 7초는 CSV 관측 밖이다.
+- app.log는 16:02:27.864 Current Load 약 50.42%에서 CPU Threshold Violated를 기록했다. top의 대상 PID 표본 26개는 0~5%이며 OS CPU 과점유 증거로 단정하지 않는다. Watchdog/SIGTERM 명시는 없다. 사용자 셸의 Terminated는 종료 관측 근거이나 신호 발신자·정책을 입증하지 않는다. top은 앱 종료 후에도 빈 대상 목록으로 16:02:59까지 기록했다.
+- Review Decision: SKIP — 사용자 원본 읽기 및 상태 기록만 수행. CPU 필수 증거 미충족 유지. 다음은 관측 지표 불일치·종료 근거의 한계를 정리한 보고서 계획 검토이며, 동일 조건 반복으로 재현 성공을 추정하지 않는다.
+
+- 사용자 “다음 단계 진행”으로 읽기 전용 계획을 진행했다. 기준 HEAD `64dc487`, 시작 작업 트리 clean.
+- Implementer `gpt-6-sol` / `medium`, `fork_turns="none"`으로 계획을 회수했다. 도구가 지정 설정을 수락했으며 실제 실행 모델 메타데이터는 별도 확인하지 않았다.
+- source 수정 없이 기존 준비 도구로 512/80/false 실행 후 같은 자식 PID에 top 배치 표본(1초 간격, 60회)과 monitor CSV를 함께 수집한다. top 로그는 새 run_dir에 noclobber로 저장한다. 60초 표본 종료는 앱 종료를 의미하지 않는다.
+- 현재 작업 공간에 runs 원본이 없어 이전 수치는 저장된 기록 기준이다. 사용자 실행 결과로 OS CPU와 앱 지표를 구분하고 Watchdog 종료 근거를 확인한 뒤 비교·보고서 계획을 정한다. 필수 증거 확보를 보장하지 않는다.
+- Review Decision: SKIP — 기존 도구 실행 안내만 회수. 기존 인자화 REQUIRED 리뷰 완료 유지. source 수정·실행 테스트 없음. 보고서 작성 계획은 아직 승인되지 않았다.
 
 ## 2026-10-13 인자화 승인 및 첫 관측
 
@@ -85,7 +106,7 @@ Deadlock 본 실험, 스케줄링 보너스, TASK-002 실패 주입, 신규 프�
 - [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh): 재사용 우선.
 - [메모리 비교 스크립트](../../../run-memory-comparison.sh), [OOM 보고서](../../reports/oom.md): 이전 실험과 한계 참고, 기존 메모리 기능 보존.
 - [README](../../../README.md), [학습 노트](../../study-note.md).
-- `docs/reports/cpu.md`: 신규 예정.
+- [CPU 보고서 초안](../../reports/cpu.md).
 
 ## Implementation Notes
 
