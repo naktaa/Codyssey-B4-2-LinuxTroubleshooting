@@ -1,5 +1,53 @@
 # Worklog
 
+## 2026-10-26 TASK-004 Deadlock 보고서 독립 리뷰 완료
+
+- 사용자 “진행”으로 RECOMMENDED 보고서 리뷰 승인. 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [리뷰](reviews/REVIEW-TASK-004-DEADLOCK-REPORT.md)를 회수했다. 지정값 수락과 실제 실행 모델 메타데이터 검증은 구분한다.
+- Critical/Major/Minor 없음. 실제 원본 8개와 수치·발췌·락 순환 관계·동일 조건 비교·관측 이후 cleanup을 대조했다. 반환값·최종 포트 상태는 TASK에 보존한 사용자 확인에 의존한다는 한계를 명시했다. PM 판정상 수정 finding 없음, 추가 리뷰 SKIP(보고서 변경 없음).
+- 보고서 사용자 확인·최종 학습 정리 대기. 별도 도구 중단·실패 경합을 검증한 것으로 처리하지 않으며 추가 미션 필수 실험으로 확대하지 않는다. 앱·테스트 실행 및 source·보고서 변경 없음.
+- 커밋 보류 — TASK-004 사용자 보고서 확인·학습 정리 및 실제 마감 범위 반영 후 구현·문서 묶음을 판단한다.
+
+## 2026-10-26 TASK-004 Deadlock 보고서 작성
+
+- 사용자 “작성 시자ㅣㄱ”으로 신규 보고서 한 파일 작성 계획 승인. 기존 Implementer `gpt-6.1-sol` / `medium`에 위임해 [deadlock.md](../reports/deadlock.md)를 작성하고 원본·수치·링크 self-check와 실제 위치 설명을 회수했다.
+- PM은 네 필수 절, true/false의 입력 고정·PID·시각·스레드/메모리·로그 발췌와 해석 한계를 대조했다. false의 경로 변경·OS 스레드 존재·관측 후 cleanup과 true의 RSS 소폭 감소를 반영했다. 바이너리 내부 구현과 무한 시간의 안전성을 확정하지 않는다.
+- Review Decision RECOMMENDED: 평가 핵심 보고서의 원인 추론과 비교 해석 검토, Reviewer GPT-6.1 Sol / Medium. 사용자 진행/생략 결정·보고서 확인·최종 학습 정리 대기. 관측 스크립트의 기존 REQUIRED 리뷰는 완료 상태로 유지한다.
+- source·원본·README·학습 노트 변경과 앱/테스트 실행은 하지 않았다. 신호·실패 경합 검증 등은 미확인으로 보존한다. 커밋 보류 — 보고서 리뷰 결정·사용자 확인 및 TASK 마감 범위 반영 후 구현과 문서 묶음을 판단한다.
+
+## 2026-10-26 TASK-004 false 비교 사용자 검증
+
+- 사용자 true 앱 종료·포트 해제 확인 후 512/40/false·60초 실행 및 반환값0을 전달했다. `run-2026-10-26_18-00-02-1munWl`의 네 원본을 대조했다. 자식10481·launcher10476과 관측 종료 시 포트 생존, 메모리/CPU 작업·로그의 지속 진행을 확인했다.
+- 같은 관측 기간 true의 A/B 순환 대기와 false의 작업 진행을 비교했다. false에도 OS 작업 스레드가 있고 메인의 futex_wait가 보이므로 스레드 존재·대기 위치만으로 교착 판정하지 않는다. CSV RSS18,500→504,780KiB 및 평균CPU5.0→1.8%, 모두 RUNNING이다. 18:01:06 이후 cleanup 로그는 CSV 수집 뒤의 추가 자료다.
+- 설정 외 입력은 동일하나 앱의 실행 경로가 바뀌었으므로 내부 락 구현의 해결이나 영구 회피로 확대하지 않는다. Review Decision SKIP(원본 대조·상태 기록). 정상 두 경로 외 중단·자연종료·실패 경합은 미검증이다. AI의 실행·종료 없음. 다음은 보고서 계획 승인이다.
+
+## 2026-10-26 TASK-004 true 관측 사용자 검증
+
+- 사용자의 단일 명령 512/40/true·60초 관측 및 반환값 0을 확인하고 `run-2026-10-26_17-54-55-kFiIRQ`의 네 원본을 읽었다. launcher9870·자식9875와 포트 생존, 파일 생성·수집과 시간 만료 후 앱 유지 정상 경로를 대조했다.
+- 로그는 Thread-1의 A 획득→B 대기, Thread-2의 B 획득→A 대기를 17:55:05.064에 기록한 뒤 멈췄다. 반복 표에서 세 TID는 futex_wait, 두 작업 TID 평균CPU0.0%다. RSS18,440→18,148KiB 소폭 감소를 불변이라고 표현하지 않는다. 순환 대기 로그와 OS 관측을 종합한 교착 재현 근거를 확보했다.
+- Review Decision SKIP: source 변경 없는 사용자 원본 대조·상태 기록. AI의 앱 실행·종료 없음. 신호중단/실패경합 등 검증·false 비교·보고서·학습 정리는 미완료로 남겼다.
+- 다음은 사용자가 실제 PID 동일성을 확인해 앱을 종료하고 15034 해제 후 512/40/false를 동일시간 관측하는 것이다. 커밋 보류 — false 비교와 TASK 마감 범위를 확인한 뒤 구현·관련 문서 묶음을 판단한다.
+
+## 2026-10-26 모델 정책 전환 및 TASK-004 리뷰 수정 완료
+
+- 사용자 “pm은 6.1 sol high 구현 리뷰는 6.1 sol medium … 하네스 문서에 변경 반영하고 task004 수정도 시작” 승인에 따라 [모델 정책](MODEL_POLICY.md)·[운영 지침](WORKFLOW.md)·역할 프롬프트·TASK 템플릿을 역할별 고정값으로 갱신했다. 과거 실행 이력은 보존했다. PM 모델 ID는 제공된 실행 컨텍스트에서 `gpt-6.1-sol`로 확인되며 High는 사용자 지정값이다.
+- Major-1/Minor-1 수정은 새 Implementer `gpt-6.1-sol` / `medium`, `fork_turns="none"`에 위임해 [관측 스크립트](../../run-deadlock-observation.sh) 한 파일만 변경했다. 관제 0/의도된143 허용, INT130/TERM143 반환, 중단된 wait의 최종 상태 보존을 구현했다.
+- Review Decision REQUIRED로 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [변경 범위 재검토](reviews/REVIEW-TASK-004.md)를 회수했다. 두 finding 해결, 새 finding 없음. PM diff·최종 코드 대조 완료. 두 호출 모두 지정값을 수락했으며 실제 하위 실행 모델 메타데이터는 별도로 조회하지 않았다. 추가 리뷰 SKIP(재검토 후 source 변경 없음).
+- 오래된 TASK·STATUS 문구를 단일 명령·사용자 검증 대기로 정리했다. Git 공백 검사와 수정 전후 정적 대조만 수행했다. 앱·스크립트·테스트 실행, commit/push 및 학습 노트 작성은 하지 않았다.
+- 다음은 첫 관측과 반환값 확인, 이후 앱 상태에 따른 중단 검증·false 비교 결정이다. 커밋 권장 — 하네스 모델 정책 전환: `Docs: 역할별 모델을 GPT-6.1 Sol로 통일`. TASK-004 구현 묶음은 사용자 검증 후 권장한다. 실제 Git 쓰기 없음.
+
+## 2026-10-26 TASK-004 단일 관측 구현·리뷰
+
+- 사용자 가독성 요청 및 “구현 시작” 승인으로 신규 [관측 스크립트](../../run-deadlock-observation.sh)와 [README](../../README.md) 두 파일만 Implementer `gpt-6-sol` / `medium`이 수정했다. 기존 준비·관제 도구 재사용, 기본 60초, 시각별 표와 로그 8줄, 앱 유지 정책이다.
+- 정적 self-check·PM 파일 대조 후 Review Decision REQUIRED. 새 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`의 [리뷰](reviews/REVIEW-TASK-004.md)를 회수했다. Major-1 관제 실패 은폐 가능성, Minor-1 TERM/INT 코드 혼합을 ACCEPT했다. 지정 모델 수락과 실제 실행 메타데이터 확인은 구분한다.
+- 관제 반환값 0/의도한143만 허용하고 INT130/TERM143을 구분하는 한 파일 수정 계획 승인 대기. 아직 리뷰 수정하지 않았다. 앱·테스트 실행 없음. 커밋 보류 — 리뷰 수정·사용자 검증 후 판단한다.
+
+## 2026-10-26 TASK-004 착수
+
+- 사용자 “일단 하위 에이전트 패널은 딱히 없어서 그냥 하자. 다음 진행”으로 기존 내장 위임 방식 유지 및 제안된 Deadlock Step 승인. 시작 HEAD `d47a7bd`, 작업 트리 clean을 확인했다. PM은 Git 쓰기를 하지 않았다.
+- [TASK-004](tasks/TASK-004.md)를 작성하고 새 Implementer `gpt-6-sol` / `medium`, `fork_turns="none"`의 읽기 전용 계획을 회수했다. 요청 설정 수락과 실행 모델 메타데이터 확인은 구분한다.
+- 기존 도구로 512/40/true에서 CSV와 15초 간격 네 번의 PID·스레드·CPU/RSS·대기 위치·마지막 로그를 수집한다. 사용자 실행 전 목적·측정 대상·충족 기준을 설명한다. 결과 전 false 비교나 재현 성공을 가정하지 않는다.
+- Review Decision SKIP — 실행 안내만 회수, source·원본 변경 및 앱/테스트 실행 없음. CPU 필수 증거 부족은 보존한다. 커밋 보류 — 첫 관측 결과 반영 후 TASK-004 상태 기록의 보존 시점을 판단한다.
+
 ## 2026-10-26 CPU 보고서 독립 리뷰 완료
 
 - 사용자 “진행”으로 RECOMMENDED 리뷰 승인. 새 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`에 [CPU 보고서](../reports/cpu.md)와 원본·요구사항 대조를 위임했다. 요청 설정 수락과 실제 실행 모델 확인은 구분한다.

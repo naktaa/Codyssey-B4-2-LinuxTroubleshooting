@@ -2,6 +2,8 @@
 
 ## Current Phase
 
+TASK-004 관측 도구 구현·수정·REQUIRED 재검토 및 true/false 사용자 비교 완료. Deadlock 보고서 작성·RECOMMENDED 독립 리뷰 완료, 지적 없음. 보고서 사용자 확인·최종 학습 정리 대기. 별도 도구 실패 검증은 미확인으로 남긴다. TASK-003 CPU 필수 증거 부족은 미완료로 보존한다.
+
 TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 사용자 요청으로 생략하고 실행 미검증으로 남긴다. REQUIRED 리뷰·보완·정상 비교·학습 정리 완료, 추가 리뷰 SKIP. TASK-003 두 차례 CPU 관측 및 인자화 정상 경로 확인, REQUIRED 독립 리뷰 완료. CPU 필수 증거 보완 관측과 나머지 회귀 검증 대기.
 
 ## Completed
@@ -19,6 +21,8 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 [TASK-002](tasks/TASK-002.md)의 [OOM 보고서](../reports/oom.md)를 비교 출력과 원본 CSV·앱 로그에 대조했다. 128/256MB 모두 MemoryGuard 자체 종료이며 첫 RUNNING→EXITED 관측은 17초→33초, 최고 RSS 표본은 146,520→274,628 KiB였다. 256/512MB는 서로 다른 작업·종료 경로로 별도 한계 사례를 유지한다.
 
 ## Next
+
+- [Deadlock 보고서](../reports/deadlock.md) 작성 및 [독립 리뷰](reviews/REVIEW-TASK-004-DEADLOCK-REPORT.md) 완료, Critical/Major/Minor 없음. 추가 리뷰 SKIP. [TASK-004](tasks/TASK-004.md)는 보고서 사용자 확인과 학습 정리로 마감한다. 정상 수집·true/false 비교는 확인했고 별도 신호 중단·실패 경합 등은 미검증이다.
 
 1. [CPU 보고서 초안](../reports/cpu.md) 작성·원본 정적 대조 및 [RECOMMENDED 독립 리뷰](reviews/REVIEW-TASK-003-CPU-REPORT.md) 완료, 지적 없음. 추가 리뷰 SKIP. 사용자 보고서 확인 및 남은 증거 확보 방향 결정 대기. 512/80/false, PID 5286, 실행 기록부터 EXITED까지 약 34초(관제 구간 27초), top 최대 5%, 앱 임계치 위반 약 50.42%를 기록했다. 보호 종료를 시사하는 흐름과 미확인 내부 지표를 구분했으며 OS 과점유·Watchdog 입증 부족은 유지한다. 표시 모드만 바꾼 재실험은 예정하지 않는다.
 2. 비교 근거: 첫 80% 실행은 37초 종료, 두 번째 40% 실행은 첫 RUNNING부터 사용자 kill에 따른 EXITED 관측까지 248초(18:05:18→18:09:26). 자연 종료 수명 비교로 해석하지 않는다. 인자 적용·부트·CSV 종료 수집은 확인했다. [TASK-003](tasks/TASK-003.md) 참조.
@@ -43,6 +47,8 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 - 별도 지정이 없으면 runs의 실행 시각이 최신인 디렉터리를 확인하고 부트 설정·PID와 대조한다.
 
 ## Current Task
+
+[TASK-004](tasks/TASK-004.md) — 관측 도구 구현·리뷰 및 true/false 비교, 보고서 작성·독립 리뷰 완료. 보고서 사용자 확인·최종 학습 정리 대기. 현재 모델 정책은 PM GPT-6.1 Sol / High, Implementer·Reviewer GPT-6.1 Sol / Medium이다. 이전 TASK-003의 미확인 사항은 아래 기록대로 보존한다.
 
 [TASK-003](tasks/TASK-003.md) — 사용자 승인으로 준비 도구의 메모리·CPU·멀티스레드 3개 인자, 메모리 비교 호출 호환, README 사용법을 반영했다. [REQUIRED 리뷰](reviews/REVIEW-TASK-003.md) 지적 없음. 인자 정상 경로와 두 번째 관측은 확인했고, OS CPU 급상승·Watchdog 증거 보완 및 나머지 회귀 검증 대기다. TASK-002는 사용자 검증 생략 결정과 한계를 기록하고 마감했다.
 

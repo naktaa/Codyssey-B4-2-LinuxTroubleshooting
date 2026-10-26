@@ -10,8 +10,8 @@
 
 <!-- 현재 상태·배경·기존 결정. 과거 채팅 없이 이해 가능하도록 작성합니다.
 난이도: LOW / MEDIUM / HIGH
-추천 모델: GPT-6 Luna / GPT-6 Sol
-Reasoning: Low / Medium / High
+추천 모델: GPT-6.1 Sol
+Reasoning: Medium
 추천 이유:
 Review 예상: REQUIRED / RECOMMENDED / SKIP (이유)
 Review Decision: 구현 후 PM이 실제 판정·이유·다음 행동 기록

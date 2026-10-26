@@ -7,7 +7,7 @@
 
 | 역할 | 담당 | 변경 권한 |
 | --- | --- | --- |
-| PM — GPT-6 Astra | 분석, 한 Step 제안, TASK·모델 추천, Review 판단·Triage, 상태 갱신 | 미션 상태 문서, 승인된 README·설명용 diagram. 공통 Harness 규칙 변경은 별도 사용자 승인. 기능 source 구현 금지 |
+| PM — GPT-6.1 Sol / High | 분석, 한 Step 제안, TASK·모델 추천, Review 판단·Triage, 상태 갱신 | 미션 상태 문서, 승인된 README·설명용 diagram. 공통 Harness 규칙 변경은 별도 사용자 승인. 기능 source 구현 금지 |
 | Implementer | 계획 반환, 승인된 구현·수정, 상세 설명·테스트 안내 | 계획 단계는 읽기 전용. 구현 단계는 전달받은 사용자 승인 범위 |
 | Reviewer | 독립 정적 검토, 근거 있는 Findings | 지정 리뷰 문서의 Critical/Major/Minor/Good. source 수정 금지 |
 | 사용자 | PM 세션에서 범위·계획·리뷰 수정 승인, 실제 실행·테스트 | 최종 결정. PM 세션의 모델 선택 |
@@ -48,7 +48,7 @@ PM은 구현 결과를 받을 때마다 다음 셋 중 하나를 출력합니다
 
 파일 관련 REQUIRED 기준은 프로그램의 저장 동작과 데이터 위험을 뜻합니다. 모든 source·문서 편집을 일괄 REQUIRED로 분류하지 않습니다.
 PM은 파일 저장/덮어쓰기/삭제, 사용자 데이터 변경, ownership/lifetime, 데이터 손실 가능성, 실행만으로 드러나지 않는 내부 로직, 외부 API/비동기 상태를 확인합니다. 중요한 위험이 있으면 REQUIRED로 판단합니다.
-모델·reasoning은 난이도와 위험으로 별도 추천합니다. REQUIRED라고 가장 강한 모델을 무조건 선택하지 않습니다.
+모델·reasoning은 [모델 정책](MODEL_POLICY.md)의 역할별 고정값을 따릅니다. 난이도와 위험은 Review 등급 판단에 사용합니다.
 
 ## 안전성 검토 기준
 
@@ -186,7 +186,7 @@ PM은 같은 `docs/study-note.md` 상단의 전체 미션 목표·제약과 학�
 
 1. 사용자가 이 템플릿의 [AGENTS.md](../../AGENTS.md)와 docs/harness/를 새 repository에 직접 복사합니다. 같은 목적의 기존 파일이 있으면 먼저 읽고 병합하며 덮어쓰거나 중복 구조를 만들지 않습니다.
 2. [MISSION.md](MISSION.md) 입력 영역에 원문의 내용·요구사항·계층을 보존하고 Markdown formatting만 정리해 저장합니다. 프로젝트별 기술 스택·추가 규칙이 필요하면 [AGENTS.md](../../AGENTS.md)에 짧게 추가합니다.
-3. GPT-6 Astra PM 세션에서 [prompts/PM.md](prompts/PM.md)를 사용합니다. PM은 원문 분석 → REQUIREMENTS 초기 작성 → 실제 repository 확인 → STATUS 초기화 → Roadmap·README 구성·시각화 필요성 제안 → 승인된 README 골격 작성 → 첫 Step 제안을 진행합니다.
+3. GPT-6.1 Sol / High PM 세션에서 [prompts/PM.md](prompts/PM.md)를 사용합니다. PM은 원문 분석 → REQUIREMENTS 초기 작성 → 실제 repository 확인 → STATUS 초기화 → Roadmap·README 구성·시각화 필요성 제안 → 승인된 README 골격 작성 → 첫 Step 제안을 진행합니다.
 4. 새 PM 세션은 [AGENTS.md](../../AGENTS.md), PM 프롬프트, MISSION, REQUIREMENTS, STATUS를 읽고 필요한 현재 TASK·최근 WORKLOG·코드를 확인합니다. 현재 위임 기능과 모델 지원을 확인하고 저장된 단계·승인 범위·결과 위치·다음 행동을 실제 diff와 대조해 재개합니다. 이전 에이전트의 생존이나 이전 실행의 성공을 추정하지 않습니다.
 
 새 미션에서는 이전 미션의 docs/study-note.md 내용도 가져오지 않고 새로 시작합니다. 진행 중인 미션의 학습 기록을 초기화하거나 삭제하지 않습니다. 공통 LEARNING_TEMPLATE은 재사용합니다.
