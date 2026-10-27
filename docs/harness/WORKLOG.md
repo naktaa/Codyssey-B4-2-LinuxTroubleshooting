@@ -1,5 +1,51 @@
 # Worklog
 
+## 2026-10-27 TASK-003 CPU 비교 보고서 독립 재검토
+
+- 사용자 “일단 진행해봐”로 RECOMMENDED 리뷰를 승인했다. 새 독립 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`의 [2026-10-27 비교 재검토](reviews/REVIEW-TASK-003-CPU-REPORT.md#2026-10-27-비교-추가-독립-재검토)를 회수했다. 요청 설정은 위임 도구가 수락했으며 실제 실행 모델 메타데이터는 별도 확인하지 않았다.
+- 두 실행의 각 원본 다섯 파일과 [CPU 보고서](../reports/cpu.md) 추가 내용을 대조했다. 80% 첫 RUNNING→EXITED 30초, 40% 60초 종료 시 생존, top 최대 5%·8%와 누적 CPU, 40%의 관측 후 메모리 정리 분리가 일치했다. Critical/Major/Minor 없음. PM Disposition 완료, 재검토 후 보고서 변경 없음으로 추가 리뷰 SKIP.
+- OS CPU 급상승·Watchdog 보호 조치와 앱 내부 지표 계산식은 미입증이다. REQ-003 완료나 사용자 이해 완료로 처리하지 않는다. 사용자 후속 질문·보고서 확인을 기다린다. 리뷰·PM은 앱·스크립트·테스트를 실행하지 않았고 Git 쓰기 없음. 커밋 보류 — 사용자 확인과 CPU 미완료 범위 처리 후 실제 변경 묶음을 판단한다.
+
+## 2026-10-27 TASK-003 40% 비교 사용자 실행·CPU 보고서 갱신
+
+- 사용자 `ss` 사전 확인은 포트 15034 리스너 없음이었고, 512/40/false·기본60초 CPU 관측 도구 실행 결과와 반환값 `0`을 전달받았다. [앱 로그](../../runs/run-2026-10-27_16-13-41-binP1r/app.log), [앱 자체 로그](../../runs/run-2026-10-27_16-13-41-binP1r/agent_app.log), [관제 CSV](../../runs/run-2026-10-27_16-13-41-binP1r/monitor.csv), [프로세스 관계표](../../runs/run-2026-10-27_16-13-41-binP1r/process-scope.log), [top CSV](../../runs/run-2026-10-27_16-13-41-binP1r/top-scope.csv)를 정적 대조했다.
+- 앱은 Healthy 경로로 작업을 계속했고 launcher5479·자식5484는 마지막 61번째 프레임에도 존재했다. 관제 60행 모두 RUNNING, 자식 top 최대8%, CPU 누적0.05→1.26초, RSS18,340→505,048KiB였다. 첫 메모리 정리는 마지막 top·CSV 뒤인 16:14:45.944다. 80% 실행의 첫 RUNNING→EXITED 30초와 40%의 60초 구간 생존을 비교하되 작업 경로가 달라 CPU 완화의 인과 증거로 쓰지 않는다. 앱 로그의 40% 피크·cooldown과 OS CPU는 다른 지표다.
+- 기존 대화에서 제시한 [CPU 보고서](../reports/cpu.md) 한 파일 반영 계획에 따라 Implementer `gpt-6-sol` / `medium`, `fork_turns="none"`으로 비교를 갱신했다. PM이 실제 diff·10개 원본 링크·수치·시각과 `git diff --check`를 대조했다. 기능 source·다른 사용자 파일은 수정하지 않았고 앱·스크립트·테스트를 AI가 실행하지 않았다.
+- Review Decision RECOMMENDED — 평가 핵심 보고서의 새 근거·인과 한계를 독립 확인한다. 새 Reviewer `gpt-6-sol` / `medium` 진행/생략 선택 대기. REQ-003은 OS CPU 급상승과 Watchdog 종료 정책 입증 부족으로 미완료다. 40% 앱은 관측 종료 시 살아 있었고 이후 현재 상태는 확인하지 않았다. 커밋 보류 — 보고서 리뷰 선택과 사용자 확인 후 범위를 판단한다.
+
+## 2026-10-27 TASK-003 CPU 범위 관측 첫 사용자 실행 확인
+
+- 사용자가 CPU 관측 도구를 512/80/false·기본 60초로 실행하고 반환값 `0`을 전달했다. [앱 로그](../../runs/run-2026-10-27_15-59-44-5osiuy/app.log), [앱 자체 로그](../../runs/run-2026-10-27_15-59-44-5osiuy/agent_app.log), [관제 CSV](../../runs/run-2026-10-27_15-59-44-5osiuy/monitor.csv), [프로세스 관계표](../../runs/run-2026-10-27_15-59-44-5osiuy/process-scope.log), [top CSV](../../runs/run-2026-10-27_15-59-44-5osiuy/top-scope.csv)를 정적으로 대조했다. 상세 수치와 한계는 [TASK-003](tasks/TASK-003.md#2026-10-27-첫-cpu-범위-관측-사용자-검증)에 기록했다.
+- 61프레임 수집 확인. 앱 launcher 4278·자식 4283은 프레임 1~30에 존재하고 31부터 사라졌다. 표본에서 추가 앱 후손은 없다. 부모 누적 CPU 0:00.08 일정, 자식 순간 최고 5.0%·누적 0:00.04→0:00.32. 앱 로그는 `Current Load` 5.00→53.08%와 16:00:14.658 임계치 위반, 관제는 16:00:15 `EXITED`를 기록한다. 수집 성공과 CPU 과점유 입증을 구분한다.
+- Review Decision SKIP — 읽기 전용 원본 해석·PM 상태 기록이며 source 변경 없음. 실제 실행은 사용자 담당. 추가 후손의 지속적인 부하를 놓쳤다는 설명은 표본과 맞지 않는다. 앱 지표 계산식·80% 설정과 위반 수치의 관계·Watchdog 종료 주체는 미확인이다. CPU 보고서·REQ-003 완료로 처리하지 않고 후속 범위를 결정한다. 커밋 보류 — 미완료 증거 해석과 보고서 범위를 정한 뒤 CPU 관측 도구 변경과 함께 판단한다.
+
+## 2026-10-27 하네스 역할별 모델 정책 변경
+
+- 사용자 요청으로 향후 PM은 GPT-6 Sol / High, Implementer·Reviewer는 GPT-6 Sol / Medium으로 변경했다. [모델 정책](MODEL_POLICY.md)·[운영 절차](WORKFLOW.md)·[PM](prompts/PM.md)·[Implementer](prompts/IMPLEMENTER.md)·[Reviewer](prompts/REVIEWER.md) 지침·[TASK 템플릿](tasks/TASK_TEMPLATE.md)·[현재 상태](STATUS.md)의 운영 문구를 동기화했다.
+- 과거 TASK·리뷰·WORKLOG의 `gpt-6.1-sol` 호출 기록은 당시 이력으로 보존한다. 기존 다른 모델의 하위 에이전트는 새 위임에 재사용하지 않는다. 문서 변경은 현재 PM 세션의 실행 모델을 바꾸지 않으며, 새 PM 세션의 모델은 사용자가 선택해야 한다.
+- 기능 source·실행 증거는 변경하지 않았다. TASK-003 CPU 관측 도구의 사용자 실행 검증 대기를 유지한다. Review Decision SKIP — 운영 문구만 변경했고 정적 대조로 확인한다. 커밋 보류 — 진행 중인 CPU 관측 변경과 사용자 검증 결과를 확인한 뒤 문서 변경을 묶는다.
+
+## 2026-10-27 TASK-003 CPU 관측 도구 리뷰 수정·재검토 완료
+
+- 사용자 “수정 시작”으로 Major-1/2 두 파일 수정 계획 승인. Implementer `gpt-6.1-sol` / `medium`이 [관측 스크립트](../../run-cpu-observation.sh)와 [README](../../README.md)만 변경했다. 앱 관련 PID의 프레임별 top 출현 및 유효 launcher/app 구간 표본, 필수 열 허용 목록·CPU/TIME+ 형식 검사를 추가했다. 사용자 top 설정은 유지하고 지원 제한·시점 차이·PID 재사용 확인 한계를 명시했다.
+- Review Decision REQUIRED로 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [재검토](reviews/REVIEW-TASK-003-CPU-OBSERVATION.md)를 회수했다. 두 Major 정적 해결·새 Critical/Major/Minor 없음. PM이 수정 전 사본과 현재 파일을 대조했다. 도구가 지정값을 수락했으며 실제 실행 모델 메타데이터는 별도 확인하지 않았다. 추가 리뷰 SKIP(재검토 후 source 변경 없음).
+- 앱·스크립트·문법 검사·테스트 실행 없음. 실제 정상 수집·top 설정별 동작·실패·신호 경합은 사용자 검증 대기다. 기존 도구·보고서·원본·학습 노트와 사용자 작업 파일은 수정하지 않았다.
+- 다음은 사용자 512/80/false 기본60초 실행·반환값·원본 대조다. CPU 급상승·보호 종료 입증을 완료로 처리하지 않았다. 커밋 보류 — 첫 사용자 실행과 필요한 보완을 확인한 뒤 도구·README·리뷰·상태 기록을 묶는다.
+
+## 2026-10-27 TASK-003 관측 도구 구현·독립 리뷰
+
+- 사용자 “구현 시작”으로 두 파일 계획 승인. Implementer `gpt-6.1-sol` / `medium`이 신규 [CPU 관측 스크립트](../../run-cpu-observation.sh)와 [README](../../README.md) CPU 절만 변경했다. coproc top 직접 자식·읽기 FD 보존, 선택 열 CSV와 ps 관계표, 기존 monitor 수집과 자신의 자식 정리·앱 유지 정책을 구현했다. PM은 최종 파일·정적 diff를 대조했다.
+- Review Decision REQUIRED로 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [리뷰](reviews/REVIEW-TASK-003-CPU-OBSERVATION.md)를 회수했다. Major-1 사용자 top 제한으로 앱 PID 누락 시 성공 가능, Major-2 선행 ENVIRON 등으로 열 오염 가능을 ACCEPT했다. 요청 설정 수락과 실제 실행 모델 메타데이터 검증은 구분한다.
+- 읽기 전용 보완 계획을 회수했다. 앱 관련 PID의 프레임별 top 출현 검사·누락 실패 처리, 필수 열까지 기본 필드 허용 목록 및 CPU/TIME+ 형식 검사, README의 수집 범위·한계 보완을 두 파일에서 제안한다. 사용자 설정 변경·범용 설정 파서·신규 의존성은 추가하지 않는다. 수정 승인은 아직 받지 않았다.
+- 사용자 변경으로 보이는 신규 `.vscode/`·`test.c`는 이번 범위에서 읽거나 수정하지 않았다. source·앱·스크립트·테스트 실행 없음. 커밋 보류 — 리뷰 수정·재검토와 사용자 실행 확인 후 판단한다.
+
+## 2026-10-27 TASK-003 CPU 관측 범위 보완 계획
+
+- 사용자 “다음 작업”으로 CPU 미충족 근거 검토를 재개했다. HEAD `d0fa83a`, 작업 트리 clean을 확인했다. 새 Implementer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 읽기 전용 계획을 회수했다. 지정값 수락과 실제 실행 모델 메타데이터 확인은 구분한다.
+- 제공 자료에 Current Load 정의가 없고 준비 도구의 관측 범위는 초기 직접 자식 하나였다. 기존 PID 오류로 단정하지 않고 launcher·추가 후손 범위를 검토할 계획이다. 전체 ps 관계와 top 구간·누적 CPU에서 앱 관련 행만 사후 연결한다. 인자/COMMAND는 저장하지 않고 사용자 top 설정을 변경하지 않는 열 추출 계획을 확인했다.
+- 반복 입력을 줄이는 사용자 선호에 따라 신규 예정 `run-cpu-observation.sh`와 [README](../../README.md)의 두 파일 계획을 제시한다. 기본60초, 기존 준비·CSV 재사용, noclobber·수집 자식만 정리·앱 유지 정책이다. [TASK-003](tasks/TASK-003.md)에 상세 경계와 해석 기준을 기록했다.
+- Review Decision SKIP(읽기 전용 계획·상태 기록). 구현 후 예상 REQUIRED. source·보고서·원본 변경, 앱·테스트 실행 없음. 구체적 구현 계획 승인 대기, 커밋 보류 — 실행 도구 승인·구현·리뷰 범위가 정해진 뒤 묶음을 판단한다.
+
 ## 2026-10-27 TASK-004 최종 학습 정리·마감
 
 - 사용자 “다음 작업”으로 재개했다. HEAD `fe590c6`, 시작 작업 트리 clean을 확인했다. 전날 사용자 보고서 확인 후 중단 및 PM 모델 변경으로 미반영됐던 확인 기록을 복구했다. PM 실행 컨텍스트의 현재 모델 ID는 `gpt-6.1-sol`이며 High는 사용자 지정 정책이다.

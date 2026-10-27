@@ -1,14 +1,14 @@
 # 모델 사용 정책
 
-2026-10-26 사용자 승인부터 PM은 GPT-6.1 Sol / High, Implementer와 Reviewer는 GPT-6.1 Sol / Medium으로 고정합니다. 과거 TASK·리뷰·WORKLOG의 모델 기록은 당시 실행 이력이므로 변경하지 않습니다.
+2026-10-27 사용자 요청부터 PM은 GPT-6 Sol / High, Implementer와 Reviewer는 GPT-6 Sol / Medium으로 고정합니다. 과거 TASK·리뷰·WORKLOG의 모델 기록은 당시 실행 이력이므로 변경하지 않습니다.
 
-이 표는 사용자가 지정한 운영 정책입니다. PM 세션은 사용자가 GPT-6.1 Sol / High로 선택하고, PM은 아래 정책과 현재 도구의 지원 목록을 확인해 하위 에이전트의 모델·reasoning을 명시합니다. 지원하지 않는 설정을 임의로 대체하지 않습니다.
+이 표는 사용자가 지정한 운영 정책입니다. 새 PM 세션은 사용자가 GPT-6 Sol / High로 선택하고, PM은 아래 정책과 현재 도구의 지원 목록을 확인해 하위 에이전트의 모델·reasoning을 명시합니다. 문서 변경만으로 실행 중인 PM 세션의 모델이 바뀌지는 않습니다. 지원하지 않는 설정을 임의로 대체하지 않습니다.
 
 | 역할 | 사용할 모델 ID | Reasoning | 책임 |
 | --- | --- | --- | --- |
-| PM | `gpt-6.1-sol` | High | 미션 분석, Step·TASK 설계, 승인 요청, 위임·결과 회수, Review 판단·Triage, 상태 관리 |
-| Implementer | `gpt-6.1-sol` | Medium | 읽기 전용 계획 반환 후 승인된 TASK 구현 |
-| Reviewer | `gpt-6.1-sol` | Medium | 구현 대화를 상속하지 않는 새 에이전트에서 독립 검토·보고 |
+| PM | `gpt-6-sol` | High | 미션 분석, Step·TASK 설계, 승인 요청, 위임·결과 회수, Review 판단·Triage, 상태 관리 |
+| Implementer | `gpt-6-sol` | Medium | 읽기 전용 계획 반환 후 승인된 TASK 구현 |
+| Reviewer | `gpt-6-sol` | Medium | 구현 대화를 상속하지 않는 새 에이전트에서 독립 검토·보고 |
 
 PM은 기능 source를 구현하지 않습니다. 역할별 모델·reasoning은 난이도에 따라 자동 변경하지 않습니다.
 
@@ -24,13 +24,13 @@ PM은 작업 특성과 영향 범위로 난이도·Review 등급을 판단하되
 
 2026-10-08 확인: 설치된 CLI는 `codex-cli 0.162.0-alpha.2`이며, 이 채팅에 제공된 `collaboration.spawn_agent`는 `task_name`, `message`, `model`, `reasoning_effort`, `fork_turns`를 받습니다. CLI 버전만으로 채팅 기능을 보증하지 않으며 실제 제공된 도구 계약을 우선합니다.
 
-- 2026-10-26 현재 도구 계약은 `gpt-6.1-sol`과 `medium` / `high` reasoning 지정을 지원합니다. PM High는 사용자 선택으로 유지하고, Implementer·Reviewer는 생성 시 Medium을 명시합니다.
+- 2026-10-27 현재 도구 계약은 `gpt-6-sol`과 `medium` / `high` reasoning 지정을 지원합니다. PM High는 사용자 선택으로 유지하고, Implementer·Reviewer는 생성 시 Medium을 명시합니다.
 - 생성 시 `model`과 `reasoning_effort`를 명시하고 `fork_turns="none"`을 사용합니다. 전체 대화 상속(`all` 또는 생략)은 부모 모델·reasoning을 상속하며 현재 도구에서 override를 받지 않으므로 역할별 모델 지정에 사용하지 않습니다.
 - 역할 프롬프트 경로, TASK, 현재 단계, 기준점, 승인 범위와 결과 형식은 `message`로 전달합니다. Reviewer에는 구현자의 대화·결론을 정답으로 전달하지 않습니다.
 - 생성 결과의 실제 식별자로 `followup_task`를 호출해 후속 단계를 지시합니다. `send_message`는 실행 중 안내이며 유휴 에이전트를 재개하지 않습니다. `list_agents`·`wait_agent`로 상태·결과를 확인하고 필요한 경우 `interrupt_agent`를 사용합니다. 결과 본문과 실제 파일을 확인한 뒤에만 다음 단계로 갑니다.
 - 현재 도구에 에이전트별 sandbox나 custom agent 파일 선택 인수는 없습니다. 별도 `.codex/agents/` 설정의 적용을 가정하지 않고 기존 역할 문서를 전달합니다. 읽기 전용 지시는 운영 규칙이며 OS 쓰기 권한 차단을 보증하지 않습니다.
 
-예: Implementer 계획 호출은 `model="gpt-6.1-sol"`, `reasoning_effort="medium"`, `fork_turns="none"`과 계획 단계 지시를 전달합니다. Reviewer도 별도 생성하고 같은 설정을 지정합니다. 기존 다른 모델의 에이전트는 재사용하지 않고 새로 생성합니다. 별도 API나 설정 파일은 필요하지 않습니다.
+예: Implementer 계획 호출은 `model="gpt-6-sol"`, `reasoning_effort="medium"`, `fork_turns="none"`과 계획 단계 지시를 전달합니다. Reviewer도 별도 생성하고 같은 설정을 지정합니다. 기존 다른 모델의 에이전트는 재사용하지 않고 새로 생성합니다. 별도 API나 설정 파일은 필요하지 않습니다.
 
 ## 지원·실행 확인의 구분
 

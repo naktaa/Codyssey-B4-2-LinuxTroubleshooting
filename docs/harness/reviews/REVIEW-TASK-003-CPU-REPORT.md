@@ -31,3 +31,34 @@
 - RECOMMENDED 리뷰를 사용자 “진행” 승인으로 실시·완료했다. 추가 리뷰 SKIP: 리뷰 후 보고서 변경 없음.
 - CPU 보고서 초안의 정적 검토 완료와 CPU 미션 완료는 구분한다. 필수 증거 부족 및 나머지 사용자 검증은 유지한다. source·보고서 수정과 실행 테스트는 하지 않았다.
 
+## 2026-10-27 비교 추가 독립 재검토
+
+- 기준과 범위: HEAD `d0fa83a46c55f4023d78a5cf361a5a0297a313ed` 대비 작업 트리의 [CPU 보고서](../../reports/cpu.md) 추가 비교 문장만 검토했다. 과거 리뷰·PM Disposition은 위에 보존했다. [TASK-003](../tasks/TASK-003.md)의 비교 기준과 [MISSION CPU 요구](../MISSION.md), [REQ-003·REQ-005](../REQUIREMENTS.md)에 대조했다.
+- 원본: 80% 실행의 [app.log](../../../runs/run-2026-10-27_15-59-44-5osiuy/app.log), [agent_app.log](../../../runs/run-2026-10-27_15-59-44-5osiuy/agent_app.log), [monitor.csv](../../../runs/run-2026-10-27_15-59-44-5osiuy/monitor.csv), [top-scope.csv](../../../runs/run-2026-10-27_15-59-44-5osiuy/top-scope.csv), [process-scope.log](../../../runs/run-2026-10-27_15-59-44-5osiuy/process-scope.log)와 40% 실행의 [app.log](../../../runs/run-2026-10-27_16-13-41-binP1r/app.log), [agent_app.log](../../../runs/run-2026-10-27_16-13-41-binP1r/agent_app.log), [monitor.csv](../../../runs/run-2026-10-27_16-13-41-binP1r/monitor.csv), [top-scope.csv](../../../runs/run-2026-10-27_16-13-41-binP1r/top-scope.csv), [process-scope.log](../../../runs/run-2026-10-27_16-13-41-binP1r/process-scope.log)를 읽었다.
+- 방법과 한계: 독립 정적 대조만 수행했다. 앱·스크립트·테스트 실행, 바이너리 분석, 보고서·source 수정은 하지 않았다. `runs/`는 Git 제외 자료라 다른 작업 공간에는 없을 수 있다. 로그에 없는 앱 내부 `Current Load` 계산식, 종료 신호 발신자, 이후 자연 생존 시간은 판단할 수 없다. PM의 호출 요청값은 `gpt-6-sol` / `medium`, `fork_turns="none"`이며 실제 실행 모델 메타데이터는 확인하지 않았다.
+
+### Critical
+
+없음.
+
+### Major
+
+없음.
+
+### Minor
+
+없음.
+
+### Good
+
+- [CPU 보고서](../../reports/cpu.md) 60~84행·130~139행은 두 [app.log 80%](../../../runs/run-2026-10-27_15-59-44-5osiuy/app.log) 1~17행과 [app.log 40%](../../../runs/run-2026-10-27_16-13-41-binP1r/app.log) 1~31행의 `512/80/false`·`512/40/false` 부트 설정을 맞게 비교했다. 앱 경로가 `CpuWorker` 위반과 `Healthy System Monitoring`으로 달라진 점을 명시하고, 설정 변경만의 인과 효과나 해결책 검증으로 해석하지 않았다.
+- [CPU 보고서](../../reports/cpu.md) 84~105행·136행의 PID와 시간 경계는 80% [monitor.csv](../../../runs/run-2026-10-27_15-59-44-5osiuy/monitor.csv) 2행·31~32행의 15:59:45 `RUNNING`→16:00:15 `EXITED` 30초, 40% [monitor.csv](../../../runs/run-2026-10-27_16-13-41-binP1r/monitor.csv) 2행·61행의 16:13:42~16:14:42 `RUNNING` 및 [process-scope.log](../../../runs/run-2026-10-27_16-13-41-binP1r/process-scope.log) 2587~2610행의 16:14:43 자식 PID 5484 생존과 부합한다. `EXITED` 관측과 60초 관측 종료를 실제 자연 종료 시각으로 바꾸지 않았다.
+- [CPU 보고서](../../reports/cpu.md) 91~105행·137행의 자식별 `top` 최대 5%·8%, `TIME+` 0:00.04→0:00.32 및 0:00.05→0:01.26은 80% [top-scope.csv](../../../runs/run-2026-10-27_15-59-44-5osiuy/top-scope.csv) 37행·1016행·1133행과 40% [top-scope.csv](../../../runs/run-2026-10-27_16-13-41-binP1r/top-scope.csv) 37행·938행·2343행에 맞는다. 첫 프레임과 `ps`의 수명 평균 CPU를 순간 급상승 근거로 사용하지 않았다.
+- [CPU 보고서](../../reports/cpu.md) 107행은 40% [agent_app.log](../../../runs/run-2026-10-27_16-13-41-binP1r/agent_app.log) 66~68행의 첫 메모리 정리 16:14:45.944를 관측 종료 뒤 사건으로 구분한다. [CPU 보고서](../../reports/cpu.md) 111~115행·141행은 80% [agent_app.log](../../../runs/run-2026-10-27_15-59-44-5osiuy/agent_app.log) 13~14행의 임계치 위반과 PID 소멸을 넘어서 Watchdog·SIGTERM 또는 대상 프로세스의 OS CPU 급상승을 주장하지 않고 필수 증거 부족을 유지한다.
+
+### PM Disposition (2026-10-27 재검토)
+
+- Critical/Major/Minor 없음. 새 비교의 설정·PID·시각·CPU 표본과 60초 이후 메모리 정리 구분을 원본과 보고서에 대조했다. ACCEPT/DEFER/REJECT할 finding은 없다.
+- 사용자 “일단 진행해봐”로 RECOMMENDED 독립 리뷰를 실시·완료했다. 리뷰 뒤 보고서 source 변경 없음. 추가 리뷰 SKIP.
+- 검토 통과는 CPU 과점유·Watchdog 종료 근거 확보나 TASK-003 완료를 의미하지 않는다. 앱 `Current Load` 계산식·80% 설정에서 약 53%에 위반된 이유·종료 신호 주체는 미확인으로 남긴다.
+

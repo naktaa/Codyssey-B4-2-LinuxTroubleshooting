@@ -2,9 +2,9 @@
 
 ## Current Phase
 
-2026-10-27 TASK-004 Deadlock 마감 완료. 관측 도구·보고서 독립 리뷰, true/false 사용자 실행 비교·보고서 확인·최종 학습 정리를 마쳤다. 별도 도구 신호·실패 경로는 실행 미검증으로 보존한다. 다음 기능 작업은 TASK-003 CPU의 필수 증거 부족 재검토다.
+2026-10-27 TASK-004 마감 완료. TASK-003 CPU 관측 도구 REQUIRED 재검토와 80%·40% 비교 보고서 RECOMMENDED 독립 재검토 완료, 새 finding 없음. 종료·60초 생존 차이는 기록했으나 OS CPU 과점유·Watchdog 근거는 미확보다.
 
-TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 사용자 요청으로 생략하고 실행 미검증으로 남긴다. REQUIRED 리뷰·보완·정상 비교·학습 정리 완료, 추가 리뷰 SKIP. TASK-003 두 차례 CPU 관측 및 인자화 정상 경로 확인, REQUIRED 독립 리뷰 완료. CPU 필수 증거 보완 관측과 나머지 회귀 검증 대기.
+TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 사용자 요청으로 생략하고 실행 미검증으로 남긴다. REQUIRED 리뷰·보완·정상 비교·학습 정리 완료, 추가 리뷰 SKIP. TASK-003 기존 CPU 관측·인자화와 이번 부모·후손 범위 관측을 확인했고 관측 도구 REQUIRED 독립 리뷰를 완료했다. CPU 필수 증거 부족과 나머지 회귀 검증이 남아 있다.
 
 ## Completed
 
@@ -22,6 +22,8 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 [TASK-002](tasks/TASK-002.md)의 [OOM 보고서](../reports/oom.md)를 비교 출력과 원본 CSV·앱 로그에 대조했다. 128/256MB 모두 MemoryGuard 자체 종료이며 첫 RUNNING→EXITED 관측은 17초→33초, 최고 RSS 표본은 146,520→274,628 KiB였다. 256/512MB는 서로 다른 작업·종료 경로로 별도 한계 사례를 유지한다.
 
 ## Next
+
+- [TASK-003](tasks/TASK-003.md)의 512/80/false와 512/40/false 관측을 [CPU 보고서](../reports/cpu.md)에 비교하고 [RECOMMENDED 독립 재검토](reviews/REVIEW-TASK-003-CPU-REPORT.md#2026-10-27-비교-추가-독립-재검토)를 완료했다. Critical/Major/Minor 없음. 사용자의 후속 질문·보고서 확인을 기다린다. 40% 앱은 관측 종료 시 살아 있었으므로 다음 실행 전 PID·포트를 다시 확인한다.
 
 - [TASK-004](tasks/TASK-004.md) 마감 완료. [Deadlock 보고서](../reports/deadlock.md)·[학습 절](../study-note.md#task-004-교착상태-관측과-멀티스레드-설정-비교)·README를 최종 결과로 동기화했다. 사용자 이해와 별도 신호·실패 검증은 미확인으로 보존한다.
 
@@ -50,7 +52,7 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 
 ## Current Task
 
-[TASK-003](tasks/TASK-003.md) — CPU OS 과점유·보호 종료의 증거 부족을 재검토할 대상이다. 이번 턴에서는 추가 CPU 실행·source 수정을 하지 않았다. [TASK-004](tasks/TASK-004.md)는 2026-10-27 마감 완료했다. 현재 모델 정책은 PM GPT-6.1 Sol / High, Implementer·Reviewer GPT-6.1 Sol / Medium이다.
+[TASK-003](tasks/TASK-003.md) — 관측 도구 REQUIRED 재검토, 80%·40% 사용자 실행 비교와 [CPU 보고서](../reports/cpu.md) RECOMMENDED 재검토 완료. 사용자 보고서 확인·후속 질문 대기, CPU 필수 증거는 미완료다. [TASK-004](tasks/TASK-004.md)는 2026-10-27 마감 완료했다. 현재 모델 정책은 PM GPT-6 Sol / High, Implementer·Reviewer GPT-6 Sol / Medium이다.
 
 [TASK-003](tasks/TASK-003.md) — 사용자 승인으로 준비 도구의 메모리·CPU·멀티스레드 3개 인자, 메모리 비교 호출 호환, README 사용법을 반영했다. [REQUIRED 리뷰](reviews/REVIEW-TASK-003.md) 지적 없음. 인자 정상 경로와 두 번째 관측은 확인했고, OS CPU 급상승·Watchdog 증거 보완 및 나머지 회귀 검증 대기다. TASK-002는 사용자 검증 생략 결정과 한계를 기록하고 마감했다.
 
