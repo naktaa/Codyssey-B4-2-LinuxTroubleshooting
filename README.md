@@ -2,7 +2,7 @@
 
 제공된 `agent-leak-app`을 Linux에서 실행하고 메모리 누수, CPU 과점유, 교착상태를 관측하여 증거 기반 장애 보고서 3건을 작성하는 교육 미션입니다.
 
-실행·관제 도구의 기본 동작과 OOM 메모리 설정 비교를 사용자 실행으로 확인하고 [OOM 보고서](docs/reports/oom.md)를 작성했습니다. TASK-002 리뷰 보완은 완료했으며 실패 경로 실행 검증은 사용자 선택으로 생략했습니다(정적 확인만). CPU 관측을 준비 중이며 Deadlock 비교와 보고서는 대기 중입니다. [미션 원문](docs/harness/MISSION.md), [요구사항](docs/harness/REQUIREMENTS.md), [진행 상태](docs/harness/STATUS.md)를 기준으로 진행합니다.
+실행·관제 도구, 메모리 비교와 [OOM 보고서](docs/reports/oom.md), 교착 재현·회피 비교와 [Deadlock 보고서](docs/reports/deadlock.md)를 사용자 실행·리뷰로 확인했습니다. TASK-002 실패 경로 실행 검증은 사용자 선택으로 생략했습니다(정적 확인만). [CPU 보고서 초안](docs/reports/cpu.md)은 관측값과 한계를 기록했으며 OS CPU 급상승·보호 종료의 필수 증거가 부족합니다. [미션 원문](docs/harness/MISSION.md), [요구사항](docs/harness/REQUIREMENTS.md), [진행 상태](docs/harness/STATUS.md)를 기준으로 진행합니다.
 
 ## 프로젝트 구조
 
@@ -15,7 +15,7 @@
 
 ## 실행 환경 및 방법
 
-macOS 호스트의 OrbStack Linux 머신을 사용합니다. 실행은 Linux 머신 내부의 일반 사용자 계정에서 진행하며 Docker는 사용하지 않습니다.
+실행은 Linux 머신 내부의 일반 사용자 계정에서 진행하며 Docker는 사용하지 않습니다. 초기 기록에는 macOS 호스트의 OrbStack Linux가 있으나, 2026-10-26 사용자 출력에서 확인한 현재 환경은 x86_64 Linux·논리 CPU 6개·KVM입니다. 이 출력만으로 호스트나 OrbStack 구성을 단정하지 않습니다.
 
 아래 절차의 앱 실행·CSV 관제·column 조회를 Ubuntu Linux 머신에서 사용자 실행으로 확인했습니다. 실행마다 부트 성공과 실제 로그를 확인하세요.
 
@@ -93,9 +93,9 @@ CSV의 `date_local`과 `time_local`은 Linux 머신의 현지 관측 날짜·시
 
 ## 장애 보고서 및 비교 결과
 
-### 교착상태 첫 관측 — 한 명령으로 실행
+### 교착상태 관측 및 비교 — 한 명령으로 실행
 
-Linux 머신의 저장소 루트에서 일반 사용자로 실행합니다. 첫 후보는 메모리 512MB, CPU 40%, 멀티스레드 `true`입니다. 앞선 512/40/false 실행이 사용자 종료까지 유지되어 CPU 임계치 종료의 간섭을 줄일 후보로 골랐으며, 교착 재현을 보장하는 값은 아닙니다.
+Linux 머신의 저장소 루트에서 일반 사용자로 실행합니다. 메모리 512MB, CPU 40%를 유지한 60초 비교에서 `true`는 두 스레드의 A/B 락 순환 대기와 로그 정체, `false`는 다른 앱 경로에서 작업·로그 진행을 확인했습니다. 실제 증거와 해석 한계는 [Deadlock 보고서](docs/reports/deadlock.md)에 정리했습니다. 이 결과가 모든 실행의 재현이나 영구 회피를 보장하지는 않습니다.
 
 ```bash
 bash ./run-deadlock-observation.sh 512 40 true
@@ -105,11 +105,11 @@ bash ./run-deadlock-observation.sh 512 40 true
 
 스크립트는 [prepare-env.sh](prepare-env.sh)에서 받은 **자식 PID와 이번 실행의 `run_dir`**를 그대로 사용합니다. `run_dir/app.log`에는 앱 원본 출력, `run_dir/agent_app.log`에는 앱 자체 로그, `run_dir/monitor.csv`에는 1초 간격 CPU·RSS, `run_dir/thread-observation.txt`에는 15초 간격의 시각별 구분선·프로세스/스레드 표·마지막 앱 로그 8줄이 저장됩니다. 관측 파일의 `wchan`은 커널 대기 위치 참고값이며 락 소유자나 순환 대기를 직접 증명하지 않습니다. CSV의 `%CPU`도 프로세스 시작 이후 평균입니다. PID 생존, 자원·로그 정체, 스레드별 대기 관계를 함께 판단하며 낮은 CPU만으로 교착상태를 확정하지 마세요.
 
-관측 시간이 끝나거나 `Ctrl+C`를 누르면 스크립트가 **자신이 시작한 관제만 종료**합니다. 앱은 자동 종료하지 않습니다. 앱이 자연 종료하면 CSV의 `EXITED` 기록을 확인하고, 관측·부트·저장 실패 메시지가 나오면 부분 파일과 남은 앱 PID·포트 상태를 먼저 확인하세요. 화면에 출력된 세 증거 경로와 `agent_app.log`를 함께 보존해 주세요. 새 실행은 고유 디렉터리를 쓰고 관측 파일은 기존 내용을 덮어쓰지 않습니다. 이 신규 스크립트의 실제 실행 결과는 아직 확인하지 않았습니다. 첫 실행의 실제 로그를 확인한 후 false 비교 시점과 앱 종료 방법을 결정합니다.
+관측 시간이 끝나거나 `Ctrl+C`를 누르면 스크립트가 **자신이 시작한 관제만 종료**하도록 구현했습니다. 앱은 자동 종료하지 않습니다. 앱이 자연 종료하면 CSV의 `EXITED` 기록을 확인하고, 관측·부트·저장 실패 메시지가 나오면 부분 파일과 남은 앱 PID·포트 상태를 먼저 확인하세요. 화면에 출력된 세 증거 경로와 `agent_app.log`를 함께 보존해 주세요. 새 실행은 고유 디렉터리를 쓰고 관측 파일은 기존 내용을 덮어쓰지 않습니다. true/false 두 사용자 실행에서 정상 수집·반환값 0·시간 만료 후 앱 유지를 확인했습니다. Ctrl+C/TERM·자연 종료·관제 오류 경합 경로는 실행 미검증입니다. 두 설정은 별도로 실행하며 다음 실행 전 기존 앱과 포트 상태를 확인해야 합니다.
 
 ### 메모리 설정 전후 비교 — 한 명령으로 실행
 
-OrbStack **Linux 머신의 저장소 루트**에서 일반 사용자로 실행합니다. 설정을 바꾸려면 [run-memory-comparison.sh](run-memory-comparison.sh) 상단의 `BEFORE_MEMORY_LIMIT`, `AFTER_MEMORY_LIMIT`, `CPU_LIMIT`, `MULTI_THREAD`, `AGENT_HOME_DIR`만 편집합니다. 현재 기본값은 **128MB → 256MB**, CPU 80%, 멀티스레드 비활성입니다. 첫 256MB → 512MB 실행에서 512MB가 다른 작업으로 전환되어 메모리 생존 시간 비교가 성립하지 않아 기본값을 바꿨습니다. 두 메모리 한계는 50~512MB 범위의 서로 다른 정수여야 합니다. 실제 계정의 비밀값을 이 파일에 적지 마세요.
+**Linux 머신의 저장소 루트**에서 일반 사용자로 실행합니다. 설정을 바꾸려면 [run-memory-comparison.sh](run-memory-comparison.sh) 상단의 `BEFORE_MEMORY_LIMIT`, `AFTER_MEMORY_LIMIT`, `CPU_LIMIT`, `MULTI_THREAD`, `AGENT_HOME_DIR`만 편집합니다. 현재 기본값은 **128MB → 256MB**, CPU 80%, 멀티스레드 비활성입니다. 첫 256MB → 512MB 실행에서 512MB가 다른 작업으로 전환되어 메모리 생존 시간 비교가 성립하지 않아 기본값을 바꿨습니다. 두 메모리 한계는 50~512MB 범위의 서로 다른 정수여야 합니다. 실제 계정의 비밀값을 이 파일에 적지 마세요.
 
 ```bash
 ./run-memory-comparison.sh
@@ -124,10 +124,10 @@ OrbStack **Linux 머신의 저장소 루트**에서 일반 사용자로 실행�
 | 분석 대상 | 비교할 설정 | 상태 |
 | --- | --- | --- |
 | 메모리 증가 및 MemoryGuard 종료 | MEMORY_LIMIT | [128/256MB 비교](docs/reports/oom.md) 확인: 관측 생존 시간 17초 → 33초 |
-| CPU 과점유 및 Watchdog 종료 | CPU_MAX_OCCUPY | 실험 전 |
-| 교착상태 재현 및 회피 | MULTI_THREAD_ENABLE | 실험 전 |
+| CPU 과점유 및 Watchdog 종료 | CPU_MAX_OCCUPY | [관측 초안](docs/reports/cpu.md): OS 과점유·보호 종료 증거 부족 |
+| 교착상태 재현 및 회피 | MULTI_THREAD_ENABLE | [true/false 비교](docs/reports/deadlock.md) 완료: 순환 대기·정체 → 작업 진행 |
 
-128/256MB 사용자 실행에서는 두 설정 모두 `MemoryWorker`의 메모리 증가와 MemoryGuard 자체 종료가 기록됐습니다. 관측 시간은 17초와 33초로 16초 늘었지만, 두 실행 모두 결국 종료됐습니다. [OOM 보고서](docs/reports/oom.md)에 원본 발췌, 측정 기준과 첫 256/512MB 비교의 한계를 기록했습니다. CPU·Deadlock 본 보고서는 해당 TASK에서 작성합니다.
+128/256MB 사용자 실행에서는 두 설정 모두 `MemoryWorker`의 메모리 증가와 MemoryGuard 자체 종료가 기록됐습니다. 관측 시간은 17초와 33초로 16초 늘었지만, 두 실행 모두 결국 종료됐습니다. [OOM 보고서](docs/reports/oom.md)에 원본 발췌, 측정 기준과 첫 256/512MB 비교의 한계를 기록했습니다. Deadlock 비교·보고서는 완료했으며 CPU 보고서는 필수 증거 보완이 남아 있습니다.
 
 ## 확인된 동작
 
@@ -135,4 +135,4 @@ OrbStack **Linux 머신의 저장소 루트**에서 일반 사용자로 실행�
 
 ## 학습 자료
 
-[학습 노트](docs/study-note.md)에서 TASK-001의 실행 준비 → 부모/자식 PID → CSV 수집 → 파일 보호·실패 처리와 TASK-002의 메모리 비교·증거 해석 순서로 읽을 수 있습니다. 이후 TASK의 학습 내용도 같은 파일에 이어서 작성합니다.
+[학습 노트](docs/study-note.md)에서 TASK-001 실행 준비·CSV 관제 → TASK-002 메모리 비교·증거 해석 → [TASK-004 교착상태·단일 관측 도구](docs/study-note.md#task-004-교착상태-관측과-멀티스레드-설정-비교) 순서로 읽을 수 있습니다. TASK-003 CPU의 최종 학습 정리는 미완료입니다.

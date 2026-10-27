@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-TASK-004 관측 도구 구현·수정·REQUIRED 재검토 및 true/false 사용자 비교 완료. Deadlock 보고서 작성·RECOMMENDED 독립 리뷰 완료, 지적 없음. 보고서 사용자 확인·최종 학습 정리 대기. 별도 도구 실패 검증은 미확인으로 남긴다. TASK-003 CPU 필수 증거 부족은 미완료로 보존한다.
+2026-10-27 TASK-004 Deadlock 마감 완료. 관측 도구·보고서 독립 리뷰, true/false 사용자 실행 비교·보고서 확인·최종 학습 정리를 마쳤다. 별도 도구 신호·실패 경로는 실행 미검증으로 보존한다. 다음 기능 작업은 TASK-003 CPU의 필수 증거 부족 재검토다.
 
 TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 사용자 요청으로 생략하고 실행 미검증으로 남긴다. REQUIRED 리뷰·보완·정상 비교·학습 정리 완료, 추가 리뷰 SKIP. TASK-003 두 차례 CPU 관측 및 인자화 정상 경로 확인, REQUIRED 독립 리뷰 완료. CPU 필수 증거 보완 관측과 나머지 회귀 검증 대기.
 
@@ -15,6 +15,7 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 - MEMORY_LIMIT=49 실패 안내 및 변수 유지 확인.
 - 관제 Ctrl+C 이후 앱 PID 12741 생존(SN, 00:11) 확인.
 - REQUIRED 독립 리뷰 완료, Minor-1 반영 및 검증 완료. 추가 리뷰 SKIP.
+- REQ-004 Deadlock: true의 A/B 락 순환 대기·작업 정체와 false의 작업 진행 비교, 보고서·두 리뷰·사용자 확인·최종 학습 정리 완료. 사용자 이해 완료는 미확인이다.
 
 ## 이전 TASK 결과
 
@@ -22,7 +23,7 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 
 ## Next
 
-- [Deadlock 보고서](../reports/deadlock.md) 작성 및 [독립 리뷰](reviews/REVIEW-TASK-004-DEADLOCK-REPORT.md) 완료, Critical/Major/Minor 없음. 추가 리뷰 SKIP. [TASK-004](tasks/TASK-004.md)는 보고서 사용자 확인과 학습 정리로 마감한다. 정상 수집·true/false 비교는 확인했고 별도 신호 중단·실패 경합 등은 미검증이다.
+- [TASK-004](tasks/TASK-004.md) 마감 완료. [Deadlock 보고서](../reports/deadlock.md)·[학습 절](../study-note.md#task-004-교착상태-관측과-멀티스레드-설정-비교)·README를 최종 결과로 동기화했다. 사용자 이해와 별도 신호·실패 검증은 미확인으로 보존한다.
 
 1. [CPU 보고서 초안](../reports/cpu.md) 작성·원본 정적 대조 및 [RECOMMENDED 독립 리뷰](reviews/REVIEW-TASK-003-CPU-REPORT.md) 완료, 지적 없음. 추가 리뷰 SKIP. 사용자 보고서 확인 및 남은 증거 확보 방향 결정 대기. 512/80/false, PID 5286, 실행 기록부터 EXITED까지 약 34초(관제 구간 27초), top 최대 5%, 앱 임계치 위반 약 50.42%를 기록했다. 보호 종료를 시사하는 흐름과 미확인 내부 지표를 구분했으며 OS 과점유·Watchdog 입증 부족은 유지한다. 표시 모드만 바꾼 재실험은 예정하지 않는다.
 2. 비교 근거: 첫 80% 실행은 37초 종료, 두 번째 40% 실행은 첫 RUNNING부터 사용자 kill에 따른 EXITED 관측까지 248초(18:05:18→18:09:26). 자연 종료 수명 비교로 해석하지 않는다. 인자 적용·부트·CSV 종료 수집은 확인했다. [TASK-003](tasks/TASK-003.md) 참조.
@@ -32,7 +33,8 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 ## Open Issues
 
 - TASK-002 부트 표식 누락·before 저장 실패 경로는 사용자 선택으로 실행 검증 생략(정적 확인만). 정상 비교 comparison-B8CmgX 확인 완료. 별도 셸 종료 코드 출력은 전달받지 않았다.
-- CPU·Deadlock 본 실험·보고서 및 전체 제출은 미완료다.
+- CPU 필수 증거 보완·최종 보고서, 전체 제출과 사용자 학습 목표 확인은 미완료다. Deadlock 실험·보고서·학습 정리는 완료했다.
+- TASK-004 관측 도구의 Ctrl+C/TERM·자연 종료·관제 오류 경합은 실행 미검증이다. 정상 시간 만료·앱 유지·파일 수집은 두 사용자 실행에서 확인했다. 이 항목은 미션 Deadlock의 추가 필수 실험으로 확대하지 않는다.
 - 512MB 실행의 작업 전환·CPU 임계치 판정 내부 이유는 미확인이다.
 - 2026-10-13 첫 CPU 관측은 PID 4910, 첫 RUNNING→EXITED 37초. 앱 Current Load 50.58%에서 임계치 위반을 기록했지만 top 캡처는 3.0%(사용자 관찰 약 5%)이며 Watchdog·SIGTERM 명시는 없다. OS 과점유 및 보호 종료 입증은 미완료다.
 - TASK-002 학습 노트 작성은 완료했으나 사용자 이해 완료는 별도로 확인한다.
@@ -48,7 +50,7 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 
 ## Current Task
 
-[TASK-004](tasks/TASK-004.md) — 관측 도구 구현·리뷰 및 true/false 비교, 보고서 작성·독립 리뷰 완료. 보고서 사용자 확인·최종 학습 정리 대기. 현재 모델 정책은 PM GPT-6.1 Sol / High, Implementer·Reviewer GPT-6.1 Sol / Medium이다. 이전 TASK-003의 미확인 사항은 아래 기록대로 보존한다.
+[TASK-003](tasks/TASK-003.md) — CPU OS 과점유·보호 종료의 증거 부족을 재검토할 대상이다. 이번 턴에서는 추가 CPU 실행·source 수정을 하지 않았다. [TASK-004](tasks/TASK-004.md)는 2026-10-27 마감 완료했다. 현재 모델 정책은 PM GPT-6.1 Sol / High, Implementer·Reviewer GPT-6.1 Sol / Medium이다.
 
 [TASK-003](tasks/TASK-003.md) — 사용자 승인으로 준비 도구의 메모리·CPU·멀티스레드 3개 인자, 메모리 비교 호출 호환, README 사용법을 반영했다. [REQUIRED 리뷰](reviews/REVIEW-TASK-003.md) 지적 없음. 인자 정상 경로와 두 번째 관측은 확인했고, OS CPU 급상승·Watchdog 증거 보완 및 나머지 회귀 검증 대기다. TASK-002는 사용자 검증 생략 결정과 한계를 기록하고 마감했다.
 

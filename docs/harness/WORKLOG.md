@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-27 TASK-004 최종 학습 정리·마감
+
+- 사용자 “다음 작업”으로 재개했다. HEAD `fe590c6`, 시작 작업 트리 clean을 확인했다. 전날 사용자 보고서 확인 후 중단 및 PM 모델 변경으로 미반영됐던 확인 기록을 복구했다. PM 실행 컨텍스트의 현재 모델 ID는 `gpt-6.1-sol`이며 High는 사용자 지정 정책이다.
+- 기존 승인된 마감 산출물에 따라 Implementer `gpt-6.1-sol` / `medium`에 [학습 노트](../study-note.md) TASK-004 절 작성을 위임했다. 단일 명령 실행 흐름·Bash 구문·신호/wait 처리·락 순환·실제 비교·해석 한계·동료평가 질문을 추가했고 PM이 실제 소스 위치와 링크를 대조했다. 기존 본문·사용자 메모는 보존했다.
+- 전날 사용자 실행·보고서 확인과 도구/보고서 독립 리뷰, 이번 학습 정리를 근거로 미션 Deadlock 기능 완료 및 TASK-004 마감을 확인했다. [REQ-004](REQUIREMENTS.md) 완료, [상태](STATUS.md)·[README](../../README.md)·보고서 상태 표기를 동기화했다. CPU 미완료와 별도 도구 신호·실패 경로 실행 미검증, 사용자 이해 미확인은 보존한다.
+- Review Decision SKIP: 학습·문서 상태 동기화로 실행 코드·원본 및 보고서 기술 본문 변경 없음. 기존 REQUIRED·RECOMMENDED 독립 리뷰 판정을 유지한다. 앱·테스트 실행과 Git 쓰기는 하지 않았다.
+- 다음은 TASK-003의 OS CPU와 앱 내부 지표 차이·보호 종료 증거 부족에 대한 최소 후속 계획 검토다. 커밋 권장 — TASK-004 학습 및 검증된 상태 마감 문서: `Docs: TASK-004 학습 정리 및 완료 상태 반영`.
+
 ## 2026-10-26 TASK-004 Deadlock 보고서 독립 리뷰 완료
 
 - 사용자 “진행”으로 RECOMMENDED 보고서 리뷰 승인. 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [리뷰](reviews/REVIEW-TASK-004-DEADLOCK-REPORT.md)를 회수했다. 지정값 수락과 실제 실행 모델 메타데이터 검증은 구분한다.

@@ -9,7 +9,7 @@
 | 완료 | REQ-001 | §4 사전 준비 | 일반 사용자로 실행하고 환경변수·디렉터리·시험용 키 파일·포트 조건을 모두 충족하여 부트 성공을 사용자 확인한다. |
 | 완료 | REQ-002 | §2, §4 메모리 | monitor.sh로 물리 메모리 증가를 관측하고 종료 직전/직후 로그에서 MemoryGuard 임계치 초과와 자체 종료 근거를 식별한다. MEMORY_LIMIT 변경 전후 최소 2회 실행하여 생존 시간 증가와 수치를 비교한다. |
 | 미완료 | REQ-003 | §2, §4 CPU | 대상 프로세스의 CPU 급상승을 top/ps/관제로 확보하고 Watchdog 종료 로그로 보호 조치를 설명한다. CPU_MAX_OCCUPY 변경 전후 종료 여부 또는 생존 시간 변화를 비교한다. |
-| 미완료 | REQ-004 | §2, §4 교착상태 | PID 존재, CPU/MEM 변화 정체(top -H 또는 ps -L), 마지막 WAITING/BLOCKED 로그를 확보한다. 스레드 간 자원 대기를 근거로 교착상태를 추론하고 MULTI_THREAD_ENABLE 변경 전후 재현/회피를 비교한다. |
+| 완료 | REQ-004 | §2, §4 교착상태 | PID 존재, CPU/MEM 변화 정체(top -H 또는 ps -L), 마지막 WAITING/BLOCKED 로그를 확보한다. 스레드 간 자원 대기를 근거로 교착상태를 추론하고 MULTI_THREAD_ENABLE 변경 전후 재현/회피를 비교한다. |
 | 미완료 | REQ-005 | §2 | GitHub Issue 형태 보고서 3건을 작성한다. 각 보고서는 Description / Evidence & Logs / Root Cause Analysis / Workaround & Verification 구조로 현상·조건·재현 경로·객관적 증거·원인·조치·Before & After를 포함한다. PDF 또는 GitHub Repository 링크로 제출한다. |
 | 미완료 | REQ-006 | §3 | 사용자가 메모리 구조와 누수 영향, 프로세스 CPU 과점유에 따른 지연, 교착상태 개념과 진단, 증거 기반 육하원칙 보고를 스스로 설명할 수 있는지 확인한다. |
 
@@ -33,6 +33,8 @@
 - §7: monitor.sh, ps, top, htop, pstree, kill 등 Linux 표준 명령어 및 라이브러리 사용.
 
 ## Notes
+
+- 2026-10-27: [TASK-004](tasks/TASK-004.md)의 512/40/true·false 두 사용자 실행, [Deadlock 보고서](../reports/deadlock.md)와 독립 리뷰·사용자 보고서 확인을 근거로 REQ-004 완료를 반영했다. RSS 소폭 감소 등 측정 한계를 보존하고 락 순환 로그와 반복 OS 대기를 종합했다. [최종 학습 정리](../study-note.md#task-004-교착상태-관측과-멀티스레드-설정-비교)도 완료했으나 사용자 이해 완료를 추정하지 않는다. 관측 도구의 별도 신호·실패 경로는 실행 미검증으로 남긴다. REQ-003과 전체 제출·학습 확인은 여전히 미완료다.
 
 - 제공 파일: [x86 바이너리](../../agent-app-leak/agent-leak-app-x86), [arm64 바이너리](../../agent-app-leak/agent-leak-app-arm64). 사용자가 x86 바이너리 실행을 검증했다. AI는 실행 및 내부 분석을 하지 않았다.
 - 2026-09-29 사용자 확인: monitor.sh 별도 제공본 없음. [TASK-001](tasks/TASK-001.md)에서 최소 스크립트를 작성한다. 실행 환경은 macOS 호스트의 OrbStack Linux 머신이며 Docker를 사용하지 않는다.
