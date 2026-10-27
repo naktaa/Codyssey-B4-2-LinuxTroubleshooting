@@ -10,7 +10,7 @@
 
 ## 2. Evidence & Logs (증거 자료)
 
-이번 실행 원본: [app.log](../../runs/run-2026-10-26_16-01-54-2PYjC0/app.log), [agent_app.log](../../runs/run-2026-10-26_16-01-54-2PYjC0/agent_app.log), [monitor.csv](../../runs/run-2026-10-26_16-01-54-2PYjC0/monitor.csv), [top.log](../../runs/run-2026-10-26_16-01-54-2PYjC0/top.log). 네 파일을 확인했다. `runs/`는 Git 제외 대상이므로 다른 작업 공간에서는 링크가 열리지 않을 수 있다. 핵심 원문을 아래에 발췌한다.
+이번 실행 원본: [app.log](../../runs/261026-160154_512_80_false-2PYjC0/app.log), [agent_app.log](../../runs/261026-160154_512_80_false-2PYjC0/agent_app.log), [monitor.csv](../../runs/261026-160154_512_80_false-2PYjC0/monitor.csv), [top.log](../../runs/261026-160154_512_80_false-2PYjC0/top.log). 네 파일을 확인했다. `runs/`는 Git 제외 대상이므로 다른 작업 공간에서는 링크가 열리지 않을 수 있다. 핵심 원문을 아래에 발췌한다.
 
 `app.log`의 설정·부트 기록:
 
@@ -57,9 +57,9 @@ top - 16:02:27
 
 ### 2026-10-27 동일 입력의 80%·40% 관측
 
-80% 실행 원본: [app.log](../../runs/run-2026-10-27_15-59-44-5osiuy/app.log), [agent_app.log](../../runs/run-2026-10-27_15-59-44-5osiuy/agent_app.log), [monitor.csv](../../runs/run-2026-10-27_15-59-44-5osiuy/monitor.csv), [top-scope.csv](../../runs/run-2026-10-27_15-59-44-5osiuy/top-scope.csv), [process-scope.log](../../runs/run-2026-10-27_15-59-44-5osiuy/process-scope.log).
+80% 실행 원본: [app.log](../../runs/261027-155944_512_80_false-5osiuy/app.log), [agent_app.log](../../runs/261027-155944_512_80_false-5osiuy/agent_app.log), [monitor.csv](../../runs/261027-155944_512_80_false-5osiuy/monitor.csv), [top-scope.csv](../../runs/261027-155944_512_80_false-5osiuy/top-scope.csv), [process-scope.log](../../runs/261027-155944_512_80_false-5osiuy/process-scope.log).
 
-40% 실행 원본: [app.log](../../runs/run-2026-10-27_16-13-41-binP1r/app.log), [agent_app.log](../../runs/run-2026-10-27_16-13-41-binP1r/agent_app.log), [monitor.csv](../../runs/run-2026-10-27_16-13-41-binP1r/monitor.csv), [top-scope.csv](../../runs/run-2026-10-27_16-13-41-binP1r/top-scope.csv), [process-scope.log](../../runs/run-2026-10-27_16-13-41-binP1r/process-scope.log). 두 실행의 각 다섯 파일을 대조했다. `runs/`는 Git 제외 대상이므로 다른 작업 공간에서는 링크가 열리지 않을 수 있다.
+40% 실행 원본: [app.log](../../runs/261027-161341_512_40_false-binP1r/app.log), [agent_app.log](../../runs/261027-161341_512_40_false-binP1r/agent_app.log), [monitor.csv](../../runs/261027-161341_512_40_false-binP1r/monitor.csv), [top-scope.csv](../../runs/261027-161341_512_40_false-binP1r/top-scope.csv), [process-scope.log](../../runs/261027-161341_512_40_false-binP1r/process-scope.log). 두 실행의 각 다섯 파일을 대조했다. `runs/`는 Git 제외 대상이므로 다른 작업 공간에서는 링크가 열리지 않을 수 있다.
 
 두 `app.log`의 설정과 앱 지표 발췌(주석은 실행 구분):
 

@@ -8,7 +8,7 @@ fi
 
 codyssey_prepare_env() {
     local tool architecture selected_binary agent_home key_file listeners account_uid run_root
-    local selected_memory selected_cpu selected_threads run_stamp new_run_dir launch_local
+    local selected_memory selected_cpu selected_threads name_memory name_cpu name_threads run_stamp new_run_dir launch_local
     local existing_pid children attempt
 
     # A sourced file can inherit its caller's positional arguments, so require a complete setting set.
@@ -113,8 +113,15 @@ codyssey_prepare_env() {
         return 1
     fi
 
-    run_stamp=$(date +%Y-%m-%d_%H-%M-%S) || return 1
-    if ! new_run_dir=$(mktemp -d "$run_root/run-$run_stamp-XXXXXX"); then
+    # Normalize only the directory name; the app still receives the caller's original values.
+    name_memory=$((10#$selected_memory))
+    name_cpu=$((10#$selected_cpu))
+    case "$selected_threads" in
+        true|1|yes) name_threads=true ;;
+        false|0|no) name_threads=false ;;
+    esac
+    run_stamp=$(date +%y%m%d-%H%M%S) || return 1
+    if ! new_run_dir=$(mktemp -d "$run_root/${run_stamp}_${name_memory}_${name_cpu}_${name_threads}-XXXXXX"); then
         printf 'Cannot create a new evidence directory under %s.\n' "$run_root" >&2
         return 1
     fi

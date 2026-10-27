@@ -23,8 +23,8 @@ bash ./run-deadlock-observation.sh 512 40 false
 
 | 설정 | 원본 |
 | --- | --- |
-| true · run-2026-10-26_17-54-55-kFiIRQ | [app.log](../../runs/run-2026-10-26_17-54-55-kFiIRQ/app.log), [agent_app.log](../../runs/run-2026-10-26_17-54-55-kFiIRQ/agent_app.log), [monitor.csv](../../runs/run-2026-10-26_17-54-55-kFiIRQ/monitor.csv), [thread-observation.txt](../../runs/run-2026-10-26_17-54-55-kFiIRQ/thread-observation.txt) |
-| false · run-2026-10-26_18-00-02-1munWl | [app.log](../../runs/run-2026-10-26_18-00-02-1munWl/app.log), [agent_app.log](../../runs/run-2026-10-26_18-00-02-1munWl/agent_app.log), [monitor.csv](../../runs/run-2026-10-26_18-00-02-1munWl/monitor.csv), [thread-observation.txt](../../runs/run-2026-10-26_18-00-02-1munWl/thread-observation.txt) |
+| true · 261026-175455_512_40_true-kFiIRQ | [app.log](../../runs/261026-175455_512_40_true-kFiIRQ/app.log), [agent_app.log](../../runs/261026-175455_512_40_true-kFiIRQ/agent_app.log), [monitor.csv](../../runs/261026-175455_512_40_true-kFiIRQ/monitor.csv), [thread-observation.txt](../../runs/261026-175455_512_40_true-kFiIRQ/thread-observation.txt) |
+| false · 261026-180002_512_40_false-1munWl | [app.log](../../runs/261026-180002_512_40_false-1munWl/app.log), [agent_app.log](../../runs/261026-180002_512_40_false-1munWl/agent_app.log), [monitor.csv](../../runs/261026-180002_512_40_false-1munWl/monitor.csv), [thread-observation.txt](../../runs/261026-180002_512_40_false-1munWl/thread-observation.txt) |
 
 두 실행의 `app.log`에는 `All Boot Checks Passed!`와 `Agent READY`가 있다. 설정·PID·수집 시각은 다음과 같다. 시각은 로컬 KST이며 수집 시작·마지막 표본 시각은 프로세스 생성·종료 시각이 아니다.
 

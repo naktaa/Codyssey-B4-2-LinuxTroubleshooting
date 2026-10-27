@@ -1,5 +1,49 @@
 # Worklog
 
+## 2026-10-27 TASK-006 공통 monitor와 자동 정리 구현·리뷰
+
+- 사용자의 “그럼 monitor 하나로 해도 괜찮다면 그렇게 해봐. 수정 시작” 승인으로 [TASK-006](tasks/TASK-006.md)의 일곱 파일 계획을 구현했다. [monitor.sh](../../monitor.sh)는 기존 2인자 PID/CSV 단독 수집을 보존하면서 설정값 3/4인자에서 앱 실행·RSS/CPU 수명 평균·대상 구간 CPU·스레드 표본·요약을 수집한다. 기존 [observe.sh](../../observe.sh)와 장애별 실행 파일은 공통 명령의 호환 진입점이며 [kill-agent-leak.sh](../../kill-agent-leak.sh)는 이번 실행 PID·시작 식별값 정리와 정확한 바이너리 경로의 수동 정리로 수정했다. [README](../../README.md)를 새 형식에 맞췄다. 과거 `runs/` 원본과 사용자 무관 변경은 보존했다.
+- [REQUIRED 독립 리뷰](reviews/REVIEW-TASK-006.md)의 Major-1(종료 직후 top 표본), Major-2(앱 로그 읽기 오류), Minor-1(정리 후 PID 재사용 표시)을 PM이 모두 ACCEPT했다. 사용자의 “수정” 승인을 받고 [monitor.sh](../../monitor.sh)·[README](../../README.md) 두 파일에 한정해 보완했다. [새 독립 재검토](reviews/REVIEW-TASK-006-FIX.md)에서 기존 지적은 정적으로 해결됐고 새 Critical/Major/Minor가 없었다. 추가 리뷰 SKIP.
+- Implementer는 Bash 문법·diff 공백 정적 확인을 보고했다. PM은 source·리뷰·승인 범위를 대조했으며 앱·스크립트 실제 실행은 하지 않았다. 새 산출물·반환값·자동 정리·포트 해제와 기존 2인자 호환은 사용자 검증 대기다. REQ-003의 OS CPU 급상승·Watchdog 종료 근거는 미확보 상태를 유지한다. TASK 학습 정리는 기능 검증 뒤 진행한다.
+- 커밋 보류 — 새 공통 관측의 사용자 실행 결과와 남은 수정 여부를 확인한 뒤 이번 응집된 변경 범위를 판단한다. 실제 commit/push는 수행하지 않았다.
+
+### 첫 사용자 실행 대조: 128/40/false
+
+- 사용자 `bash ./monitor.sh 128 40 false 30` 실행과 셸 종료값 `0`을 받았다. [실행 원본](../../runs/261027-215714_128_40_false-JX9kZg/) 여섯 파일을 대조했고 상세 PID·시각·수치는 [TASK-006 기록](tasks/TASK-006.md#첫-공통-관측-사용자-실행-12840false-30초-한도)에 남겼다. 자식 PID 24966 RSS 18,272→146,292 KiB, MemoryGuard 임계치·자체 종료 21:57:32.448, CSV `EXITED` 21:57:33이다.
+- 요약의 정리 전 자식 `absent`, 정리 status 0·양 PID 최종 absent·포트 해제를 확인했다. PM 별도 `ss` 조회도 LISTEN 없음이었다. 터미널의 launcher PID 24961 `Killed` 알림은 자식 MemoryGuard 기록과 구분하며 신호 발신자는 확인하지 못했다. CPU·교착 및 기존 2인자 경로 검증, TASK 학습 정리는 대기다. Review Decision: SKIP — 기존 REQUIRED 독립 재검토 완료 후 읽기 전용 사용자 원본 대조·상태 기록만 수행했다.
+
+### CPU 설정 사용자 실행 대조: 512/80/false
+
+- 사용자가 `bash ./monitor.sh 512 80 false 60`과 종료값 `0`을 전달했다. [실행 원본](../../runs/261027-220215_512_80_false-LYxfY1/) 여섯 파일을 대조했고 상세 PID·시각·수치는 [TASK-006 기록](tasks/TASK-006.md#cpu-설정-공통-관측-사용자-실행-51280false-60초-한도)에 남겼다. 앱은 `Current Load` 5.00→51.89%와 22:02:36.930 CPU 임계치 위반을 기록했고 자식 PID 25496은 다음 초 CSV에서 `EXITED`다.
+- 확인된 자식 top 구간 표본 17개는 최대 4.0%, 누적 CPU 시간 0:00.05→0:00.20이다. 요약의 정리 전 자식 `absent`, cleanup status 0, 최종 양 PID absent·포트 해제를 확인했다. PM 별도 `ss`에도 LISTEN 행은 없다. 앱 내부 Load를 OS 과점유로 읽지 않으며 Watchdog·SIGTERM 명시도 없다. 명령 성공과 REQ-003 증거 확보는 별개다.
+- Review Decision: SKIP — 이미 완료된 REQUIRED 독립 재검토 이후 사용자 원본을 읽고 상태만 기록했다. 기능 source·보고서는 변경하지 않았고 앱을 AI가 실행하지 않았다. 다음은 40% 시간 만료 후 앱 생존·자동 정리와 교착 경로 확인이다.
+
+### CPU 40% 시간 만료 후 정리 사용자 실행
+
+- 사용자가 `bash ./monitor.sh 512 40 false 60`과 반환값 `0`을 전달했다. [실행 원본](../../runs/261027-221144_512_40_false-V0VJm5/) 여섯 파일을 대조했고 상세 시각·PID·수치는 [TASK-006 기록](tasks/TASK-006.md#cpu-40-공통-관측-사용자-실행-51240false-60초-한도)에 남겼다. 앱은 `Healthy System Monitoring`과 A/B/C 완료 뒤 메모리·CPU 작업을 실행했고 내부 Load가 40% 피크→cooldown→재상승했다.
+- 자식 PID 26088은 관측 종료 22:12:45에도 `SNl+`이고 CSV 마지막 상태가 `RUNNING`이었다. 그 뒤 도구 정리 status 0·양 PID absent·포트 해제를 확인했다. PM 별도 `ss`에서도 LISTEN 없음이다. 관제 수집기 status 143은 앱이 살아 있을 때 수집기만 종료한 결과이며 반환값 0과 구분한다. 60초는 생존 하한이다.
+- 확인된 대상 top 표본 51개 최대 7.0%, 누적 CPU 0:00.05→0:01.17. 80% 실행의 앱 임계치 위반 후 종료와 생존 차이는 있지만 앱 작업 경로도 달라 정책의 단독 효과로 입증하지 않는다. OS 과점유·Watchdog 근거는 미확보. Review Decision: SKIP — REQUIRED 재검토 이후 원본 읽기·PM 상태 기록만 수행, source·보고서 수정과 AI 앱 실행 없음.
+
+### 교착 설정 시간 만료 후 정리 사용자 실행·기능 완료 판단
+
+- 사용자가 `bash ./monitor.sh 400 40 true 60`과 반환값 `0`을 전달했다. [실행 원본](../../runs/261027-221930_400_40_true-wMYexd/) 여섯 파일을 읽었으며 PID·표본·시각별 상세 근거는 [TASK-006 기록](tasks/TASK-006.md#교착-설정-공통-관측-사용자-실행-40040true-60초-한도)에 남겼다. 두 작업 스레드의 A/B 락 순환 대기 로그가 22:19:40.159에 끝나고 관측 종료 22:20:32까지 새 로그가 없었다.
+- 자식 PID 27204는 53개 CSV 행에서 `RUNNING`, RSS 18,408 KiB 일정이었다. 확인된 앱 top 구간 표본 52개는 모두 0.0%이며 누적 CPU 시간 0:00.05가 유지됐다. `ps -L`의 15·30·45초 표본에서 세 스레드가 `futex_wait`였다. 락 소유 관계는 앱 로그로 판단하며 대기 위치 하나만으로 증명하지 않는다.
+- 정리 전 자식은 `SNl+`, CSV 수집기 status 143은 수집기 종료다. 이후 도구 정리 status 0, 두 PID absent, 포트 15034 해제를 요약과 PM의 별도 `ss`에서 확인했다. 앱이 스스로 회복·종료한 것으로 기록하지 않는다. 기존 TASK-004의 true/false 비교는 별도 원본을 유지한다.
+- PM은 네 공통 설정 사용자 실행과 기존 REQUIRED 리뷰·수정 재검토, 정적 호환 확인을 근거로 TASK-006 공통 기능 완료를 확인했다. 기존 2인자 호출·부분 실패/중단·수동 무인자 정리의 실제 실행은 미검증이다. REQ-003의 OS CPU 급상승·Watchdog도 미충족이다. Review Decision: SKIP — 사용자 원본 대조·상태 문서 갱신이며 기능 source 변경이 없다. 다음은 Implementer의 최종 학습 정리와 PM 마감 확인이다.
+
+### TASK-006 최종 학습 정리·마감
+
+- 기존 TASK-006 Implementer(GPT-6 Sol / Medium)가 [학습 노트](../study-note.md#task-006-공통-관측과-실행-후-안전-정리)의 읽기 순서와 새 절만 작성했다. PM은 현재 `monitor.sh`·`prepare-env.sh`·`kill-agent-leak.sh`의 실행 흐름·코드 링크, 네 실행 원본 수치, 정리 전후 상태 구분, CPU 미입증 및 기존 2인자/이상 경로 실행 미검증 표현을 대조했다. Implementer의 링크 대상·줄 위치 정적 확인과 PM의 `git diff --check`가 통과했다. 앱·스크립트 실행은 이번 정리에서 하지 않았다.
+- TASK-006 기능·필요 리뷰·사용자 검증·학습 정리를 마감했다. TASK-001·004 학습 절의 당시 코드 구조 설명은 보존하고 현재 공통 구현은 새 TASK-006 절을 우선 읽도록 했다. [REQUIREMENTS](REQUIREMENTS.md)의 REQ-002·004 완료와 REQ-003 미완료를 유지한다. Review Decision: SKIP — 학습·상태 문서 추가는 새 기능 source 변경이나 새로운 원인 주장이 없고 기존 REQUIRED 재검토가 완료됐다.
+- 커밋 권장 — TASK-006 공통 관측·자동 정리 코드와 리뷰·학습·사용법 문서: `Feat: 공통 장애 관측과 안전한 실행 후 정리 통합`. 기존 TASK-003/004 보고서 등 별도 변경과 혼합 범위는 실제 staging 전에 확인한다. PM은 commit/push를 하지 않았다.
+
+## 2026-10-27 TASK-005 시각 기반 폴더 이동·독립 리뷰 재개
+
+- 사용자의 “날짜시간순으로 정렬되게 ... 현재 runs 안에 있는 폴더 이름도 ... 변경” 승인에 따라 [TASK-005 매핑](tasks/TASK-005.md#implementation-notes)의 당시 7개 폴더를 `YYMMDD-HHMMSS_메모리_CPU_스레드-XXXXXX`로 이동했다. Implementer는 26개 파일의 상대 경로·SHA-256 전후 일치를 보고했다. 원본 로그 안의 옛 절대 경로 출력은 편집하지 않았다. 현재 존재하지 않는 과거 실행 링크와 사용자 추가 실행 폴더는 대상에서 제외했다.
+- [prepare-env.sh](../../prepare-env.sh) 생성 규칙과 [README](../../README.md)를 맞추고 실제 7개를 가리키는 문서 링크를 갱신했다. [시각 접두어 독립 리뷰](reviews/REVIEW-TASK-005-TIMESTAMP-MIGRATION.md)는 설정·시각·기존 식별자·새 증거 링크 92개를 확인했고 Critical/Major/Minor 없음. 첫 Reviewer 호출은 사용량 한도로 실패했으며 같은 지정 모델의 새 Reviewer 재시도에서 결과를 회수했다. 이동 전 해시 manifest가 리뷰어에게 없어 바이트 동일성은 독립 검증하지 못했다. 초 단위 이름은 같은 초 실행의 엄밀한 순서를 보장하지 않는다.
+- 사용자 실행의 [17:40:57 앱 로그](../../runs/261027-174057_512_40_false-kz262f/app.log)는 새 이름·설정·부트 성공을 보여 준다. 그 실행에는 `memory-observation.txt`가 없어 새 공통 memory mode의 검증으로 삼지 않는다. 최근 사용자가 추가한 `memory-test.sh`·`kill-agent-leak.sh`와 `run-memory-comparison.sh`의 300/350/40/false 설정 변경은 TASK-005 승인 범위 밖의 사용자 변경으로 보존한다.
+- Review Decision: 후속 REQUIRED 독립 리뷰 완료, 지적 없음. README의 같은 초 정렬 한계 문구와 PM 상태 기록은 source 변경이 없어 추가 리뷰 SKIP. 앱·스크립트 실행 및 실패 경로 검증은 사용자 담당으로 미완료다. 커밋 보류 — TASK-005 공통 명령의 사용자 검증을 확인한 뒤 이번 변경과 과거 경로 문서 갱신을 묶는다.
+
 ## 2026-10-27 TASK-003 CPU 비교 보고서 독립 재검토
 
 - 사용자 “일단 진행해봐”로 RECOMMENDED 리뷰를 승인했다. 새 독립 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`의 [2026-10-27 비교 재검토](reviews/REVIEW-TASK-003-CPU-REPORT.md#2026-10-27-비교-추가-독립-재검토)를 회수했다. 요청 설정은 위임 도구가 수락했으며 실제 실행 모델 메타데이터는 별도 확인하지 않았다.
@@ -8,14 +52,14 @@
 
 ## 2026-10-27 TASK-003 40% 비교 사용자 실행·CPU 보고서 갱신
 
-- 사용자 `ss` 사전 확인은 포트 15034 리스너 없음이었고, 512/40/false·기본60초 CPU 관측 도구 실행 결과와 반환값 `0`을 전달받았다. [앱 로그](../../runs/run-2026-10-27_16-13-41-binP1r/app.log), [앱 자체 로그](../../runs/run-2026-10-27_16-13-41-binP1r/agent_app.log), [관제 CSV](../../runs/run-2026-10-27_16-13-41-binP1r/monitor.csv), [프로세스 관계표](../../runs/run-2026-10-27_16-13-41-binP1r/process-scope.log), [top CSV](../../runs/run-2026-10-27_16-13-41-binP1r/top-scope.csv)를 정적 대조했다.
+- 사용자 `ss` 사전 확인은 포트 15034 리스너 없음이었고, 512/40/false·기본60초 CPU 관측 도구 실행 결과와 반환값 `0`을 전달받았다. [앱 로그](../../runs/261027-161341_512_40_false-binP1r/app.log), [앱 자체 로그](../../runs/261027-161341_512_40_false-binP1r/agent_app.log), [관제 CSV](../../runs/261027-161341_512_40_false-binP1r/monitor.csv), [프로세스 관계표](../../runs/261027-161341_512_40_false-binP1r/process-scope.log), [top CSV](../../runs/261027-161341_512_40_false-binP1r/top-scope.csv)를 정적 대조했다.
 - 앱은 Healthy 경로로 작업을 계속했고 launcher5479·자식5484는 마지막 61번째 프레임에도 존재했다. 관제 60행 모두 RUNNING, 자식 top 최대8%, CPU 누적0.05→1.26초, RSS18,340→505,048KiB였다. 첫 메모리 정리는 마지막 top·CSV 뒤인 16:14:45.944다. 80% 실행의 첫 RUNNING→EXITED 30초와 40%의 60초 구간 생존을 비교하되 작업 경로가 달라 CPU 완화의 인과 증거로 쓰지 않는다. 앱 로그의 40% 피크·cooldown과 OS CPU는 다른 지표다.
 - 기존 대화에서 제시한 [CPU 보고서](../reports/cpu.md) 한 파일 반영 계획에 따라 Implementer `gpt-6-sol` / `medium`, `fork_turns="none"`으로 비교를 갱신했다. PM이 실제 diff·10개 원본 링크·수치·시각과 `git diff --check`를 대조했다. 기능 source·다른 사용자 파일은 수정하지 않았고 앱·스크립트·테스트를 AI가 실행하지 않았다.
 - Review Decision RECOMMENDED — 평가 핵심 보고서의 새 근거·인과 한계를 독립 확인한다. 새 Reviewer `gpt-6-sol` / `medium` 진행/생략 선택 대기. REQ-003은 OS CPU 급상승과 Watchdog 종료 정책 입증 부족으로 미완료다. 40% 앱은 관측 종료 시 살아 있었고 이후 현재 상태는 확인하지 않았다. 커밋 보류 — 보고서 리뷰 선택과 사용자 확인 후 범위를 판단한다.
 
 ## 2026-10-27 TASK-003 CPU 범위 관측 첫 사용자 실행 확인
 
-- 사용자가 CPU 관측 도구를 512/80/false·기본 60초로 실행하고 반환값 `0`을 전달했다. [앱 로그](../../runs/run-2026-10-27_15-59-44-5osiuy/app.log), [앱 자체 로그](../../runs/run-2026-10-27_15-59-44-5osiuy/agent_app.log), [관제 CSV](../../runs/run-2026-10-27_15-59-44-5osiuy/monitor.csv), [프로세스 관계표](../../runs/run-2026-10-27_15-59-44-5osiuy/process-scope.log), [top CSV](../../runs/run-2026-10-27_15-59-44-5osiuy/top-scope.csv)를 정적으로 대조했다. 상세 수치와 한계는 [TASK-003](tasks/TASK-003.md#2026-10-27-첫-cpu-범위-관측-사용자-검증)에 기록했다.
+- 사용자가 CPU 관측 도구를 512/80/false·기본 60초로 실행하고 반환값 `0`을 전달했다. [앱 로그](../../runs/261027-155944_512_80_false-5osiuy/app.log), [앱 자체 로그](../../runs/261027-155944_512_80_false-5osiuy/agent_app.log), [관제 CSV](../../runs/261027-155944_512_80_false-5osiuy/monitor.csv), [프로세스 관계표](../../runs/261027-155944_512_80_false-5osiuy/process-scope.log), [top CSV](../../runs/261027-155944_512_80_false-5osiuy/top-scope.csv)를 정적으로 대조했다. 상세 수치와 한계는 [TASK-003](tasks/TASK-003.md#2026-10-27-첫-cpu-범위-관측-사용자-검증)에 기록했다.
 - 61프레임 수집 확인. 앱 launcher 4278·자식 4283은 프레임 1~30에 존재하고 31부터 사라졌다. 표본에서 추가 앱 후손은 없다. 부모 누적 CPU 0:00.08 일정, 자식 순간 최고 5.0%·누적 0:00.04→0:00.32. 앱 로그는 `Current Load` 5.00→53.08%와 16:00:14.658 임계치 위반, 관제는 16:00:15 `EXITED`를 기록한다. 수집 성공과 CPU 과점유 입증을 구분한다.
 - Review Decision SKIP — 읽기 전용 원본 해석·PM 상태 기록이며 source 변경 없음. 실제 실행은 사용자 담당. 추가 후손의 지속적인 부하를 놓쳤다는 설명은 표본과 맞지 않는다. 앱 지표 계산식·80% 설정과 위반 수치의 관계·Watchdog 종료 주체는 미확인이다. CPU 보고서·REQ-003 완료로 처리하지 않고 후속 범위를 결정한다. 커밋 보류 — 미완료 증거 해석과 보고서 범위를 정한 뒤 CPU 관측 도구 변경과 함께 판단한다.
 
@@ -70,13 +114,13 @@
 
 ## 2026-10-26 TASK-004 false 비교 사용자 검증
 
-- 사용자 true 앱 종료·포트 해제 확인 후 512/40/false·60초 실행 및 반환값0을 전달했다. `run-2026-10-26_18-00-02-1munWl`의 네 원본을 대조했다. 자식10481·launcher10476과 관측 종료 시 포트 생존, 메모리/CPU 작업·로그의 지속 진행을 확인했다.
+- 사용자 true 앱 종료·포트 해제 확인 후 512/40/false·60초 실행 및 반환값0을 전달했다. `261026-180002_512_40_false-1munWl`의 네 원본을 대조했다. 자식10481·launcher10476과 관측 종료 시 포트 생존, 메모리/CPU 작업·로그의 지속 진행을 확인했다.
 - 같은 관측 기간 true의 A/B 순환 대기와 false의 작업 진행을 비교했다. false에도 OS 작업 스레드가 있고 메인의 futex_wait가 보이므로 스레드 존재·대기 위치만으로 교착 판정하지 않는다. CSV RSS18,500→504,780KiB 및 평균CPU5.0→1.8%, 모두 RUNNING이다. 18:01:06 이후 cleanup 로그는 CSV 수집 뒤의 추가 자료다.
 - 설정 외 입력은 동일하나 앱의 실행 경로가 바뀌었으므로 내부 락 구현의 해결이나 영구 회피로 확대하지 않는다. Review Decision SKIP(원본 대조·상태 기록). 정상 두 경로 외 중단·자연종료·실패 경합은 미검증이다. AI의 실행·종료 없음. 다음은 보고서 계획 승인이다.
 
 ## 2026-10-26 TASK-004 true 관측 사용자 검증
 
-- 사용자의 단일 명령 512/40/true·60초 관측 및 반환값 0을 확인하고 `run-2026-10-26_17-54-55-kFiIRQ`의 네 원본을 읽었다. launcher9870·자식9875와 포트 생존, 파일 생성·수집과 시간 만료 후 앱 유지 정상 경로를 대조했다.
+- 사용자의 단일 명령 512/40/true·60초 관측 및 반환값 0을 확인하고 `261026-175455_512_40_true-kFiIRQ`의 네 원본을 읽었다. launcher9870·자식9875와 포트 생존, 파일 생성·수집과 시간 만료 후 앱 유지 정상 경로를 대조했다.
 - 로그는 Thread-1의 A 획득→B 대기, Thread-2의 B 획득→A 대기를 17:55:05.064에 기록한 뒤 멈췄다. 반복 표에서 세 TID는 futex_wait, 두 작업 TID 평균CPU0.0%다. RSS18,440→18,148KiB 소폭 감소를 불변이라고 표현하지 않는다. 순환 대기 로그와 OS 관측을 종합한 교착 재현 근거를 확보했다.
 - Review Decision SKIP: source 변경 없는 사용자 원본 대조·상태 기록. AI의 앱 실행·종료 없음. 신호중단/실패경합 등 검증·false 비교·보고서·학습 정리는 미완료로 남겼다.
 - 다음은 사용자가 실제 PID 동일성을 확인해 앱을 종료하고 15034 해제 후 512/40/false를 동일시간 관측하는 것이다. 커밋 보류 — false 비교와 TASK 마감 범위를 확인한 뒤 구현·관련 문서 묶음을 판단한다.
@@ -120,7 +164,7 @@
 
 ## 2026-10-26 CPU 보완 관측 계획 회수
 
-- 후속 사용자 실행 `run-2026-10-26_16-01-54-2PYjC0`의 app.log·monitor.csv·top.log를 현재 작업 공간에서 직접 대조했다. 512/80/false 부트 통과, PID 5286, 실행 기록부터 EXITED까지 약 34초, CSV 관측 구간 27초. top 대상 표본 26개의 CPU는 0~5%, 앱은 약 50.42%에서 임계치 위반을 기록했다. Watchdog/SIGTERM 명시 없음. 사용자 출력의 Terminated만으로 보호 정책·신호 발신자를 확정하지 않는다. top은 앱 종료 후에도 수집을 계속했다. 필수 증거 미충족 유지, Review Decision SKIP(원본 대조·상태 기록). 앱·테스트 실행 및 source 수정 없음.
+- 후속 사용자 실행 `261026-160154_512_80_false-2PYjC0`의 app.log·monitor.csv·top.log를 현재 작업 공간에서 직접 대조했다. 512/80/false 부트 통과, PID 5286, 실행 기록부터 EXITED까지 약 34초, CSV 관측 구간 27초. top 대상 표본 26개의 CPU는 0~5%, 앱은 약 50.42%에서 임계치 위반을 기록했다. Watchdog/SIGTERM 명시 없음. 사용자 출력의 Terminated만으로 보호 정책·신호 발신자를 확정하지 않는다. top은 앱 종료 후에도 수집을 계속했다. 필수 증거 미충족 유지, Review Decision SKIP(원본 대조·상태 기록). 앱·테스트 실행 및 source 수정 없음.
 
 - 사용자 “다음 단계 진행”에 따라 Implementer `gpt-6-sol` / `medium`, `fork_turns="none"`으로 읽기 전용 계획을 회수했다. 요청 설정 수락과 실제 실행 모델 메타데이터 확인은 구분한다.
 - [TASK-003](tasks/TASK-003.md)에 512/80/false의 동일 자식 PID top·CSV·앱 로그 수집 계획을 기록했다. 현재 runs 원본은 없으며 이전 수치는 저장된 기록 기준이다. 사용자 실행 후 40% 재관측과 보고서 계획을 결정한다.

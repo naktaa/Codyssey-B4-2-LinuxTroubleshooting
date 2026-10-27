@@ -2,6 +2,10 @@
 
 ## Current Phase
 
+2026-10-27 [TASK-006](tasks/TASK-006.md) 마감 완료: 공통 `monitor.sh`의 메모리 종료(128/40/false), CPU 임계치 기록 뒤 종료(512/80/false), 60초 생존 뒤 정리(512/40/false), 교착 대기 뒤 정리(400/40/true)를 사용자 실행 원본으로 확인했다. 마지막 교착 실행은 락 순환 대기 로그 뒤 약 52초간 PID 생존·RSS/CPU/로그 정체가 이어졌고 도구 정리 뒤 포트가 해제됐다. [REQUIRED 리뷰](reviews/REVIEW-TASK-006.md)의 Major-1/2·Minor-1 승인 수정과 [독립 재검토](reviews/REVIEW-TASK-006-FIX.md)의 새 finding 없음, [최종 학습 정리](../study-note.md#task-006-공통-관측과-실행-후-안전-정리)도 확인했다. 기존 2인자 호출·실패/중단·수동 정리는 정적 확인만 있고 실행 미검증이다. CPU OS 급상승·Watchdog 필수 증거는 여전히 부족하다.
+
+2026-10-27 [TASK-005](tasks/TASK-005.md)의 공통 관측 명령·시간 제한 메모리 관측·시각/설정 기반 폴더 이름을 구현했다. 최초 REQUIRED 리뷰의 Major-1·Minor-1은 승인 수정과 독립 재검토에서 정적 해결됐고, 7개 과거 증거 폴더 이름·관련 링크 변경도 별도 독립 리뷰에서 Critical/Major/Minor가 없었다. 후속 TASK-006 공통 명령의 네 사용자 실행을 확인했다. 첫 시각 접두어 Reviewer 호출은 사용량 한도로 실패했고 같은 지정 모델의 재시도에서 결과를 회수했다.
+
 2026-10-27 TASK-004 마감 완료. TASK-003 CPU 관측 도구 REQUIRED 재검토와 80%·40% 비교 보고서 RECOMMENDED 독립 재검토 완료, 새 finding 없음. 종료·60초 생존 차이는 기록했으나 OS CPU 과점유·Watchdog 근거는 미확보다.
 
 TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 사용자 요청으로 생략하고 실행 미검증으로 남긴다. REQUIRED 리뷰·보완·정상 비교·학습 정리 완료, 추가 리뷰 SKIP. TASK-003 기존 CPU 관측·인자화와 이번 부모·후손 범위 관측을 확인했고 관측 도구 REQUIRED 독립 리뷰를 완료했다. CPU 필수 증거 부족과 나머지 회귀 검증이 남아 있다.
@@ -16,12 +20,17 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 - 관제 Ctrl+C 이후 앱 PID 12741 생존(SN, 00:11) 확인.
 - REQUIRED 독립 리뷰 완료, Minor-1 반영 및 검증 완료. 추가 리뷰 SKIP.
 - REQ-004 Deadlock: true의 A/B 락 순환 대기·작업 정체와 false의 작업 진행 비교, 보고서·두 리뷰·사용자 확인·최종 학습 정리 완료. 사용자 이해 완료는 미확인이다.
+- TASK-006 공통 관측·자동 정리: 네 설정 경로의 사용자 실행, REQUIRED 리뷰·수정 재검토, 최종 학습 정리 완료. 기존 2인자와 이상 경로의 실행 검증은 미확인이다.
 
 ## 이전 TASK 결과
 
 [TASK-002](tasks/TASK-002.md)의 [OOM 보고서](../reports/oom.md)를 비교 출력과 원본 CSV·앱 로그에 대조했다. 128/256MB 모두 MemoryGuard 자체 종료이며 첫 RUNNING→EXITED 관측은 17초→33초, 최고 RSS 표본은 146,520→274,628 KiB였다. 256/512MB는 서로 다른 작업·종료 경로로 별도 한계 사례를 유지한다.
 
 ## Next
+
+- [TASK-003](tasks/TASK-003.md): CPU 보고서의 OS CPU 급상승·Watchdog 근거 부족을 유지하고, 현재 증거로 미션 요구를 어디까지 설명할 수 있는지 후속 범위를 결정한다. 공통 도구의 추가 설정 반복만으로 CPU 입증을 약속하지 않는다.
+
+- [TASK-005](tasks/TASK-005.md): 처음 7개 원본의 시각·설정 기반 이름과 문서 링크를 갱신했다. 당시 mode별 `memory-observation.txt` 실행 검증은 후속 TASK-006의 단일 공통 산출물로 대체됐으며 과거 형식의 사용자 재실행을 요구하지 않는다. 파일 26개 해시 전후 일치는 Implementer 보고이고 이동 전 manifest의 독립 검증은 미수행이다.
 
 - [TASK-003](tasks/TASK-003.md)의 512/80/false와 512/40/false 관측을 [CPU 보고서](../reports/cpu.md)에 비교하고 [RECOMMENDED 독립 재검토](reviews/REVIEW-TASK-003-CPU-REPORT.md#2026-10-27-비교-추가-독립-재검토)를 완료했다. Critical/Major/Minor 없음. 사용자의 후속 질문·보고서 확인을 기다린다. 40% 앱은 관측 종료 시 살아 있었으므로 다음 실행 전 PID·포트를 다시 확인한다.
 
@@ -51,6 +60,10 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 - 별도 지정이 없으면 runs의 실행 시각이 최신인 디렉터리를 확인하고 부트 설정·PID와 대조한다.
 
 ## Current Task
+
+[TASK-003](tasks/TASK-003.md) — CPU 필수 증거·보고서 후속 판단 대기. [TASK-006](tasks/TASK-006.md)은 공통 `monitor.sh`·안전 정리의 네 사용자 실행, REQUIRED 리뷰와 최종 학습 정리까지 마감했다. 기존 2인자 호출·이상 경로는 실행 미검증이다.
+
+[TASK-005](tasks/TASK-005.md) — 시각·설정 기반 폴더와 공통 명령 구현, 리뷰 수정 및 과거 7개 증거 폴더/링크 변경 독립 리뷰 완료. mode별 실행 형식은 후속 TASK-006에서 단일 공통 명령으로 바뀌었다.
 
 [TASK-003](tasks/TASK-003.md) — 관측 도구 REQUIRED 재검토, 80%·40% 사용자 실행 비교와 [CPU 보고서](../reports/cpu.md) RECOMMENDED 재검토 완료. 사용자 보고서 확인·후속 질문 대기, CPU 필수 증거는 미완료다. [TASK-004](tasks/TASK-004.md)는 2026-10-27 마감 완료했다. 현재 모델 정책은 PM GPT-6 Sol / High, Implementer·Reviewer GPT-6 Sol / Medium이다.
 

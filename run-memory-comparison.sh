@@ -8,9 +8,9 @@ fi
 set -u
 
 # Change only these values for the two runs. Keep the other settings equal.
-BEFORE_MEMORY_LIMIT=128
-AFTER_MEMORY_LIMIT=256
-CPU_LIMIT=80
+BEFORE_MEMORY_LIMIT=300
+AFTER_MEMORY_LIMIT=350
+CPU_LIMIT=40
 MULTI_THREAD=false
 AGENT_HOME_DIR="${HOME:-}/agent-leak-lab"
 
