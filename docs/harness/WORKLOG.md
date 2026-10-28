@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-28 TASK-003 CPU 보고서의 0.1초 표본 보강
+
+- 사용자 승인 후 [CPU 보고서](../reports/cpu.md)에 기존 80%·40% 비교와 분리해 새 80% 실행의 앱 로그 45.50%·53.71%, 대상 프로세스 0.1초 CPU 45.94%·54.41%, 1초 CPU 4.19%, 관제 수명평균 0.8% 원문 근거를 추가했다. 0.1초 CPU 사용률의 계산 기준과 구간 차이를 적고 앱 내부 지표 정의·Watchdog/SIGTERM·지속 과점유·시스템 지연은 미확인으로 유지했다. 다른 수집법의 OS 수치를 설정 전후 완화 효과로 비교하지 않는다. 원본 `runs/`와 기능 source는 수정하지 않았다.
+- PM이 원본 네 파일의 시각·수치와 보고서 발췌를 대조했고 `git diff --check` 통과. Review Decision: SKIP — 기존 독립 리뷰 이후 한 실행의 직접 증거만 국소 보강했다. 사용자 보고서 확인·TASK 학습 정리 대기.
+
+## 2026-10-28 TASK-003 CPU 출력 형식 조정
+
+- 사용자 계획 승인 후 [monitor.sh](../../monitor.sh)에 실행 PID·관측/수집·정리 상태와 결과 폴더의 짧은 터미널 출력을 복원했다. [cpu_precise.c](../../cpu_precise.c)는 두 새 CPU CSV의 네 측정 열만 소수점 2자리로 표시하고, 양수 판정·합산·CPU 계산은 원값을 유지한다. [README](../../README.md)에 반올림 한계를 기록했다. 기존 실행 원본은 수정하지 않았다.
+- 정적 확인: `bash -n monitor.sh`, `cc -std=c11 -O2 -Wall -Wextra -Werror -pedantic -fsyntax-only cpu_precise.c`, `git diff --check` 모두 통과. Review Decision: SKIP — 앞선 REQUIRED 독립 리뷰의 수집·프로세스 수명 로직은 변하지 않고 표시 형식만 바뀌었다. 실제 앱 실행 및 새 출력·CSV 검증은 사용자 담당이며 미실행이다.
+
+## 2026-10-28 TASK-003 C CPU 관측 교체
+
+- 사용자 요청으로 [cpu_precise.c](../../cpu_precise.c)의 프로세스 CPU clock을 100ms·약 1초 CSV 수집에 사용하고, [monitor.sh](../../monitor.sh)는 실행별 숨김 바이너리 자동 컴파일·앱 PID/시작 tick 전달·성공 터미널 무출력을 구현했다. 두 CSV는 원래 양수 표본 행, 그룹 마지막 행의 `group_percent_sum`, 그룹 사이 빈 줄을 기록한다. 합계는 사용률이 아닌 비교용 퍼센트 단순 합이다. [README](../../README.md)에 생성물·측정 기준·출력 동작을 반영했다. 기존 Python·루트 바이너리·실행 원본은 보존했다.
+- 정적 self-check: C 경고 포함 문법 검사, 셸 문법, `git diff --check`. Review Decision: REQUIRED — 새 C 파일 기록과 PID/자식 수명 처리를 독립 [리뷰](reviews/REVIEW-TASK-003-CPU-PRECISE.md)로 확인했다. Critical/Major 0, Minor-1(README Ctrl+C 구분)은 승인된 README 안내 범위에서 ACCEPT·수정했다. 앱·스크립트 실제 실행은 사용자가 담당하며 새 결과 확인 전 보고서는 변경하지 않았다.
+
 ## 2026-10-28 TASK-008 공통 관측 스크립트 정리
 
 - 사용자 “진행” 승인으로 [TASK-008](tasks/TASK-008.md)의 삭제 6개, [monitor.sh](../../monitor.sh) 요약 축약, [README](../../README.md) 현재 명령 및 과거 문서의 삭제 파일 링크 정리를 Implementer가 수행했다. 기존 `runs/` 원본, 내부 의존 스크립트, `monitor.sh` 2인자 경로는 보존했다.

@@ -2,6 +2,12 @@
 
 ## Current Phase
 
+2026-10-28 [TASK-003](tasks/TASK-003.md) [CPU 보고서](../reports/cpu.md)에 사용자 실행의 새 512/80/false 앱 로그와 0.1초·1초 OS CPU 표본을 추가했다. 대상 프로세스의 0.1초 순간 상승은 확인했지만 앱 내부 `Current Load`와 동일한 정의, 지속 과점유·시스템 지연, Watchdog/SIGTERM 종료 주체는 확인되지 않았다. 종전 40% After의 OS CPU 수치와 새 0.1초 표본은 같은 수집법의 전후 효과로 비교하지 않는다. Review Decision: SKIP — 기존 독립 리뷰 후 제한된 증거 보강이며 원본·source 변경이 없다. 사용자 보고서 확인 대기.
+
+2026-10-28 [TASK-003](tasks/TASK-003.md) 출력 형식 후속: 사용자 승인으로 설정값 호출 시 PID, 관측·수집·정리 상태, 결과 폴더와 최종 결과를 터미널에 간결하게 표시한다. 새 CPU CSV의 경과 시간·간격·구간 CPU·그룹 합계는 소수점 2자리 표시이며 계산은 원값이다. 정적 문법·diff 확인만 마쳤고 새 출력의 사용자 실행 확인은 대기한다. Review Decision: SKIP — 기존 REQUIRED 리뷰 이후 표시와 문서만 변경했다.
+
+2026-10-28 [TASK-003](tasks/TASK-003.md) C 수집기 도입 당시: 사용자 요청으로 C 프로세스 CPU 시계 수집기를 `monitor.sh`에 연결했다. 설정값 실행은 C를 자동 컴파일하고 앱 PID를 검증해 100ms·약 1초 CPU CSV를 만든다. 양수 표본은 그룹별로 구분하고 마지막 행의 퍼센트 단순 합은 실제 CPU 사용률과 별도다. REQUIRED [독립 리뷰](reviews/REVIEW-TASK-003-CPU-PRECISE.md)는 Critical/Major 0, README 안내 Minor 1을 승인 범위에서 수정했다. 이후 사용자가 C 방식의 실행 로그를 제공했으며 앱 내부 상승 속도는 같은 설정에서도 달랐다. CPU 미션의 OS 급상승·Watchdog 결론은 자동 완료 처리하지 않는다.
+
 2026-10-28 [TASK-008](tasks/TASK-008.md): 사용자 승인으로 `monitor.sh`만 현재 관측 명령으로 안내하고, 사용하지 않는 실행 스크립트 6개를 삭제했다. `observation.txt`의 반복 표본을 없애고 정리 전 앱 상태·로그 신호·정리 결과는 유지했다. README와 삭제 파일을 가리키던 문서 링크를 정리했다. REQUIRED [독립 리뷰](reviews/REVIEW-TASK-008.md)는 Critical/Major 0, 역사적 TASK-005 안내에 관한 Minor 1을 DEFER로 분류했다. 새 형식의 실제 실행 확인은 사용자 담당이며 아직 수행하지 않았다.
 
 2026-10-28 [TASK-007](tasks/TASK-007.md) 보너스 [스케줄링 보고서](../reports/scheduling.md)와 [최종 학습 절](../study-note.md#task-007-정상-실행-로그의-스케줄링-패턴-추론)을 정리했다. 한 정상 실행의 A→B→C 기록 간격과 FCFS·SJF·SRT·RR·Priority·HRN의 구별 한계를 설명하고, FCFS형 가설의 장단점·서비스 적합성을 포함했다. 실제 OS·앱 정책이나 RR 시간 할당량을 확정하지 않는다. 사용자는 독립 리뷰를 생략했고 후속 한 문단 보완은 SKIP이다. 문서 작성은 사용자 이해 완료를 뜻하지 않는다.
