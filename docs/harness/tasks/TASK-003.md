@@ -15,7 +15,7 @@
 ## Execution State
 
 - 현재 단계: 현 증거 기준 CPU 보고서 작성·사용자 확인 완료. CPU 관측 도구 REQUIRED 재검토와 기존 CPU 보고서 RECOMMENDED 독립 재검토 완료. 2026-10-28 추가 앱 로그 근거를 보강했으나 CPU 과점유·Watchdog 필수 증거는 미완료다.
-- 승인 범위: [prepare-env.sh](../../../prepare-env.sh)의 메모리·CPU·멀티스레드 3개 위치 인자 지원, [메모리 비교 스크립트](../../../run-memory-comparison.sh)의 명시 인자 호출, [README](../../../README.md)의 사용법 반영. 무인자 환경변수·기본값 방식은 유지한다.
+- 승인 범위: [prepare-env.sh](../../../prepare-env.sh)의 메모리·CPU·멀티스레드 3개 위치 인자 지원, 메모리 비교 스크립트 (삭제 전 `run-memory-comparison.sh`)의 명시 인자 호출, [README](../../../README.md)의 사용법 반영. 무인자 환경변수·기본값 방식은 유지한다.
 - 위임: 이전 `gpt-6-sol` 호출은 아래 이력으로 보존한다. 이번 계획은 새 Implementer `gpt-6.1-sol` / `medium`, `fork_turns="none"`으로 회수했다. 도구가 요청 설정을 수락했으며 실제 하위 실행 모델 메타데이터는 별도 확인하지 않았다.
 - 결과 위치: 이 TASK에 회수한 계획을 기록한다.
 - 다음 행동: 사용자가 현재 증거 기준 [CPU 보고서](../../reports/cpu.md) 마무리를 요청했다. 추가 `top` 실험은 반복하지 않는다. 앱 `Current Load` 정의와 종료 주체가 확인되지 않아 OS CPU 과점유·Watchdog 근거를 완료로 처리하지 않은 채, 다음 제출 준비 단계에서 이 한계를 유지한다.
@@ -48,7 +48,7 @@
 - Review Decision REQUIRED로 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [변경 범위 재검토](../reviews/REVIEW-TASK-003-CPU-OBSERVATION.md)를 회수했다. Major-1/2 정적 해결·새 Critical/Major/Minor 없음. PM이 수정 전 사본 diff·최종 파일을 대조했다. 지정 설정 수락과 실제 실행 메타데이터 검증은 구분한다. 추가 리뷰 SKIP(재검토 후 source 변경 없음).
 - 앱·스크립트·문법 검사·테스트는 실행하지 않았다. 정상 수집·사용자 top 필터/열 배치·시간 만료·신호·쓰기 실패는 사용자 실행 검증 대기다. 학습 정리는 TASK 마감 시 수행한다.
 
-- 구현: [run-cpu-observation.sh](../../../run-cpu-observation.sh)와 [README](../../../README.md) CPU 절만 Implementer `gpt-6.1-sol` / `medium`이 변경했다. Bash coproc로 top을 직접 자식으로 두고 PID·읽기 FD를 보존하며 선택 열 CSV와 전체 ps 관계표를 저장한다. PM 기존 상태 변경과 사용자 파일은 보존했다. source 정적 self-check·PM 실제 파일 대조 완료, 앱·스크립트·테스트 실행 없음.
+- 구현: `run-cpu-observation.sh` (삭제 전)와 [README](../../../README.md) CPU 절만 Implementer `gpt-6.1-sol` / `medium`이 변경했다. Bash coproc로 top을 직접 자식으로 두고 PID·읽기 FD를 보존하며 선택 열 CSV와 전체 ps 관계표를 저장한다. PM 기존 상태 변경과 사용자 파일은 보존했다. source 정적 self-check·PM 실제 파일 대조 완료, 앱·스크립트·테스트 실행 없음.
 - Review Decision REQUIRED: 증거 저장·수집 자식 수명 처리. 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [독립 리뷰](../reviews/REVIEW-TASK-003-CPU-OBSERVATION.md)에서 Major-1(필터로 앱 PID 누락 가능), Major-2(선행 ENVIRON 등으로 열 오염 가능)를 회수했다. Critical/Minor 없음. 두 finding ACCEPT, 아직 미수정.
 - 보완 예정 파일은 관측 스크립트·README 두 개다. 프레임별 ps 관계표의 launcher·app·연결 후손 PID가 top에 나타나는지 검사하고 누락이나 유효 앱 표본 부재를 불완전으로 판정한다. 사용자 필터 완전 해제를 보장하지 않으며 시점 차이·표본 사이 후손 생존 한계를 명시한다.
 - 마지막 필수 열까지 기본 단일 토큰 필드(PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+)만 허용하고 선행/중간 미지원 필드는 저장 전 실패 처리한다. CPU 숫자·TIME+ 지원 형식도 확인한다. 필수 열 뒤의 데이터는 저장하지 않는다. 사용자 설정 파일 변경·범용 rc 파서·공통 모듈·신규 의존성은 추가하지 않는다.
@@ -150,7 +150,7 @@ Deadlock 본 실험, 스케줄링 보너스, TASK-002 실패 주입, 신규 프�
 ## Relevant Files
 
 - [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh): 재사용 우선.
-- [메모리 비교 스크립트](../../../run-memory-comparison.sh), [OOM 보고서](../../reports/oom.md): 이전 실험과 한계 참고, 기존 메모리 기능 보존.
+- 메모리 비교 스크립트 (삭제 전 `run-memory-comparison.sh`), [OOM 보고서](../../reports/oom.md): 이전 실험과 한계 참고, 기존 메모리 기능 보존.
 - [README](../../../README.md), [학습 노트](../../study-note.md).
 - [CPU 보고서 초안](../../reports/cpu.md).
 

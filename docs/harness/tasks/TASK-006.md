@@ -20,10 +20,10 @@
 ## Execution State
 
 - 현재 단계: 완료. 승인된 일곱 파일 구현, [REQUIRED 독립 리뷰](../reviews/REVIEW-TASK-006.md)의 Major-1/2·Minor-1 사용자 승인 수정, [수정 독립 재검토](../reviews/REVIEW-TASK-006-FIX.md) 완료. 재검토에서 새 Critical/Major/Minor 없음. 새 공통 경로의 메모리·CPU 종료/시간 만료·교착 시간 만료 사용자 실행을 확인했고 [최종 학습 절](../../study-note.md#task-006-공통-관측과-실행-후-안전-정리)을 현재 코드 기준으로 정리했다. 기존 2인자 호환과 실패·중단·수동 정리 경로는 정적 확인만으로 실행 미검증.
-- 승인된 수정 계획: [monitor.sh](../../../monitor.sh)를 관측 로직의 단일 소유 파일로 확장한다. 새 3/4인자 호출은 `prepare-env.sh`로 앱을 실행하고, 같은 파일에 있는 기존 CSV 수집 로직을 백그라운드 호출하며 `top` 구간 CPU·앱 PID의 `ps -L` 스레드 표본을 수집한다. 기존 2인자 PID/CSV 호출의 결과 형식·앱 유지·파일 보호는 보존한다. [observe.sh](../../../observe.sh)와 기존 세 장애별 실행 스크립트는 새 3/4인자 호출에 전달하는 얇은 호환 진입점으로 바꾼다. 모든 새 공통 실행에서 `app.log`, 앱이 생성하는 `agent_app.log`, `monitor.csv`, `observation.txt`, `cpu-samples.csv`, `thread-observation.txt`를 사용한다. CPU 표본은 이번 실행 앱 PID만, 스레드 표본은 앱 PID만 기록한다. 전체 시스템 scope 파일은 새 실행에서 만들지 않는다. 설정만으로 장애를 확정하지 않고 로그·표본 신호와 미확인 항목을 요약한다.
+- 승인된 수정 계획: [monitor.sh](../../../monitor.sh)를 관측 로직의 단일 소유 파일로 확장한다. 새 3/4인자 호출은 `prepare-env.sh`로 앱을 실행하고, 같은 파일에 있는 기존 CSV 수집 로직을 백그라운드 호출하며 `top` 구간 CPU·앱 PID의 `ps -L` 스레드 표본을 수집한다. 기존 2인자 PID/CSV 호출의 결과 형식·앱 유지·파일 보호는 보존한다. `observe.sh` (삭제 전)와 기존 세 장애별 실행 스크립트는 새 3/4인자 호출에 전달하는 얇은 호환 진입점으로 바꾼다. 모든 새 공통 실행에서 `app.log`, 앱이 생성하는 `agent_app.log`, `monitor.csv`, `observation.txt`, `cpu-samples.csv`, `thread-observation.txt`를 사용한다. CPU 표본은 이번 실행 앱 PID만, 스레드 표본은 앱 PID만 기록한다. 전체 시스템 scope 파일은 새 실행에서 만들지 않는다. 설정만으로 장애를 확정하지 않고 로그·표본 신호와 미확인 항목을 요약한다.
 - 승인된 종료 계획: [kill-agent-leak.sh](../../../kill-agent-leak.sh)의 자동 호출은 이번 실행 PID·시작 식별값만 받도록 고친다. 관측 종료 당시 상태를 먼저 요약한 뒤 동일성을 신호 직전에 재확인하여 TERM, 필요 시 동일 PID만 KILL하고 포트 상태를 확인한다. 준비 실패 등으로 동일성을 확인하지 못하면 신호를 생략하고 실패·수동 확인 대상을 명시한다. 명령행 부분 문자열 검색은 제거한다. 수동 무인자 호출은 현재 UID·이 저장소 바이너리 실제 경로가 정확히 일치하는 프로세스만 대상으로 삼고, 같은 바이너리의 다른 실행도 포함될 수 있음을 출력한다. `ps`/`ss` 실패는 성공으로 취급하지 않는다.
 - 호환성 영향: 기존 세 실행 스크립트의 이름·3/4개 설정 인자 호출은 유지하지만 별도 수집 로직·과거 파일명과 앱을 남겨 두는 동작은 공통 증거·자동 정리로 바뀐다. `monitor.sh`의 새 설정값 호출도 앱을 관측 후 정리하고, 기존 2인자 PID/CSV 호출은 앱을 정리하지 않는다. [README](../../../README.md)에 차이를 명시하고 과거 증거·이력 문서는 보존한다.
-- 승인 범위: [monitor.sh](../../../monitor.sh)가 3/4인자 공통 관측을 구현하고 2인자 PID/CSV 기존 동작을 보존한다. [observe.sh](../../../observe.sh)와 세 장애별 실행 스크립트는 thin wrapper, [kill-agent-leak.sh](../../../kill-agent-leak.sh)는 자동 호출에서 이번 실행 PID·시작 식별값만 검증·정리하고 수동 무인자는 현재 UID·정확한 앱 실행 파일 경로로 제한한다. [README](../../../README.md)는 새 사용법·동작 변경을 반영한다. 공통 산출물은 위 계획의 여섯 이름이며 과거 원본과 무관 파일은 보존한다.
+- 승인 범위: [monitor.sh](../../../monitor.sh)가 3/4인자 공통 관측을 구현하고 2인자 PID/CSV 기존 동작을 보존한다. `observe.sh` (삭제 전)와 세 장애별 실행 스크립트는 thin wrapper, [kill-agent-leak.sh](../../../kill-agent-leak.sh)는 자동 호출에서 이번 실행 PID·시작 식별값만 검증·정리하고 수동 무인자는 현재 UID·정확한 앱 실행 파일 경로로 제한한다. [README](../../../README.md)는 새 사용법·동작 변경을 반영한다. 공통 산출물은 위 계획의 여섯 이름이며 과거 원본과 무관 파일은 보존한다.
 - 구현 결과: `monitor.sh`에 기존 2인자 CSV 단독 호출과 신규 3/4인자 공통 관측을 두었다. `observe.sh`·세 장애별 스크립트는 호환 진입점, `kill-agent-leak.sh`는 자동 PID+시작 식별값 정리와 수동 정확 실행 파일 검색으로 바꾸었다. README 사용법을 갱신했다. Implementer는 셸 문법·diff 공백 정적 확인을 보고했고 앱 실행은 하지 않았다. PM은 `CPU Threshold Violated!` 요약 누락을 대조 중 발견해 승인 범위 안에서 보완을 회수했다.
 - Review Decision: REQUIRED — 공통 증거 저장·기존 PID/CSV 호환·신호/종료 흐름 및 다중 스크립트 동작 변경. 새 GPT-6 Sol / Medium Reviewer의 [정적 리뷰](../reviews/REVIEW-TASK-006.md)는 Critical 없음, Major 2건·Minor 1건이다. 실제 실행 결과를 뜻하지 않는다.
 - 승인된 리뷰 수정 계획: [monitor.sh](../../../monitor.sh)에서 top 표본 후 자연 종료와 PID 재사용을 구분해 확인 불가 표본을 별도 `identity_status`로 보존하고, 로그 검색의 일치·불일치·읽기 오류를 구분하며, 정리 후 PID 상태에 시작 식별값을 대조한다. [README](../../../README.md)에 새 CPU CSV 열과 해석 한계를 적는다. 기존 2인자 호출·종료 신호 정책·과거 원본은 유지한다. 승인 근거: 사용자 “수정”.
@@ -76,8 +76,8 @@
 
 ## Scope
 
-- 승인된 수정 파일은 [monitor.sh](../../../monitor.sh), [observe.sh](../../../observe.sh), [observe-memory.sh](../../../observe-memory.sh), [run-cpu-observation.sh](../../../run-cpu-observation.sh), [run-deadlock-observation.sh](../../../run-deadlock-observation.sh), [kill-agent-leak.sh](../../../kill-agent-leak.sh), [README.md](../../../README.md)다.
-- [prepare-env.sh](../../../prepare-env.sh), [run-memory-comparison.sh](../../../run-memory-comparison.sh), 사용자 [memory-test.sh](../../../memory-test.sh), 과거 `runs/` 증거는 변경하지 않는다.
+- 승인된 수정 파일은 [monitor.sh](../../../monitor.sh), `observe.sh` (삭제 전), `observe-memory.sh` (삭제 전), `run-cpu-observation.sh` (삭제 전), `run-deadlock-observation.sh` (삭제 전), [kill-agent-leak.sh](../../../kill-agent-leak.sh), [README.md](../../../README.md)다.
+- [prepare-env.sh](../../../prepare-env.sh), `run-memory-comparison.sh` (삭제 전), 사용자 `memory-test.sh` (삭제 전), 과거 `runs/` 증거는 변경하지 않는다.
 
 ## Out of Scope
 
@@ -97,7 +97,7 @@
 
 ## Relevant Files
 
-- [observe.sh](../../../observe.sh), [observe-memory.sh](../../../observe-memory.sh), [run-cpu-observation.sh](../../../run-cpu-observation.sh), [run-deadlock-observation.sh](../../../run-deadlock-observation.sh), [kill-agent-leak.sh](../../../kill-agent-leak.sh), [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh), [README.md](../../../README.md).
+- `observe.sh` (삭제 전), `observe-memory.sh` (삭제 전), `run-cpu-observation.sh` (삭제 전), `run-deadlock-observation.sh` (삭제 전), [kill-agent-leak.sh](../../../kill-agent-leak.sh), [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh), [README.md](../../../README.md).
 
 ## Implementation Notes
 

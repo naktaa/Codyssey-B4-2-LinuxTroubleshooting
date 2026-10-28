@@ -14,7 +14,7 @@
 - Review 예상: RECOMMENDED — 평가 산출물의 증거 연결·해석 검토. 실제 변경 위험을 보고 PM이 재판정한다.
 - Review Decision: REQUIRED (2026-09-30 PM). 최초 예상 이후 순차 실행·증거 파일 저장·파이프라인 종료 코드 처리가 추가됐다. 신규 비교 스크립트의 파일 보존·쓰기 실패·다음 실행 중단과 보고서 증거 연결을 GPT-6 Sol / Medium 독립 Reviewer가 검토한다. 정상 비교 사용자 검증은 확인했으며 실패 경로 실행 검증과 학습 최종 정리는 남아 있다.
 - 리뷰 PM 판정: [REVIEW-TASK-002](../reviews/REVIEW-TASK-002.md) 실시 완료. Major-1 부트 성공 확인, Major-2 첫 실행 비교 로그 저장 실패 시 다음 실행 중단, Minor-1 README 진행 상태를 ACCEPT. 사용자가 “오케이 보완하자 그럼”으로 아래 보완 계획을 승인했다. 기존 정상 비교 증거는 유효하다.
-- 리뷰 보완 계획 승인: 2026-09-30 Major-1·Major-2·Minor-1 반영 승인. 수정 파일은 [비교 스크립트](../../../run-memory-comparison.sh)와 [README](../../../README.md). 각 실행의 앱 로그에서 부트 성공 표식을 확인해 없으면 비정상 반환하고 다음 실행을 중단한다. before 출력 저장 완료·성공을 확인한 뒤에만 after를 시작하고, 저장 실패 시 stderr 안내와 비정상 종료를 유지한다. README 도입부는 OOM 결과 확보·보고서 작성 및 리뷰 지적 처리 중, CPU·Deadlock 대기로 맞춘다. 같은 계획은 재승인 없이 Implementer가 반영하며 실질적 범위 확대만 다시 승인받는다.
+- 리뷰 보완 계획 승인: 2026-09-30 Major-1·Major-2·Minor-1 반영 승인. 수정 파일은 비교 스크립트 (삭제 전 `run-memory-comparison.sh`)와 [README](../../../README.md). 각 실행의 앱 로그에서 부트 성공 표식을 확인해 없으면 비정상 반환하고 다음 실행을 중단한다. before 출력 저장 완료·성공을 확인한 뒤에만 after를 시작하고, 저장 실패 시 stderr 안내와 비정상 종료를 유지한다. README 도입부는 OOM 결과 확보·보고서 작성 및 리뷰 지적 처리 중, CPU·Deadlock 대기로 맞춘다. 같은 계획은 재승인 없이 Implementer가 반영하며 실질적 범위 확대만 다시 승인받는다.
 - 보완 경계·확인 기준: 기존 고유 로그 경로·원본 증거·보고서 수치 및 prepare-env.sh·monitor.sh 기능은 보존한다. 부트 이후 MemoryGuard 자체 종료를 부트 실패로 취급하지 않는다. 사용자 확인은 정상 두 실행 및 부트 성공 표식 누락·첫 실행 비교 출력 저장 실패 시 after 미실행과 비정상 반환을 구분한다. 안전한 별도 검증 환경·자료를 사용하고 원본을 손상시키지 않는다. 학습 노트는 TASK 마감 시 정리한다.
 - 보완 결과 PM 확인: 2026-09-30 Major-1·Major-2·Minor-1 반영을 현재 코드·README에서 확인했다. 추가 Review Decision: SKIP(승인된 국소 수정의 실패 반환·다음 실행 경계를 정적으로 확인). 기존 REQUIRED 독립 리뷰 실시 완료 상태를 유지한다. 현재 수정본의 실패 경로 사용자 검증은 아직 미확인이다.
 - 학습 작성 예외 승인·반영: 사용자가 이번 한 번만 PM 세션 작성을 요청하여 [학습 노트](../../study-note.md)를 현재 코드·기존 실험 증거 기준으로 정리했다. 공통 역할·작성 시점 정책은 유지하며 검증 대기와 사용자 이해 미확인을 명시했다.
@@ -96,7 +96,7 @@
 
 - [MISSION.md](../MISSION.md), [REQUIREMENTS.md](../REQUIREMENTS.md), [WORKLOG.md](../WORKLOG.md): 요구사항·이전 검증 근거, 읽기 참조.
 - [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh): 재사용·설명 대상. 기능 변경은 이번 범위 밖이다.
-- [run-memory-comparison.sh](../../../run-memory-comparison.sh): 사용자 요청으로 추가한 순차 실행·관제 진입점. 실제 실행은 사용자 담당.
+- `run-memory-comparison.sh` (삭제 전): 사용자 요청으로 추가한 순차 실행·관제 진입점. 실제 실행은 사용자 담당.
 - [README.md](../../../README.md): 한 명령 비교 실험 안내·보고서 링크·검증 상태 갱신.
 - [OOM 보고서](../../reports/oom.md): 128/256MB 비교의 생존 시간 증가와 앞선 256/512MB 비교의 한계를 기록했다.
 - [docs/study-note.md](../../study-note.md): 진행 중 작성된 TASK-002 초안을 보존하고 기능 완료 후 최종 코드 기준으로 정리한다.

@@ -1,7 +1,7 @@
 # Review: TASK-005 실행 시각 접두어와 기존 증거 이동
 
 - 대상: [TASK-005](../tasks/TASK-005.md)의 후속 사용자 승인(실행 폴더 시각 접두어, 당시 현존한 7개 증거 폴더 이름, 관련 문서 경로). 기준점은 `4335e76`이며 현재 작업 트리의 [prepare-env.sh](../../../prepare-env.sh), [README.md](../../../README.md), 해당 7개 `runs/` 목적지와 문서 변경을 정적으로 확인했다. `runs/`는 Git 제외 대상이므로 폴더 이동은 `git diff`에 나타나지 않는다.
-- 독립성·범위: 구현 대화를 상속하지 않았다. 최초 7개 이후 추가된 실행 폴더와 사용자 별도 [run-memory-comparison.sh](../../../run-memory-comparison.sh), [memory-test.sh](../../../memory-test.sh), [kill-agent-leak.sh](../../../kill-agent-leak.sh)의 변경은 이번 평가에서 제외했다. 앱·스크립트·테스트를 실행하거나 source·증거를 수정하지 않았다.
+- 독립성·범위: 구현 대화를 상속하지 않았다. 최초 7개 이후 추가된 실행 폴더와 사용자 별도 `run-memory-comparison.sh` (삭제 전), `memory-test.sh` (삭제 전), [kill-agent-leak.sh](../../../kill-agent-leak.sh)의 변경은 이번 평가에서 제외했다. 앱·스크립트·테스트를 실행하거나 source·증거를 수정하지 않았다.
 - 검증 한계: 현재 목적지의 26개 파일은 확인했지만 이동 **전** 상대 경로·SHA-256 manifest 원본은 Reviewer에게 없어 전후 바이트 동일성을 독립 검증할 수 없다. Implementer의 전후 manifest 동일 보고는 검증된 사실로 바꾸지 않는다. 이름과 현재 내용의 정적 일치만 판정한다. 실제 새 실행과 파일 실패 경로도 검증하지 않았다.
 
 ## Critical

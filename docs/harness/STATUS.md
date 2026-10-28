@@ -2,6 +2,8 @@
 
 ## Current Phase
 
+2026-10-28 [TASK-008](tasks/TASK-008.md): 사용자 승인으로 `monitor.sh`만 현재 관측 명령으로 안내하고, 사용하지 않는 실행 스크립트 6개를 삭제했다. `observation.txt`의 반복 표본을 없애고 정리 전 앱 상태·로그 신호·정리 결과는 유지했다. README와 삭제 파일을 가리키던 문서 링크를 정리했다. REQUIRED [독립 리뷰](reviews/REVIEW-TASK-008.md)는 Critical/Major 0, 역사적 TASK-005 안내에 관한 Minor 1을 DEFER로 분류했다. 새 형식의 실제 실행 확인은 사용자 담당이며 아직 수행하지 않았다.
+
 2026-10-28 [TASK-007](tasks/TASK-007.md) 보너스 [스케줄링 보고서](../reports/scheduling.md)와 [최종 학습 절](../study-note.md#task-007-정상-실행-로그의-스케줄링-패턴-추론)을 정리했다. 한 정상 실행의 A→B→C 기록 간격과 FCFS·SJF·SRT·RR·Priority·HRN의 구별 한계를 설명하고, FCFS형 가설의 장단점·서비스 적합성을 포함했다. 실제 OS·앱 정책이나 RR 시간 할당량을 확정하지 않는다. 사용자는 독립 리뷰를 생략했고 후속 한 문단 보완은 SKIP이다. 문서 작성은 사용자 이해 완료를 뜻하지 않는다.
 
 2026-10-28 사용자 요청으로 [OOM 보고서](../reports/oom.md)의 Before/After를 공통 `monitor.sh`로 실행된 128MB·300MB, CPU 40%, 멀티스레드 false 두 건으로 바꿨다. 128MB는 첫 RUNNING 뒤 17초에 MemoryGuard 자체 종료, 300MB는 부트 메모리 검사 OK 뒤 Heap 300MB에서 MemoryWorker 정리·회복을 기록하고 60초 관측 끝에도 생존했다. 300MB의 실행 중 WARNING은 종료 경고와 구분하며, 관측 뒤 앱은 도구가 정리했다. 앱 작업 경로와 관측 상한이 달라 한도 상향의 단독 인과 효과는 미확인이다. 사용자 보고서 확인·RECOMMENDED 리뷰 선택 및 TASK-002 학습 절 동기화 대기.

@@ -3,7 +3,7 @@
 set -u
 export LC_ALL=C
 
-# The original two-argument collector remains available to comparison scripts.
+# The original two-argument collector remains available for manual PID/CSV collection.
 sample_csv() {
     local pid=$1 log_file=$2 timestamp sample cpu rss mem state status
     if ! command -v ps >/dev/null || ! command -v date >/dev/null || ! command -v sleep >/dev/null; then
@@ -247,7 +247,7 @@ set -C
 if exec 3>"$summary_file"; then summary_open=1; else result=1; fi
 if exec 4>"$cpu_file"; then cpu_open=1; else result=1; fi
 if exec 6>"$thread_file"; then thread_open=1; else result=1; fi
-if (( summary_open )) && ! printf 'Settings: MEMORY_LIMIT=%s CPU_MAX_OCCUPY=%s MULTI_THREAD_ENABLE=%s\nObservation limit: %ss\nLauncher PID=%s start=%s; app PID=%s start=%s PPID=%s\nFiles: app.log, agent_app.log (created by app if available), monitor.csv, cpu-samples.csv, thread-observation.txt\nCPU: top second frame only; each first frame is excluded. monitor.csv CPU is a lifetime average.\n' "$MEMORY_LIMIT" "$CPU_MAX_OCCUPY" "$MULTI_THREAD_ENABLE" "$duration" "$launcher_pid" "$launcher_start" "$app_pid" "$app_start" "$launcher_pid" >&3; then result=1; fi
+if (( summary_open )) && ! printf 'Settings: MEMORY_LIMIT=%s CPU_MAX_OCCUPY=%s MULTI_THREAD_ENABLE=%s; limit=%ss\nLauncher PID=%s start=%s; app PID=%s start=%s PPID=%s\n' "$MEMORY_LIMIT" "$CPU_MAX_OCCUPY" "$MULTI_THREAD_ENABLE" "$duration" "$launcher_pid" "$launcher_start" "$app_pid" "$app_start" "$launcher_pid" >&3; then result=1; fi
 if (( cpu_open )) && ! printf 'time_local,sample,first_frame_excluded,pid,ppid_at_launch,cpu_percent_interval,cpu_time,identity_status\n' >&4; then result=1; fi
 if (( thread_open )) && ! printf 'App PID %s thread samples, approximately every 15 seconds. %%CPU is a lifetime average.\n' "$app_pid" >&6; then result=1; fi
 
@@ -328,34 +328,22 @@ if ! grep -Fxq 'All Boot Checks Passed!' "$run_dir/app.log" || ! grep -Fxq 'Agen
 if (( app_cpu_rows == 0 )); then result=1; fi
 
 if (( summary_open )); then
-    printf '\nObservation cutoff: %s\nApp PID state before cleanup: %s\nCSV collector status: %s\nCPU interval rows: %s (app PID: %s, postcheck unconfirmed: %s)\n' "$cutoff_time" "$cutoff_state" "$monitor_result" "$cpu_rows" "$app_cpu_rows" "$app_cpu_unconfirmed_rows" >&3 || result=1
-    if [[ $cutoff_state == absent || $cutoff_state == Z* || $cutoff_state == X* ]]; then
-        printf 'App work ended before cleanup; the exact cause needs app log evidence.\n' >&3 || result=1
-    else
-        printf 'App was present at the observation cutoff; later tool cleanup is separate.\n' >&3 || result=1
-    fi
+    printf '\nBefore cleanup: %s; app state: %s\nCollection: CSV status=%s; CPU rows=%s (app=%s, identity unconfirmed=%s)\n' "$cutoff_time" "$cutoff_state" "$monitor_result" "$cpu_rows" "$app_cpu_rows" "$app_cpu_unconfirmed_rows" >&3 || result=1
     app_logs=("$run_dir/app.log")
     if [[ -e $run_dir/agent_app.log || -L $run_dir/agent_app.log ]]; then app_logs+=("$run_dir/agent_app.log"); fi
-    printf 'App log signals (each is an observation, not a diagnosis):\n' >&3 || result=1
+    printf 'App log signals:\n' >&3 || result=1
     show_log_signal 'MemoryGuard limit' 'Memory limit exceeded' || result=1
     show_log_signal 'MemoryGuard self-termination' 'Self-terminating|SELF-TERMINATED' || result=1
     show_log_signal 'CpuWorker threshold (internal Load, not OS CPU)' 'CPU Threshold Violated' || result=1
     show_log_signal 'Watchdog reference (protection exit unconfirmed)' 'WATCHDOG' || result=1
     show_log_signal 'Thread WAITING/BLOCKED' 'WAITING.*BLOCKED|BLOCKED.*WAITING' || result=1
-    printf 'Last app.log line before tool cleanup:\n' >&3 || result=1
+    printf 'Last app.log line before cleanup:\n' >&3 || result=1
     tail -n 1 "$run_dir/app.log" >&3 2>/dev/null || result=1
-    printf 'Last monitor samples:\n' >&3 || result=1
-    tail -n 3 "$monitor_file" >&3 2>/dev/null || result=1
-    printf 'Last CPU interval samples:\n' >&3 || result=1
-    tail -n 3 "$cpu_file" >&3 2>/dev/null || result=1
     if (( app_cpu_unconfirmed_rows > 0 )); then
-        printf 'Postcheck-unconfirmed CPU rows are retained but cannot alone prove this app CPU usage.\n' >&3 || result=1
+        printf 'CPU rows with unconfirmed identity require separate review in cpu-samples.csv.\n' >&3 || result=1
     fi
-    printf 'Last app thread sample lines:\n' >&3 || result=1
-    tail -n 8 "$thread_file" >&3 2>/dev/null || result=1
-    printf 'Stall/deadlock requires repeated PID, CPU/RSS, thread and log evidence; no automatic finding.\n' >&3 || result=1
     if (( interrupted )); then printf 'Observation interrupted; evidence is partial.\n' >&3 || result=1; fi
-    if (( result )); then printf 'Collection/boot evidence is incomplete; do not infer a single incident type.\n' >&3 || result=1; else printf 'Collection completed; correlate logs and OS samples before diagnosing.\n' >&3 || result=1; fi
+    if (( result )); then printf 'Collection or boot evidence incomplete.\n' >&3 || result=1; fi
 fi
 
 # Cleanup begins only after the pre-cleanup state has been written.

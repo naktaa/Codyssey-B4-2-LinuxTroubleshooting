@@ -1,5 +1,11 @@
 # Worklog
 
+## 2026-10-28 TASK-008 공통 관측 스크립트 정리
+
+- 사용자 “진행” 승인으로 [TASK-008](tasks/TASK-008.md)의 삭제 6개, [monitor.sh](../../monitor.sh) 요약 축약, [README](../../README.md) 현재 명령 및 과거 문서의 삭제 파일 링크 정리를 Implementer가 수행했다. 기존 `runs/` 원본, 내부 의존 스크립트, `monitor.sh` 2인자 경로는 보존했다.
+- Implementer의 `bash -n`·`git diff --check`·링크 검색은 정적 확인이다. Review Decision: REQUIRED — 명령 삭제와 문서 영향이 있어 새 독립 [리뷰](reviews/REVIEW-TASK-008.md)를 회수했다. Critical/Major 0, Minor-1은 과거 TASK-005의 당시 다음 행동을 현행으로 오인할 여지다. PM 결정: DEFER. 현재 README·STATUS가 공통 명령으로 대체됐음을 안내하므로 과거 TASK 내용을 추가 수정하지 않는다.
+- 새 `observation.txt`와 자동 정리의 실제 결과는 사용자 실행 확인 대기다. 앱·스크립트 실행, commit/push는 수행하지 않았다.
+
 ## 2026-10-28 TASK-007 학습 절 마감
 
 - 사용자 “학습 노트만 정리 시작” 요청에 따라 같은 Implementer가 [단일 학습 노트의 TASK-007 절](../study-note.md#task-007-정상-실행-로그의-스케줄링-패턴-추론)을 최종 [보너스 보고서](../reports/scheduling.md) 기준으로 추가했다. 한 실행의 A/B/C 로그 시각 차이 계산, FCFS형 관찰과 실제 정책 판정 구분, 여섯 후보의 필요한 정보, 장단점·서비스 적합성, 재설명 질문과 근거를 연결했다. 기존 TASK 절은 보존했다.
@@ -65,7 +71,7 @@
 
 ## 2026-10-27 TASK-006 공통 monitor와 자동 정리 구현·리뷰
 
-- 사용자의 “그럼 monitor 하나로 해도 괜찮다면 그렇게 해봐. 수정 시작” 승인으로 [TASK-006](tasks/TASK-006.md)의 일곱 파일 계획을 구현했다. [monitor.sh](../../monitor.sh)는 기존 2인자 PID/CSV 단독 수집을 보존하면서 설정값 3/4인자에서 앱 실행·RSS/CPU 수명 평균·대상 구간 CPU·스레드 표본·요약을 수집한다. 기존 [observe.sh](../../observe.sh)와 장애별 실행 파일은 공통 명령의 호환 진입점이며 [kill-agent-leak.sh](../../kill-agent-leak.sh)는 이번 실행 PID·시작 식별값 정리와 정확한 바이너리 경로의 수동 정리로 수정했다. [README](../../README.md)를 새 형식에 맞췄다. 과거 `runs/` 원본과 사용자 무관 변경은 보존했다.
+- 사용자의 “그럼 monitor 하나로 해도 괜찮다면 그렇게 해봐. 수정 시작” 승인으로 [TASK-006](tasks/TASK-006.md)의 일곱 파일 계획을 구현했다. [monitor.sh](../../monitor.sh)는 기존 2인자 PID/CSV 단독 수집을 보존하면서 설정값 3/4인자에서 앱 실행·RSS/CPU 수명 평균·대상 구간 CPU·스레드 표본·요약을 수집한다. 기존 `observe.sh` (삭제 전)와 장애별 실행 파일은 공통 명령의 호환 진입점이며 [kill-agent-leak.sh](../../kill-agent-leak.sh)는 이번 실행 PID·시작 식별값 정리와 정확한 바이너리 경로의 수동 정리로 수정했다. [README](../../README.md)를 새 형식에 맞췄다. 과거 `runs/` 원본과 사용자 무관 변경은 보존했다.
 - [REQUIRED 독립 리뷰](reviews/REVIEW-TASK-006.md)의 Major-1(종료 직후 top 표본), Major-2(앱 로그 읽기 오류), Minor-1(정리 후 PID 재사용 표시)을 PM이 모두 ACCEPT했다. 사용자의 “수정” 승인을 받고 [monitor.sh](../../monitor.sh)·[README](../../README.md) 두 파일에 한정해 보완했다. [새 독립 재검토](reviews/REVIEW-TASK-006-FIX.md)에서 기존 지적은 정적으로 해결됐고 새 Critical/Major/Minor가 없었다. 추가 리뷰 SKIP.
 - Implementer는 Bash 문법·diff 공백 정적 확인을 보고했다. PM은 source·리뷰·승인 범위를 대조했으며 앱·스크립트 실제 실행은 하지 않았다. 새 산출물·반환값·자동 정리·포트 해제와 기존 2인자 호환은 사용자 검증 대기다. REQ-003의 OS CPU 급상승·Watchdog 종료 근거는 미확보 상태를 유지한다. TASK 학습 정리는 기능 검증 뒤 진행한다.
 - 커밋 보류 — 새 공통 관측의 사용자 실행 결과와 남은 수정 여부를 확인한 뒤 이번 응집된 변경 범위를 판단한다. 실제 commit/push는 수행하지 않았다.
@@ -134,14 +140,14 @@
 
 ## 2026-10-27 TASK-003 CPU 관측 도구 리뷰 수정·재검토 완료
 
-- 사용자 “수정 시작”으로 Major-1/2 두 파일 수정 계획 승인. Implementer `gpt-6.1-sol` / `medium`이 [관측 스크립트](../../run-cpu-observation.sh)와 [README](../../README.md)만 변경했다. 앱 관련 PID의 프레임별 top 출현 및 유효 launcher/app 구간 표본, 필수 열 허용 목록·CPU/TIME+ 형식 검사를 추가했다. 사용자 top 설정은 유지하고 지원 제한·시점 차이·PID 재사용 확인 한계를 명시했다.
+- 사용자 “수정 시작”으로 Major-1/2 두 파일 수정 계획 승인. Implementer `gpt-6.1-sol` / `medium`이 관측 스크립트 (삭제 전 `run-cpu-observation.sh`)와 [README](../../README.md)만 변경했다. 앱 관련 PID의 프레임별 top 출현 및 유효 launcher/app 구간 표본, 필수 열 허용 목록·CPU/TIME+ 형식 검사를 추가했다. 사용자 top 설정은 유지하고 지원 제한·시점 차이·PID 재사용 확인 한계를 명시했다.
 - Review Decision REQUIRED로 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [재검토](reviews/REVIEW-TASK-003-CPU-OBSERVATION.md)를 회수했다. 두 Major 정적 해결·새 Critical/Major/Minor 없음. PM이 수정 전 사본과 현재 파일을 대조했다. 도구가 지정값을 수락했으며 실제 실행 모델 메타데이터는 별도 확인하지 않았다. 추가 리뷰 SKIP(재검토 후 source 변경 없음).
 - 앱·스크립트·문법 검사·테스트 실행 없음. 실제 정상 수집·top 설정별 동작·실패·신호 경합은 사용자 검증 대기다. 기존 도구·보고서·원본·학습 노트와 사용자 작업 파일은 수정하지 않았다.
 - 다음은 사용자 512/80/false 기본60초 실행·반환값·원본 대조다. CPU 급상승·보호 종료 입증을 완료로 처리하지 않았다. 커밋 보류 — 첫 사용자 실행과 필요한 보완을 확인한 뒤 도구·README·리뷰·상태 기록을 묶는다.
 
 ## 2026-10-27 TASK-003 관측 도구 구현·독립 리뷰
 
-- 사용자 “구현 시작”으로 두 파일 계획 승인. Implementer `gpt-6.1-sol` / `medium`이 신규 [CPU 관측 스크립트](../../run-cpu-observation.sh)와 [README](../../README.md) CPU 절만 변경했다. coproc top 직접 자식·읽기 FD 보존, 선택 열 CSV와 ps 관계표, 기존 monitor 수집과 자신의 자식 정리·앱 유지 정책을 구현했다. PM은 최종 파일·정적 diff를 대조했다.
+- 사용자 “구현 시작”으로 두 파일 계획 승인. Implementer `gpt-6.1-sol` / `medium`이 신규 CPU 관측 스크립트 (삭제 전 `run-cpu-observation.sh`)와 [README](../../README.md) CPU 절만 변경했다. coproc top 직접 자식·읽기 FD 보존, 선택 열 CSV와 ps 관계표, 기존 monitor 수집과 자신의 자식 정리·앱 유지 정책을 구현했다. PM은 최종 파일·정적 diff를 대조했다.
 - Review Decision REQUIRED로 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [리뷰](reviews/REVIEW-TASK-003-CPU-OBSERVATION.md)를 회수했다. Major-1 사용자 top 제한으로 앱 PID 누락 시 성공 가능, Major-2 선행 ENVIRON 등으로 열 오염 가능을 ACCEPT했다. 요청 설정 수락과 실제 실행 모델 메타데이터 검증은 구분한다.
 - 읽기 전용 보완 계획을 회수했다. 앱 관련 PID의 프레임별 top 출현 검사·누락 실패 처리, 필수 열까지 기본 필드 허용 목록 및 CPU/TIME+ 형식 검사, README의 수집 범위·한계 보완을 두 파일에서 제안한다. 사용자 설정 변경·범용 설정 파서·신규 의존성은 추가하지 않는다. 수정 승인은 아직 받지 않았다.
 - 사용자 변경으로 보이는 신규 `.vscode/`·`test.c`는 이번 범위에서 읽거나 수정하지 않았다. source·앱·스크립트·테스트 실행 없음. 커밋 보류 — 리뷰 수정·재검토와 사용자 실행 확인 후 판단한다.
@@ -191,14 +197,14 @@
 ## 2026-10-26 모델 정책 전환 및 TASK-004 리뷰 수정 완료
 
 - 사용자 “pm은 6.1 sol high 구현 리뷰는 6.1 sol medium … 하네스 문서에 변경 반영하고 task004 수정도 시작” 승인에 따라 [모델 정책](MODEL_POLICY.md)·[운영 지침](WORKFLOW.md)·역할 프롬프트·TASK 템플릿을 역할별 고정값으로 갱신했다. 과거 실행 이력은 보존했다. PM 모델 ID는 제공된 실행 컨텍스트에서 `gpt-6.1-sol`로 확인되며 High는 사용자 지정값이다.
-- Major-1/Minor-1 수정은 새 Implementer `gpt-6.1-sol` / `medium`, `fork_turns="none"`에 위임해 [관측 스크립트](../../run-deadlock-observation.sh) 한 파일만 변경했다. 관제 0/의도된143 허용, INT130/TERM143 반환, 중단된 wait의 최종 상태 보존을 구현했다.
+- Major-1/Minor-1 수정은 새 Implementer `gpt-6.1-sol` / `medium`, `fork_turns="none"`에 위임해 관측 스크립트 (삭제 전 `run-deadlock-observation.sh`) 한 파일만 변경했다. 관제 0/의도된143 허용, INT130/TERM143 반환, 중단된 wait의 최종 상태 보존을 구현했다.
 - Review Decision REQUIRED로 새 Reviewer `gpt-6.1-sol` / `medium`, `fork_turns="none"`의 [변경 범위 재검토](reviews/REVIEW-TASK-004.md)를 회수했다. 두 finding 해결, 새 finding 없음. PM diff·최종 코드 대조 완료. 두 호출 모두 지정값을 수락했으며 실제 하위 실행 모델 메타데이터는 별도로 조회하지 않았다. 추가 리뷰 SKIP(재검토 후 source 변경 없음).
 - 오래된 TASK·STATUS 문구를 단일 명령·사용자 검증 대기로 정리했다. Git 공백 검사와 수정 전후 정적 대조만 수행했다. 앱·스크립트·테스트 실행, commit/push 및 학습 노트 작성은 하지 않았다.
 - 다음은 첫 관측과 반환값 확인, 이후 앱 상태에 따른 중단 검증·false 비교 결정이다. 커밋 권장 — 하네스 모델 정책 전환: `Docs: 역할별 모델을 GPT-6.1 Sol로 통일`. TASK-004 구현 묶음은 사용자 검증 후 권장한다. 실제 Git 쓰기 없음.
 
 ## 2026-10-26 TASK-004 단일 관측 구현·리뷰
 
-- 사용자 가독성 요청 및 “구현 시작” 승인으로 신규 [관측 스크립트](../../run-deadlock-observation.sh)와 [README](../../README.md) 두 파일만 Implementer `gpt-6-sol` / `medium`이 수정했다. 기존 준비·관제 도구 재사용, 기본 60초, 시각별 표와 로그 8줄, 앱 유지 정책이다.
+- 사용자 가독성 요청 및 “구현 시작” 승인으로 신규 관측 스크립트 (삭제 전 `run-deadlock-observation.sh`)와 [README](../../README.md) 두 파일만 Implementer `gpt-6-sol` / `medium`이 수정했다. 기존 준비·관제 도구 재사용, 기본 60초, 시각별 표와 로그 8줄, 앱 유지 정책이다.
 - 정적 self-check·PM 파일 대조 후 Review Decision REQUIRED. 새 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`의 [리뷰](reviews/REVIEW-TASK-004.md)를 회수했다. Major-1 관제 실패 은폐 가능성, Minor-1 TERM/INT 코드 혼합을 ACCEPT했다. 지정 모델 수락과 실제 실행 메타데이터 확인은 구분한다.
 - 관제 반환값 0/의도한143만 허용하고 INT130/TERM143을 구분하는 한 파일 수정 계획 승인 대기. 아직 리뷰 수정하지 않았다. 앱·테스트 실행 없음. 커밋 보류 — 리뷰 수정·사용자 검증 후 판단한다.
 
@@ -455,7 +461,7 @@ Review:
 
 - 사용자 “다음 작업 진행” 요청으로 현재 TASK의 남은 사용자 검증을 재개했다. 시작 HEAD는 `d80719b`, 작업 트리는 clean이었다. 기존 하네스 전환 커밋은 저장소에서 확인했으며 이번 PM이 실행한 것이 아니다.
 - `gpt-6-sol` / `medium`, `fork_turns="none"`으로 Implementer에 현재 코드 기준 사용자 실행 안내를 읽기 전용 위임하고 결과를 회수했다. 기능 수정·실행 테스트는 하지 않았다.
-- 현재 [비교 스크립트](../../run-memory-comparison.sh)의 128/256MB, CPU 80%, 멀티스레드 false 설정을 확인했다. OrbStack Linux 일반 사용자·저장소 루트에서 `bash ./run-memory-comparison.sh` 실행 후 즉시 셸 종료 코드와 comparison_log 경로를 PM에 전달하도록 안내한다. 완료 코드만으로 MemoryGuard 종료를 확정하지 않고 원본을 대조한다.
+- 현재 비교 스크립트 (삭제 전 `run-memory-comparison.sh`)의 128/256MB, CPU 80%, 멀티스레드 false 설정을 확인했다. OrbStack Linux 일반 사용자·저장소 루트에서 `bash ./run-memory-comparison.sh` 실행 후 즉시 셸 종료 코드와 comparison_log 경로를 PM에 전달하도록 안내한다. 완료 코드만으로 MemoryGuard 종료를 확정하지 않고 원본을 대조한다.
 - 부트 표식 누락·before 출력 저장 실패는 별도 검증 환경과 구체적인 실패 주입 계획이 필요하다. 현재 원본 로그나 실행 중 파일을 임의 변경하지 않으며, 정상 비교 확인 후 계획을 제시한다. 해당 경로는 여전히 미검증이다.
 - Review Decision: SKIP. 이번 결과는 실행 안내이며 기능 source 변경이 없다. 기존 REQUIRED 리뷰 완료·보완 후 추가 리뷰 SKIP을 유지한다. TASK-002 기능 완료로 처리하지 않는다.
 - 커밋 보류 — 사용자 검증 결과 반영과 TASK 마감 범위를 확인한 뒤 기록 변경을 묶는다. 실제 commit/push 없음.
@@ -476,7 +482,7 @@ Review:
 
 - 최신 사용자 실행 원본 `runs/run-2026-10-13_16-29-50-Ni7K0x`의 512/80/false, 부트 성공, PID 4910, 첫 RUNNING→EXITED 37초를 확인했다. 앱 Current Load 50.58%의 임계치 위반과 top 캡처 3.0%(사용자 관찰 약 5%)는 서로 같은 지표로 단정하지 않는다. Watchdog·SIGTERM 명시와 OS 과점유 입증은 미완료다.
 - 사용자 요청에 따라 앞으로 별도 지정이 없으면 최신 실행 디렉터리의 실제 설정·PID를 대조한다. 원본은 보존한다.
-- 사용자 “모든 필수기능을 수행할 때 저 인자 간편하게 설정 가능하다면 그렇게 수정.”으로 [TASK-003](tasks/TASK-003.md)의 세 파일 계획 승인. Implementer `gpt-6-sol` / `medium`이 [prepare-env.sh](../../prepare-env.sh)의 0/3개 인자 지원, [메모리 비교 스크립트](../../run-memory-comparison.sh)의 명시 인자 호출, [README](../../README.md) 사용법을 반영했다. 무인자 환경변수·기본값 방식과 기존 범위 검증을 유지한다.
+- 사용자 “모든 필수기능을 수행할 때 저 인자 간편하게 설정 가능하다면 그렇게 수정.”으로 [TASK-003](tasks/TASK-003.md)의 세 파일 계획 승인. Implementer `gpt-6-sol` / `medium`이 [prepare-env.sh](../../prepare-env.sh)의 0/3개 인자 지원, 메모리 비교 스크립트 (삭제 전 `run-memory-comparison.sh`)의 명시 인자 호출, [README](../../README.md) 사용법을 반영했다. 무인자 환경변수·기본값 방식과 기존 범위 검증을 유지한다.
 - Decision: 기존 준비 도구에 메모리·CPU·멀티스레드 세 위치 인자를 추가한다. Reason: 필수 장애별 비교에서 변경 변수와 고정 조건을 짧은 명령으로 명시한다. Alternative: 별도 CPU 실행기·env 파일·이름 있는 옵션. Why not: 현재 세 설정에는 추가 파일·파서 복잡도가 필요하지 않다.
 - Review Decision: REQUIRED. 공용 준비 도구와 메모리 비교 호출 관계 변경을 새 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`으로 독립 검토했다. [리뷰](reviews/REVIEW-TASK-003.md)에 Critical/Major/Minor 없음. PM diff 대조 완료, 수정할 finding 없음. 요청 설정 수락과 실제 실행 모델 메타데이터 검증은 구분한다.
 - Implementer 정적 self-check 및 diff 공백 검사 완료. AI는 실제 앱·테스트를 실행하지 않았다. 사용자 실행 검증, 512/40/false CPU 관측 및 기존 무인자·메모리 비교 회귀 확인은 대기다. CPU TASK와 학습 정리는 미완료로 유지한다.

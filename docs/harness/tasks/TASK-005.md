@@ -18,7 +18,7 @@
 ## Execution State
 
 - 현재 단계: 기본 구현·REQUIRED 리뷰·승인 수정·독립 재검토와 시각 접두어·당시 7개 폴더 이동·링크 변경 독립 리뷰 완료. 사용자 실행 검증 대기.
-- 승인 범위: [준비 도구](../../../prepare-env.sh)의 폴더 이름, [observe.sh](../../../observe.sh)와 [observe-memory.sh](../../../observe-memory.sh), [README.md](../../../README.md)의 사용법. 후속 승인으로 현재 존재하는 7개 증거 폴더의 이름과 이를 가리키는 문서 경로를 갱신한다. 기존 CPU·교착 스크립트, 메모리 자동 비교, 관제 도구와 과거 증거 파일 내용은 변경하지 않는다.
+- 승인 범위: [준비 도구](../../../prepare-env.sh)의 폴더 이름, `observe.sh` (삭제 전)와 `observe-memory.sh` (삭제 전), [README.md](../../../README.md)의 사용법. 후속 승인으로 현재 존재하는 7개 증거 폴더의 이름과 이를 가리키는 문서 경로를 갱신한다. 기존 CPU·교착 스크립트, 메모리 자동 비교, 관제 도구와 과거 증거 파일 내용은 변경하지 않는다.
 - 위임: Implementer GPT-6 Sol / Medium의 구현·리뷰 수정·시각 접두어 변경 결과를 회수했다. 사용자 실제 실행 전에는 기능 검증 완료로 표시하지 않는다.
 - 결과 위치: [독립 리뷰·수정 재검토](../reviews/REVIEW-TASK-005.md). 최초 Major-1·Minor-1은 사용자의 “수정해” 승인으로 `observe-memory.sh` 한 파일을 보완하고 독립 재검토에서 정적 해결·새 finding 없음. 추가 리뷰 SKIP. 앱·스크립트 실제 실행은 하지 않았다.
 - 후속 결과: 당시 7개 폴더를 매핑대로 이동했고 Implementer가 26개 파일의 상대 경로·SHA-256 전후 일치를 보고했다. [후속 독립 리뷰](../reviews/REVIEW-TASK-005-TIMESTAMP-MIGRATION.md)는 시각·설정 및 새 문서 링크 92개를 확인했고 Critical/Major/Minor가 없었다. 이동 전 manifest 원본이 리뷰어에게 없어 해시 일치는 독립 재검증하지 못했다. 첫 Reviewer 호출은 사용량 한도로 실패했고 같은 지정 모델의 새 Reviewer 재시도에서 결과를 회수했다.
@@ -41,8 +41,8 @@
 
 - [prepare-env.sh](../../../prepare-env.sh): 설정 기반의 고유 실행 폴더 이름.
 - 후속 승인 당시 존재한 7개 실행 증거 폴더의 이름을 동일 형식으로 바꾸고 기존 로그 내용의 바이트를 보존한다. 해당 폴더를 가리키는 저장소 문서 링크·설명은 새 이름으로 맞춘다. 과거 실행 당시의 옛 경로는 이 TASK에 매핑을 남긴다.
-- [observe.sh](../../../observe.sh): `memory`, `cpu`, `deadlock` mode와 각 mode의 인자를 받는 단일 사용자 진입점.
-- [observe-memory.sh](../../../observe-memory.sh): 정해진 시간의 메모리 단일 실행 관측.
+- `observe.sh` (삭제 전): `memory`, `cpu`, `deadlock` mode와 각 mode의 인자를 받는 단일 사용자 진입점.
+- `observe-memory.sh` (삭제 전): 정해진 시간의 메모리 단일 실행 관측.
 - [README.md](../../../README.md): 새 명령과 설정·폴더 형식, 종료 및 기존 도구 관계 안내.
 
 ## Out of Scope
@@ -62,8 +62,8 @@
 
 ## Relevant Files
 
-- [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh), [run-cpu-observation.sh](../../../run-cpu-observation.sh), [run-deadlock-observation.sh](../../../run-deadlock-observation.sh), [run-memory-comparison.sh](../../../run-memory-comparison.sh), [README.md](../../../README.md).
-- [observe.sh](../../../observe.sh), [observe-memory.sh](../../../observe-memory.sh).
+- [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh), `run-cpu-observation.sh` (삭제 전), `run-deadlock-observation.sh` (삭제 전), `run-memory-comparison.sh` (삭제 전), [README.md](../../../README.md).
+- `observe.sh` (삭제 전), `observe-memory.sh` (삭제 전).
 
 ## Implementation Notes
 

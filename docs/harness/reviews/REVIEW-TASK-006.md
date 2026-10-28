@@ -1,8 +1,8 @@
 # Review: TASK-006
 
 - 대상: [TASK-006](../tasks/TASK-006.md), [MISSION](../MISSION.md) §2·§4, [REQUIREMENTS](../REQUIREMENTS.md) REQ-002~004.
-- 기준점: 2026-10-27 현재 작업 트리. `git diff`와 파일 전체를 함께 확인했습니다. [monitor.sh](../../../monitor.sh), [run-cpu-observation.sh](../../../run-cpu-observation.sh), [run-deadlock-observation.sh](../../../run-deadlock-observation.sh), [README](../../../README.md)는 추적 파일이고, [observe.sh](../../../observe.sh), [observe-memory.sh](../../../observe-memory.sh), [kill-agent-leak.sh](../../../kill-agent-leak.sh)는 미추적 파일입니다. 다른 사용자 변경은 TASK-006 소유로 간주하지 않았습니다.
-- 관련 읽기 전용 확인: [prepare-env.sh](../../../prepare-env.sh), [run-memory-comparison.sh](../../../run-memory-comparison.sh), [memory-test.sh](../../../memory-test.sh), 기존 `HEAD:monitor.sh`.
+- 기준점: 2026-10-27 현재 작업 트리. `git diff`와 파일 전체를 함께 확인했습니다. [monitor.sh](../../../monitor.sh), `run-cpu-observation.sh` (삭제 전), `run-deadlock-observation.sh` (삭제 전), [README](../../../README.md)는 추적 파일이고, `observe.sh` (삭제 전), `observe-memory.sh` (삭제 전), [kill-agent-leak.sh](../../../kill-agent-leak.sh)는 미추적 파일입니다. 다른 사용자 변경은 TASK-006 소유로 간주하지 않았습니다.
+- 관련 읽기 전용 확인: [prepare-env.sh](../../../prepare-env.sh), `run-memory-comparison.sh` (삭제 전), `memory-test.sh` (삭제 전), 기존 `HEAD:monitor.sh`.
 - 독립성·한계: 구현 대화를 상속하지 않은 Reviewer의 정적 검토입니다. PM 지정 모델은 GPT-6 Sol / Medium이며 실제 실행 모델 메타데이터는 이 문서에서 별도로 검증하지 않았습니다. 앱 실행·테스트는 하지 않았으므로 CPU 장애 근거 확보, 종료 신호 결과, 포트 해제 성공을 추정하지 않습니다.
 - 안전성: 기존 증거 덮어쓰기 방지와 PID 신호 대상을 검토했습니다. 바이너리 내부·C/C++ 메모리 안전성은 이번 셸 변경 범위에 해당하지 않습니다. 실제 파일시스템 권한·프로세스 경합은 실행 미검증입니다.
 
@@ -28,7 +28,7 @@
 
 ## Good
 
-- Good-1: [monitor.sh](../../../monitor.sh)의 `sample_csv` 7~69행은 기존 2인자 CSV 헤더·수집 형식·앱 유지·noclobber를 유지하고, 새 설정값 경로와 분리합니다. [run-memory-comparison.sh](../../../run-memory-comparison.sh)와 [memory-test.sh](../../../memory-test.sh)의 기존 호출 형식도 정적으로 대조했습니다.
+- Good-1: [monitor.sh](../../../monitor.sh)의 `sample_csv` 7~69행은 기존 2인자 CSV 헤더·수집 형식·앱 유지·noclobber를 유지하고, 새 설정값 경로와 분리합니다. `run-memory-comparison.sh` (삭제 전)와 `memory-test.sh` (삭제 전)의 기존 호출 형식도 정적으로 대조했습니다.
 - Good-2: [monitor.sh](../../../monitor.sh)의 `save_top_interval` 140~187행은 첫 `top` 프레임을 제외하고 PID를 선택하며, 116~127행은 앱 PID만 `ps -L`로 기록합니다. [README](../../../README.md)는 수명 평균 CPU와 구간 CPU, 내부 Load와 OS `%CPU`의 차이를 설명하고 새 경로를 미검증으로 표시합니다.
 - Good-3: [monitor.sh](../../../monitor.sh) 294~327행은 정리 전 상태와 로그 신호를 먼저 남깁니다. [kill-agent-leak.sh](../../../kill-agent-leak.sh) 87~163행은 자동 대상 목록을 PID·시작값으로 고정하고 UID를 확인하며, `ss` 실패를 성공으로 취급하지 않고 포트의 다른 점유자를 신호 대상으로 추가하지 않습니다. 무인자 경로 39~86행은 정확한 실행 파일 경로와 대화형 확인을 요구합니다.
 

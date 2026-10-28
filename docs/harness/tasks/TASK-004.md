@@ -58,14 +58,14 @@ PID가 살아 있으나 작업이 정체된 상태를 관측하고, 스레드 �
 - 승인 근거: 사용자 “그러면 수정하면 돼” 및 “하네스 문서에 변경 반영하고 task004 수정도 시작”. 앞서 제시한 관측 스크립트 한 파일의 Major-1/Minor-1 수정과 상태 문구 정리를 승인했다.
 - 범위: 정상 관제 종료 0 또는 스크립트가 의도한 TERM 종료 143만 허용하고 다른 실패는 정상으로 표시하지 않는다. INT/TERM 중단은 각각 130/143으로 반환한다. 앱 유지 정책·관측 형식·기존 도구를 유지한다.
 - 하네스 변경: PM `gpt-6.1-sol` / High, Implementer·Reviewer `gpt-6.1-sol` / Medium으로 고정한다. 공통 정책·역할 프롬프트·템플릿의 현재 규칙만 갱신하고 과거 실행 기록은 보존한다.
-- 수정 결과: [관측 스크립트](../../../run-deadlock-observation.sh) INT/TERM trap, 중단된 wait의 최종 결과 보존, 관제 종료 상태 판정, 최종 반환값을 수정했다. 앱·기존 준비/관제 도구·로그 형식 변경 없음. 정적 self-check와 PM diff 대조 완료.
+- 수정 결과: 관측 스크립트 (삭제 전 `run-deadlock-observation.sh`) INT/TERM trap, 중단된 wait의 최종 결과 보존, 관제 종료 상태 판정, 최종 반환값을 수정했다. 앱·기존 준비/관제 도구·로그 형식 변경 없음. 정적 self-check와 PM diff 대조 완료.
 - Review Decision: REQUIRED로 변경 범위 [독립 재검토](../reviews/REVIEW-TASK-004.md)를 실시했고 Major-1/Minor-1 해결 및 새 finding 없음을 확인했다. 추가 리뷰 SKIP(재검토 후 source 변경 없음). 정상·자연 종료·중단·실패 경합의 실제 실행은 미검증이며 최종 학습 정리는 대기다.
 
 ## 회수한 첫 관측 계획
 
 ### 단일 관측 스크립트 구현·리뷰
 
-- [run-deadlock-observation.sh](../../../run-deadlock-observation.sh) 신규 작성 및 [README](../../../README.md) 사용법 추가 완료. 시각별 표·마지막 로그 8줄과 CSV를 저장한다. Implementer 정적 self-check와 PM 실제 파일 대조 완료, 앱·테스트 실행 없음.
+- `run-deadlock-observation.sh` (삭제 전) 신규 작성 및 [README](../../../README.md) 사용법 추가 완료. 시각별 표·마지막 로그 8줄과 CSV를 저장한다. Implementer 정적 self-check와 PM 실제 파일 대조 완료, 앱·테스트 실행 없음.
 - 최초 Review Decision REQUIRED: 파일 저장·백그라운드 관제 수명 처리. 새 Reviewer `gpt-6-sol` / `medium`, `fork_turns="none"`의 [독립 리뷰](../reviews/REVIEW-TASK-004.md)에서 Major-1/Minor-1을 ACCEPT했다. 이후 승인된 수정·재검토 결과는 위 절을 따른다.
 - 관측 스크립트 한 파일에서 정상 관제 0 또는 의도한 TERM 종료 143만 허용하고 INT/TERM 중단 코드 130/143을 구분하도록 수정했다.
 
@@ -111,7 +111,7 @@ CPU 추가 실험, 바이너리 내부 분석, 승인된 단일 관측 스크립
 ## Relevant Files
 
 - [prepare-env.sh](../../../prepare-env.sh), [monitor.sh](../../../monitor.sh), [README](../../../README.md).
-- [관측 스크립트](../../../run-deadlock-observation.sh), [리뷰·재검토](../reviews/REVIEW-TASK-004.md).
+- 관측 스크립트 (삭제 전 `run-deadlock-observation.sh`), [리뷰·재검토](../reviews/REVIEW-TASK-004.md).
 - [CPU TASK](TASK-003.md), [CPU 보고서](../../reports/cpu.md): 기존 관측 및 한계 참고.
 - [Deadlock 보고서](../../reports/deadlock.md).
 
