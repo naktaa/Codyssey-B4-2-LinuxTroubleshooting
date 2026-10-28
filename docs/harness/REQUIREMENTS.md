@@ -20,7 +20,7 @@
 
 ## Bonus
 
-- BONUS-001: 스케줄링 알고리즘 추론(§5, 선택). [TASK-007](tasks/TASK-007.md)의 [보고서](../reports/scheduling.md)에 정상 실행 한 건의 A→B→C 순차 완료와 FCFS·SJF·SRT·RR·Priority·HRN의 설명·로그상 가능성을 기록했다. 실제 OS·앱 정책과 CPU 교체 주기는 미확정이다. 사용자 후속 지시로 장단점·적합한 서비스 분석을 제거해 원문 보너스 요건은 부분 미충족이다. 사용자는 RECOMMENDED 독립 리뷰를 생략했다.
+- BONUS-001: 스케줄링 알고리즘 추론(§5, 선택). [TASK-007](tasks/TASK-007.md)의 [보고서](../reports/scheduling.md)에 정상 실행 한 건의 A→B→C 순차 완료와 FCFS·SJF·SRT·RR·Priority·HRN의 설명·로그상 가능성을 기록했다. 추론한 FCFS형 처리 가설의 장단점과 배치·웹 서비스 적합성도 정리했다. 실제 OS·앱 정책과 CPU 교체 주기는 미확정이며 최종 사용자 확인 대기다. 사용자는 기존 RECOMMENDED 독립 리뷰를 생략했다.
 
 ## Constraints
 
