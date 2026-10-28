@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-28 사용량 개선 하네스 규칙 병합
+
+- 사용자 지정 외부 `codex-harness-v1/APPLY_TO_EXISTING.md`의 일회성 지시와 갱신 템플릿을 현재 파일에 대조했다. [AGENTS](../../AGENTS.md), [WORKFLOW](WORKFLOW.md), [모델 정책](MODEL_POLICY.md), [PM](prompts/PM.md)·[Implementer](prompts/IMPLEMENTER.md)·[Reviewer](prompts/REVIEWER.md), [TASK 양식](tasks/TASK_TEMPLATE.md)·[학습 양식](learning/LEARNING_TEMPLATE.md)의 운영 규칙만 병합했다. 외부 템플릿의 MISSION·REQUIREMENTS·STATUS·WORKLOG·기존 TASK/리뷰·README·source는 복사하지 않았다.
+- Decision: TASK마다 PM 세션을 교체하지 않고 관련 구간·diff부터 확인한다. 같은 TASK Implementer를 재사용하고 독립 Reviewer는 유지하며, PM 재분석·수정 후 변화 없는 전체 재리뷰·긴 인계 복제를 줄인다. Reason: 긴 PM 맥락과 반복된 하위 호출에서 사용량이 컸다는 사용자 요청·로컬 기록을 반영한다. Alternative: 역할별 모델·런타임 설정 변경. Why not: 이 프로젝트의 명시적 PM High 정책과 별도 설정 승인 경계를 유지한다.
+- 범용 템플릿의 전 역할 Sol Medium 및 구현 직후 학습 절 갱신은 기존 사용자 지정 PM Sol High·TASK 마감 시 최종 학습 정리와 충돌해 적용하지 않았다. source 수정 전 승인, Review Decision·REQUIRED 검토, 안전성, 사용자 직접 테스트, 충분한 코드·학습 설명, 커밋 시점 안내를 유지했다. 자동 위임·기존 승인·미션 진행 기록도 보존했다.
+- 로컬 `~/.codex/config.toml`의 기본값은 확인 시점에 `gpt-6-astra` / `low`였고, `.vscode/settings.json`에는 Codex 모델 설정이 없었다. 현재 PM 채팅의 실제 모델·reasoning·속도와 런타임 컨텍스트 상속은 이 기본값만으로 확정하지 않았다. [모델 정책](MODEL_POLICY.md)의 하위 생성 요청은 `gpt-6-sol` / `medium` / `fork_turns="none"`을 유지한다. 설정 파일·MCP/플러그인·기능 source는 수정하지 않았다. 글로벌 기본값을 PM 정책에 맞추려면 영향 범위를 설명한 별도 변경안과 사용자 승인이 필요하다.
+- Review Decision: SKIP — 운영 문서와 양식의 국소 병합이고 기능 source·실행 설정·미션 증거는 변경하지 않았다. 기존 승인·모델·학습 시점 충돌과 상대 링크, 단일 학습 경로를 정적으로 대조했다. 앱·하위 에이전트·구독 한도 절감 테스트는 수행하지 않았다.
+- 커밋 권장 — 하네스 운영 지침·양식·상태 기록: `Docs: 기존 PM 세션을 유지하며 하네스 사용량 관리 규칙 병합`. 실제 commit/push는 수행하지 않았다.
+
 ## 2026-10-27 TASK-006 공통 monitor와 자동 정리 구현·리뷰
 
 - 사용자의 “그럼 monitor 하나로 해도 괜찮다면 그렇게 해봐. 수정 시작” 승인으로 [TASK-006](tasks/TASK-006.md)의 일곱 파일 계획을 구현했다. [monitor.sh](../../monitor.sh)는 기존 2인자 PID/CSV 단독 수집을 보존하면서 설정값 3/4인자에서 앱 실행·RSS/CPU 수명 평균·대상 구간 CPU·스레드 표본·요약을 수집한다. 기존 [observe.sh](../../observe.sh)와 장애별 실행 파일은 공통 명령의 호환 진입점이며 [kill-agent-leak.sh](../../kill-agent-leak.sh)는 이번 실행 PID·시작 식별값 정리와 정확한 바이너리 경로의 수동 정리로 수정했다. [README](../../README.md)를 새 형식에 맞췄다. 과거 `runs/` 원본과 사용자 무관 변경은 보존했다.

@@ -2,6 +2,8 @@
 
 ## Current Phase
 
+2026-10-28 사용량 관리 하네스 병합: 기존 PM 대화·자동 위임·미션 기록을 유지하고 관련 구간 읽기, 같은 TASK Implementer 재사용, 독립 Reviewer의 중복 검토 축소, 간결한 인계 규칙을 운영 문서와 템플릿에 반영했다. 프로젝트별 PM GPT-6 Sol / High와 Implementer·Reviewer Medium, TASK 마감 시 학습 정리는 그대로다. 런타임 설정은 변경하지 않았으며 현재 PM 채팅의 실제 모델·reasoning·속도는 이 문서 병합만으로 확인되지 않는다. 미션 상태와 다음 CPU 증거 과제는 아래 기록을 따른다.
+
 2026-10-27 [TASK-006](tasks/TASK-006.md) 마감 완료: 공통 `monitor.sh`의 메모리 종료(128/40/false), CPU 임계치 기록 뒤 종료(512/80/false), 60초 생존 뒤 정리(512/40/false), 교착 대기 뒤 정리(400/40/true)를 사용자 실행 원본으로 확인했다. 마지막 교착 실행은 락 순환 대기 로그 뒤 약 52초간 PID 생존·RSS/CPU/로그 정체가 이어졌고 도구 정리 뒤 포트가 해제됐다. [REQUIRED 리뷰](reviews/REVIEW-TASK-006.md)의 Major-1/2·Minor-1 승인 수정과 [독립 재검토](reviews/REVIEW-TASK-006-FIX.md)의 새 finding 없음, [최종 학습 정리](../study-note.md#task-006-공통-관측과-실행-후-안전-정리)도 확인했다. 기존 2인자 호출·실패/중단·수동 정리는 정적 확인만 있고 실행 미검증이다. CPU OS 급상승·Watchdog 필수 증거는 여전히 부족하다.
 
 2026-10-27 [TASK-005](tasks/TASK-005.md)의 공통 관측 명령·시간 제한 메모리 관측·시각/설정 기반 폴더 이름을 구현했다. 최초 REQUIRED 리뷰의 Major-1·Minor-1은 승인 수정과 독립 재검토에서 정적 해결됐고, 7개 과거 증거 폴더 이름·관련 링크 변경도 별도 독립 리뷰에서 Critical/Major/Minor가 없었다. 후속 TASK-006 공통 명령의 네 사용자 실행을 확인했다. 첫 시각 접두어 Reviewer 호출은 사용량 한도로 실패했고 같은 지정 모델의 재시도에서 결과를 회수했다.
