@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-28 TASK-002 128MB·300MB 보고서 비교
+
+- 사용자 요청에 따라 이전 128/40/false·30초와 최근 300/40/false·60초 공통 관측 원본을 대조했다. 128MB는 부트 메모리 권장치 WARNING, Heap 150MB의 MemoryGuard 자체 종료, 첫 RUNNING→EXITED 17초다. 300MB는 부트 메모리 검사 OK, Healthy System Monitoring, Heap 300MB의 MemoryWorker 정리 WARNING·Cache Flushed·MEMORY RECOVERED 뒤 60초 관측 끝까지 RUNNING이고 이후 도구 정리 status 0이다. 두 설정 모두 CPU 검사 OK, CPU 임계치 위반 기록 없음.
+- Implementer가 [OOM 보고서](../reports/oom.md)만 최신 Before/After로 재작성했다. PM은 앱 로그·CSV·관측 요약의 종료 주체와 시각, RSS 최고 150/307MB·정리 뒤 19MB를 대조하고 [README](../../README.md)의 재현 안내를 동기화했다. 128/256MB 기존 동일 작업 비교는 TASK 이력에 보존한다. 작업 경로와 관측 상한이 달라 300MB 결과를 한도 변경만의 인과 효과로 단정하지 않는다. 앱·테스트·원본 실행 없음.
+- Review Decision: RECOMMENDED — 평가 보고서의 주 비교와 종료 해석이 바뀌어 독립 증거 검토가 유용하다. 사용자 진행/생략 선택 및 보고서 확인 대기. 커밋 보류 — 사용자 확인과 TASK-002 학습 절 동기화 후 판단한다.
+
+## 2026-10-28 세 장애 보고서 형식 압축
+
+- 사용자 요청에 따라 세 보고서의 반복 실행 식별자·파일명·시각·PID를 줄이고 RSS는 관제 원값을 정수 decimal MB로 환산했다. 네 필수 절, 핵심 앱 로그 문구, 관제/OS 관측과 Before/After는 남겼다. 교착의 PID 존재 증거는 미션 필수라 한 번 유지했고, CPU의 OS 급상승·Watchdog 미입증도 유지했다.
+- Implementer가 [OOM](../reports/oom.md)·[CPU](../reports/cpu.md)·[Deadlock](../reports/deadlock.md) 세 파일만 편집했다. PM은 주요 환산값(19/150/281/517 MB), 네 절의 존재, 필수 증거와 사실·추론·미확인 경계를 대조했고 `git diff --check`를 확인했다. 앱·테스트·원본 실행 없음.
+- 사용자가 첫 압축본의 로그 근거가 지나치게 적다고 지적해 같은 Implementer가 세 보고서의 Before/After에 앱·관제·top/ps의 핵심 원문 행을 다시 넣었다. 원문은 사용자 실행 파일과 문자열 일치 대조했고, PM은 출처별 코드 블록·관측 시간·요약 단위·미입증 한계를 확인했다. 설명의 장황한 출처명과 원본 로그의 시각·PID는 구분해 처리했다.
+- Review Decision: RECOMMENDED — 평가 핵심 보고서 세 건의 증거 표시를 재구성했으므로 독립 검토가 유용하다. 사용자 진행/생략 선택과 보고서 확인 대기. 커밋 보류 — 보고서 확인과 TASK-002 학습 절 동기화 후 판단한다.
+
+## 2026-10-28 TASK-002 메모리 보고서 단일 장애 근거 정리
+
+- 사용자 요청에 따라 기존 128/256MB·CPU 40%·멀티스레드 false 실행의 `app.log`와 `monitor.csv`를 읽기 전용 대조했다. 자식 PID 12428·12576, CPU 자원 검사 OK, Heap 150/275MB의 MemoryGuard 자체 종료, 첫 RUNNING→EXITED 17초→32초, 최고 RSS 146,508→274,524 KiB다. 앱 로그에는 CPU 임계치 위반 기록이 없다. AI 실행·테스트 없음.
+- Implementer가 [OOM 보고서](../reports/oom.md)만 갱신했다. 과거 256/512MB 비교는 512MB 실행에서 다른 작업 경로와 CPU 경고가 나왔으므로 보고서의 상세 근거에서 빼고 [TASK-002](tasks/TASK-002.md)의 이력은 보존했다. PM은 보고서 diff와 원본 수치·시각을 대조했다. [README](../../README.md)의 재현 안내는 현재 비교 스크립트 설정값 300/350MB·CPU 40%와 보고서의 검증된 128/256MB·CPU 40%를 구분했다. 기능 source·원본은 바꾸지 않았다.
+- Review Decision: RECOMMENDED — 평가 보고서의 주 증거를 교체했으므로 독립 증거·해석 검토가 유용하다. 기존 REQUIRED 도구 리뷰는 유효하며 이번 변경은 문서 범위다. 사용자 리뷰 진행/생략 선택과 갱신 보고서 확인, TASK-002 학습 절 수치 동기화가 남아 있다. 커밋 보류 — 보고서 확인·학습 절 동기화 후 범위를 결정한다.
+
+## 2026-10-28 TASK-003 앱 내부 임계치 근거 보강
+
+- 사용자가 CPU 보고서에 문제가 없으면 마무리하고 다음으로 넘어가자고 요청했다. PM이 보고서·미션 CPU 최소 증거를 마지막으로 대조했다. 현 증거 기준 보고서 작성·사용자 확인은 마무리하되, OS CPU 급상승과 Watchdog 조치가 확인되지 않아 REQ-003·TASK-003 기능 완료로 표시하지 않는다. 다음 후보는 세 보고서의 제출 준비 점검이며 별도 Step 승인 전 source·보고서 본문 변경은 없다.
+- 사용자 요청으로 기존 로그를 검토했다. 512/80/false와 400/90/false 모두 앱 `Current Load` 약 50~52% 뒤 `CPU Threshold Violated!`가 나오고 다음 관제 표본에서 자식 PID `EXITED`가 확인된다. 90% 실행은 메모리 설정도 달라 동일 조건의 정책 비교는 아니다.
+- 다음 단계의 읽기 전용 제출 점검에서 세 보고서 모두 네 필수 절을 갖춘 것을 확인했다. [OOM 보고서](../reports/oom.md)의 `runs/` 링크 9개는 현재 작업 공간에 대상이 없고, CPU·Deadlock의 로컬 원본 링크는 존재한다. `runs/`는 Git 제외 대상이므로 저장소 링크 제출에서 원본 링크는 열리지 않는다. 주요 근거 발췌는 각 본문에 있으나 원본 복원이나 제출 충족을 추정하지 않는다.
+- 사용자 지시로 세 보고서의 `runs/` Markdown 링크를 제거하고 실행 식별자·확인한 파일명은 일반 텍스트로 남겼다. 기존 수치·로그 발췌와 결론은 보존했다. `rg`에서 세 보고서의 `runs/` 링크 0건, `git diff --check` 통과를 확인했다. Review Decision: SKIP — 문서 링크 정리이며 기능 source·앱·원본 변경과 실행 테스트가 없다. REQ-005 제출 및 REQ-006 학습 확인은 별도다.
+- 같은 TASK Implementer가 [CPU 보고서](../reports/cpu.md) 한 파일에 근거와 한계를 보강했다. PM은 diff·원본 링크·설정·시각·상태를 대조했고 `git diff --check`를 확인했다. 앱 시나리오·보호 분기는 추론이며 Watchdog 주체·신호와 OS CPU 급상승은 미입증으로 유지했다. 새 `top` 실험은 반복하지 않는다.
+- Review Decision: SKIP — 기존 독립 재검토에서 다룬 해석 범위의 국소 근거 추가이고 기능 source·원본 변경이 없다. 사용자 확인 후 현재 증거의 제출 한계를 결정한다. REQ-003·TASK-003 완료와 최종 학습 정리는 대기한다. 커밋 보류 — 사용자 보고서 확인과 미션 요구의 남은 처리 방향 결정 후 묶음을 판단한다.
+
 ## 2026-10-28 사용량 개선 하네스 규칙 병합
 
 - 사용자 지정 외부 `codex-harness-v1/APPLY_TO_EXISTING.md`의 일회성 지시와 갱신 템플릿을 현재 파일에 대조했다. [AGENTS](../../AGENTS.md), [WORKFLOW](WORKFLOW.md), [모델 정책](MODEL_POLICY.md), [PM](prompts/PM.md)·[Implementer](prompts/IMPLEMENTER.md)·[Reviewer](prompts/REVIEWER.md), [TASK 양식](tasks/TASK_TEMPLATE.md)·[학습 양식](learning/LEARNING_TEMPLATE.md)의 운영 규칙만 병합했다. 외부 템플릿의 MISSION·REQUIREMENTS·STATUS·WORKLOG·기존 TASK/리뷰·README·source는 복사하지 않았다.

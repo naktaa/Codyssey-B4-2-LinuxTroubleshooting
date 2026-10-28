@@ -2,6 +2,12 @@
 
 ## Current Phase
 
+2026-10-28 사용자 요청으로 [OOM 보고서](../reports/oom.md)의 Before/After를 공통 `monitor.sh`로 실행된 128MB·300MB, CPU 40%, 멀티스레드 false 두 건으로 바꿨다. 128MB는 첫 RUNNING 뒤 17초에 MemoryGuard 자체 종료, 300MB는 부트 메모리 검사 OK 뒤 Heap 300MB에서 MemoryWorker 정리·회복을 기록하고 60초 관측 끝에도 생존했다. 300MB의 실행 중 WARNING은 종료 경고와 구분하며, 관측 뒤 앱은 도구가 정리했다. 앱 작업 경로와 관측 상한이 달라 한도 상향의 단독 인과 효과는 미확인이다. 사용자 보고서 확인·RECOMMENDED 리뷰 선택 및 TASK-002 학습 절 동기화 대기.
+
+2026-10-28 사용자 요청으로 [OOM](../reports/oom.md)·[CPU](../reports/cpu.md)·[Deadlock](../reports/deadlock.md) 보고서의 표기와 톤을 다듬었다. 처음 압축본에서 빠진 핵심 원본 행은 사용자 지적에 따라 Before/After의 앱·관제·top/ps 블록에 복원했다. RSS 요약은 정수 MB로 환산하고 설명의 실행 식별자·불필요한 시각·반복 PID를 제거했다. 교착의 PID 존재 근거는 필수라 남겼다. 보고서 사용자 확인과 RECOMMENDED 독립 리뷰 선택을 기다린다. CPU 필수 증거 미충족은 유지한다.
+
+2026-10-28 [TASK-003](tasks/TASK-003.md) CPU 보고서에 80%·90% 추가 실행의 앱 내부 임계치 위반 직후 PID 종료 순서를 보강했고 사용자가 현 증거 기준 보고서 마무리를 요청했다. 새 `top` 실험은 반복하지 않으며 기존 OS 표본은 유지한다. 앱 시나리오·보호 분기는 추론이고 OS CPU 급상승과 Watchdog 보호 종료는 미입증이므로 REQ-003·TASK-003은 미완료다.
+
 2026-10-28 사용량 관리 하네스 병합: 기존 PM 대화·자동 위임·미션 기록을 유지하고 관련 구간 읽기, 같은 TASK Implementer 재사용, 독립 Reviewer의 중복 검토 축소, 간결한 인계 규칙을 운영 문서와 템플릿에 반영했다. 프로젝트별 PM GPT-6 Sol / High와 Implementer·Reviewer Medium, TASK 마감 시 학습 정리는 그대로다. 런타임 설정은 변경하지 않았으며 현재 PM 채팅의 실제 모델·reasoning·속도는 이 문서 병합만으로 확인되지 않는다. 미션 상태와 다음 CPU 증거 과제는 아래 기록을 따른다.
 
 2026-10-27 [TASK-006](tasks/TASK-006.md) 마감 완료: 공통 `monitor.sh`의 메모리 종료(128/40/false), CPU 임계치 기록 뒤 종료(512/80/false), 60초 생존 뒤 정리(512/40/false), 교착 대기 뒤 정리(400/40/true)를 사용자 실행 원본으로 확인했다. 마지막 교착 실행은 락 순환 대기 로그 뒤 약 52초간 PID 생존·RSS/CPU/로그 정체가 이어졌고 도구 정리 뒤 포트가 해제됐다. [REQUIRED 리뷰](reviews/REVIEW-TASK-006.md)의 Major-1/2·Minor-1 승인 수정과 [독립 재검토](reviews/REVIEW-TASK-006-FIX.md)의 새 finding 없음, [최종 학습 정리](../study-note.md#task-006-공통-관측과-실행-후-안전-정리)도 확인했다. 기존 2인자 호출·실패/중단·수동 정리는 정적 확인만 있고 실행 미검증이다. CPU OS 급상승·Watchdog 필수 증거는 여전히 부족하다.
@@ -26,11 +32,15 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 
 ## 이전 TASK 결과
 
-[TASK-002](tasks/TASK-002.md)의 [OOM 보고서](../reports/oom.md)를 비교 출력과 원본 CSV·앱 로그에 대조했다. 128/256MB 모두 MemoryGuard 자체 종료이며 첫 RUNNING→EXITED 관측은 17초→33초, 최고 RSS 표본은 146,520→274,628 KiB였다. 256/512MB는 서로 다른 작업·종료 경로로 별도 한계 사례를 유지한다.
+[TASK-002](tasks/TASK-002.md)의 [OOM 보고서](../reports/oom.md)는 128/300MB·CPU 40% 사용자 실행을 주 근거로 한다. 128MB는 MemoryGuard 자체 종료, 300MB는 MemoryWorker 정리 후 60초 관측 끝까지 생존했다. 이전 128/256MB 동일 작업의 17초→32초 비교는 TASK 기록에 남기며 보고서 주 근거와 구분한다.
 
 ## Next
 
-- [TASK-003](tasks/TASK-003.md): CPU 보고서의 OS CPU 급상승·Watchdog 근거 부족을 유지하고, 현재 증거로 미션 요구를 어디까지 설명할 수 있는지 후속 범위를 결정한다. 공통 도구의 추가 설정 반복만으로 CPU 입증을 약속하지 않는다.
+- 세 보고서의 압축본을 사용자에게 제시하고, 평가 핵심 문서 변경에 대한 RECOMMENDED 독립 리뷰 진행/생략을 결정한다. 사용자가 확인하면 TASK-002 학습 절의 오래된 80%·17초→33초 설명도 최신 보고서와 맞춘다.
+
+- [OOM 보고서](../reports/oom.md)의 128/300MB 수치·경고 종류·도구 정리 구분을 사용자가 확인하고, 문서 주 증거 교체에 대한 RECOMMENDED 독립 리뷰 진행 여부를 결정한다. 이후 [TASK-002 학습 절](../study-note.md#task-002-메모리-설정-전후-비교와-oom-보고)의 기존 비교 수치를 최종 보고서와 동기화한다.
+
+- [OOM](../reports/oom.md)·[CPU](../reports/cpu.md)·[Deadlock](../reports/deadlock.md) 보고서에서 Git 제외 대상 `runs/`로 향하던 링크를 제거하고 실행 식별자·필요한 원문 발췌를 남겼다. 다음은 세 보고서의 제출 형태와 REQ-005·REQ-006의 남은 범위를 확인하는 것이다. CPU 필수 증거 미충족은 유지한다.
 
 - [TASK-005](tasks/TASK-005.md): 처음 7개 원본의 시각·설정 기반 이름과 문서 링크를 갱신했다. 당시 mode별 `memory-observation.txt` 실행 검증은 후속 TASK-006의 단일 공통 산출물로 대체됐으며 과거 형식의 사용자 재실행을 요구하지 않는다. 파일 26개 해시 전후 일치는 Implementer 보고이고 이동 전 manifest의 독립 검증은 미수행이다.
 

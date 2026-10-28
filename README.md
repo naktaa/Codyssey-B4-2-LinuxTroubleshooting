@@ -130,13 +130,15 @@ bash ./run-deadlock-observation.sh 512 40 true
 
 ### 메모리 설정 전후 비교 — 한 명령으로 실행
 
-**Linux 머신의 저장소 루트**에서 일반 사용자로 실행합니다. 설정을 바꾸려면 [run-memory-comparison.sh](run-memory-comparison.sh) 상단의 `BEFORE_MEMORY_LIMIT`, `AFTER_MEMORY_LIMIT`, `CPU_LIMIT`, `MULTI_THREAD`, `AGENT_HOME_DIR`만 편집합니다. 현재 기본값은 **128MB → 256MB**, CPU 80%, 멀티스레드 비활성입니다. 첫 256MB → 512MB 실행에서 512MB가 다른 작업으로 전환되어 메모리 생존 시간 비교가 성립하지 않아 기본값을 바꿨습니다. 두 메모리 한계는 50~512MB 범위의 서로 다른 정수여야 합니다. 실제 계정의 비밀값을 이 파일에 적지 마세요.
+**Linux 머신의 저장소 루트**에서 일반 사용자로 실행합니다. 설정을 바꾸려면 [run-memory-comparison.sh](run-memory-comparison.sh) 상단의 `BEFORE_MEMORY_LIMIT`, `AFTER_MEMORY_LIMIT`, `CPU_LIMIT`, `MULTI_THREAD`, `AGENT_HOME_DIR`만 편집합니다. 현재 파일의 설정값은 **300MB → 350MB**, CPU 40%, 멀티스레드 비활성입니다. 두 메모리 한계는 50~512MB 범위의 서로 다른 정수여야 합니다. 실제 계정의 비밀값을 이 파일에 적지 마세요.
 
 ```bash
 ./run-memory-comparison.sh
 ```
 
-이 기존 비교 스크립트는 앱이 자연 종료할 때까지 기다리므로 40% 설정에서 계속 살아 있는 앱을 관측할 때는 위의 시간 제한 `monitor.sh` 설정값 호출을 두 번 실행합니다. 비교 스크립트는 먼저 고유한 `runs/comparison-.../output.log`를 만들고, 화면의 표준 출력·오류를 이 파일에도 저장합니다. 각 설정에서 기존 준비 도구로 앱을 시작하고, 별도의 설정 기반 실행 디렉터리에 `app.log`와 `monitor.csv`를 남긴 뒤 관제가 끝날 때까지 기다립니다. 비교 출력 로그에는 설정, 두 실행의 원본 경로·부모/자식 PID, 첫 `RUNNING`~`EXITED` 관측 시간, 최고 **표본** RSS, CSV 일부 행, 앱 로그의 시작·마지막 부분과 `experiment_exit_code`·`log_exit_code`·`final_exit_code`가 남습니다. 마지막에 표시되는 `comparison_log` 경로만 알려주시면 같은 저장소의 원본 CSV·앱 로그와 대조할 수 있습니다. 터미널 전체를 복사할 필요는 없습니다.
+이 기존 비교 스크립트는 앱이 자연 종료할 때까지 기다립니다. 설정에 따라 앱이 계속 살아 있으면 위의 시간 제한 `monitor.sh` 설정값 호출을 두 번 실행합니다. 비교 스크립트는 먼저 고유한 `runs/comparison-.../output.log`를 만들고, 화면의 표준 출력·오류를 이 파일에도 저장합니다. 각 설정에서 기존 준비 도구로 앱을 시작하고, 별도의 설정 기반 실행 디렉터리에 `app.log`와 `monitor.csv`를 남긴 뒤 관제가 끝날 때까지 기다립니다. 비교 출력 로그에는 설정, 두 실행의 원본 경로·부모/자식 PID, 첫 `RUNNING`~`EXITED` 관측 시간, 최고 **표본** RSS, CSV 일부 행, 앱 로그의 시작·마지막 부분과 `experiment_exit_code`·`log_exit_code`·`final_exit_code`가 남습니다. 마지막에 표시되는 `comparison_log` 경로만 알려주시면 같은 저장소의 원본 CSV·앱 로그와 대조할 수 있습니다. 터미널 전체를 복사할 필요는 없습니다.
+
+[OOM 보고서](docs/reports/oom.md)의 128MB·300MB 결과는 이미 사용자 실행한 시간 제한 `monitor.sh` 두 건을 비교한 것입니다. 128MB는 30초, 300MB는 60초를 관측했고 300MB 앱은 관측 끝에도 살아 있었으므로, 자연 종료를 기다리는 위 비교 스크립트의 완료 시간으로 해석하지 않습니다. 보고서 확인을 위한 재실행은 필요하지 않습니다.
 
 첫 실행의 준비·관제·측정·부트 성공 확인 또는 비교 출력 저장이 실패하거나 앱 프로세스·15034 포트가 아직 사용 중이면 다음 실행을 시작하지 않습니다. 부트 성공은 각 `app.log`의 `All Boot Checks Passed!`와 `Agent READY`로 확인합니다. 로그 저장 또는 실험이 실패하면 최종 종료 코드를 0으로 표시하지 않습니다. 남은 프로세스를 자동으로 종료하거나 기존 증거를 지우지 않으므로, 실패 메시지의 PID·경로와 실제 상태를 먼저 확인하세요. 완료 출력만으로 종료 원인을 확정하지 않고 두 `app.log`를 확인합니다.
 
@@ -144,11 +146,11 @@ bash ./run-deadlock-observation.sh 512 40 true
 
 | 분석 대상 | 비교할 설정 | 상태 |
 | --- | --- | --- |
-| 메모리 증가 및 MemoryGuard 종료 | MEMORY_LIMIT | [128/256MB 비교](docs/reports/oom.md) 확인: 관측 생존 시간 17초 → 33초 |
+| 메모리 증가 및 MemoryGuard 종료 | MEMORY_LIMIT | [128/300MB·CPU 40% 비교](docs/reports/oom.md): 128MB는 17초 뒤 종료, 300MB는 60초 관측 끝에도 생존 |
 | CPU 과점유 및 Watchdog 종료 | CPU_MAX_OCCUPY | [관측 초안](docs/reports/cpu.md): OS 과점유·보호 종료 증거 부족 |
 | 교착상태 재현 및 회피 | MULTI_THREAD_ENABLE | [true/false 비교](docs/reports/deadlock.md) 완료: 순환 대기·정체 → 작업 진행 |
 
-128/256MB 사용자 실행에서는 두 설정 모두 `MemoryWorker`의 메모리 증가와 MemoryGuard 자체 종료가 기록됐습니다. 관측 시간은 17초와 33초로 16초 늘었지만, 두 실행 모두 결국 종료됐습니다. [OOM 보고서](docs/reports/oom.md)에 원본 발췌, 측정 기준과 첫 256/512MB 비교의 한계를 기록했습니다. Deadlock 비교·보고서는 완료했으며 CPU 보고서는 필수 증거 보완이 남아 있습니다.
+128MB 실행은 `MemoryGuard` 자체 종료, 300MB 실행은 `MemoryWorker` 정리·회복 뒤 60초 관측 끝까지 생존했습니다. 두 실행의 앱 작업 경로와 관측 상한이 달라 한도 변경만의 효과로 단정하지 않습니다. [OOM 보고서](docs/reports/oom.md)에 핵심 원문과 측정 기준을 기록했습니다. Deadlock 비교·보고서는 완료했으며 CPU 보고서는 필수 증거 보완이 남아 있습니다.
 
 ## 확인된 동작
 
