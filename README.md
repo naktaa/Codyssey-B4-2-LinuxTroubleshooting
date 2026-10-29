@@ -30,7 +30,7 @@ bash ./monitor.sh 128 80 false 60
 bash ./monitor.sh 512 40 true 60
 ```
 
-각 실행의 `runs/`에 앱 로그, CSV, 스레드 표본, `observation.txt` 저장. 앱 부트 표식과 정리 전 상태·정리 결과 확인 후 다음 실행 시작. 관측 종료에 살아 있는 앱은 도구가 정리. 기존 PID/CSV 단독 관제와 실패 경로는 [TASK-006](docs/harness/tasks/TASK-006.md)·[학습 노트](docs/study-note.md)에 설명.
+각 실행의 `runs/`에 앱 로그, CSV, 스레드 표본, `observation.txt` 저장. 앱 부트 표식과 정리 전 상태·정리 결과 확인 후 다음 실행 시작. 관측 종료에 살아 있는 앱은 도구가 정리. 3·4인자 설정값 관측은 종료 시점에 앱 로그에서 MemoryGuard 한도 초과, 앱 내부 Load의 CPU 임계치 위반, 스레드 WAITING/BLOCKED를 찾으면 유형별 `[WARNING]`과 근거 로그를 터미널에 표시. WAITING/BLOCKED는 Deadlock 의심 신호이며 확정 진단은 아님. 기존 PID/CSV 단독 관제와 실패 경로는 [TASK-006](docs/harness/tasks/TASK-006.md)·[학습 노트](docs/study-note.md)에 설명.
 
 ## 주요 분석 결과
 

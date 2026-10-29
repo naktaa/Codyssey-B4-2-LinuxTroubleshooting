@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-29 TASK-010 로그 기반 터미널 장애 경고
+
+- 사용자 지정 파일·함수·세 감지 대상과 즉시 수정/독립 검토 생략 지시를 기록하고 새 TASK-010 Implementer(gpt-6-sol / medium / fork_turns="none")에 구현을 맡겼다. 호출 수락·결과 회수와 실제 실행 모델 메타데이터 확인은 구분하며 TASK-009 모델 예외를 승계하지 않았다.
+- [monitor.sh](../../monitor.sh)의 show_log_signal에 선택적 경고 설명을 추가하고 기존 세 로그 검사 호출에서만 `[WARNING]`과 동일 근거 줄을 터미널에 표시했다. MemoryGuard 한도·앱 내부 CPU 임계치 위반과 WAITING/BLOCKED에 따른 Deadlock 의심을 구분한다. 자기 종료·Watchdog·정리만으로 경고를 추가하지 않았다. [README](../../README.md)에 조건·시점을 설명했다.
+- 수정 직전 사본 대조에서 두 파일만 바뀌었다. summary 쓰기 실패/grep 결과 처리를 유지하고 경고 출력 실패가 수집 결과를 바꾸지 않도록 했다. CSV·관제 루프·PID 식별/정리·trap/wait·인자 분기는 수정하지 않았다. 기존 사용자 변경과 UTF-8/CRLF를 보존했다.
+- Review Decision: SKIP — 사용자 명시 지시로 독립 검토 생략. CRLF 제거 입력의 `bash -n` 정적 검사만 통과했으며 실제 앱·스크립트 실행·fixture 테스트·회귀 검증은 수행하지 않았다. 사용자 실행 확인과 이후 학습 정리는 대기한다. 기존 미션 미완료 항목은 그대로 유지한다.
+- 커밋 보류 — 실제 경고와 기록/정리의 사용자 실행 확인 후 monitor.sh·README 및 TASK-010 기록을 묶어 판단한다. 기존 TASK-009 문서 정리와 선행 사용자 변경을 자동으로 섞지 않으며 Git 쓰기 작업은 하지 않았다.
+
 ## 2026-10-29 TASK-009 RSS MB 통일·Scheduling 여섯 후보 복원
 
 - 사용자 “검토하지 말고 바로 수정 시작” 요청에 따라 같은 Implementer가 [OOM](../reports/oom.md)의 RSS 요약을 MB(1,000,000바이트)·정수 반올림으로 통일했다. 기존 CSV·로그의 KiB 원값은 보존했다. [Scheduling](../reports/scheduling.md)은 커밋 aa7de0d의 여섯 후보 정의·관측 구별 한계를 복원하고 요청에 맞춰 여섯 알고리즘의 장점·단점·적합 서비스 표를 정리했다. [학습 노트](../study-note.md)와 [REQUIREMENTS](REQUIREMENTS.md)는 보고서 후보 개수·연결 문구만 조정했다.

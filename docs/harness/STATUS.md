@@ -2,6 +2,8 @@
 
 ## Current Phase
 
+2026-10-29 [TASK-010](tasks/TASK-010.md): 사용자 “검토하지 말고 바로 수정 시작” 지시로 monitor.sh의 기존 show_log_signal과 세 호출을 재사용해 관측 종료 시 터미널 경고를 추가했다. 실제 MemoryGuard 한도·앱 CPU 임계치 로그는 해당 신호로, WAITING/BLOCKED는 Deadlock 의심으로 이유·근거 줄과 함께 표시한다. 종료·Watchdog 경고는 추가하지 않았다. 기존 CSV·observation.txt 문구·정리·인자 분기는 정적으로 보존됐고 README에 조건을 설명했다. CRLF 제거 입력의 bash -n은 통과, 실제 실행·경고·회귀 검증은 사용자 확인 대기. Review Decision: SKIP — 사용자 요청으로 독립 검토 생략. 아래는 이전 문서 정리 이력이다.
+
 2026-10-29 [TASK-009](tasks/TASK-009.md) RSS·Scheduling 후속: 사용자 “검토하지 말고 바로 수정 시작” 지시로 OOM RSS 요약을 MB로 통일하고 Scheduling의 FCFS·SJF·SRT·RR·Priority·HRN 여섯 후보와 장단점·적합 서비스 표를 복원·보완했다. 학습 노트·REQUIREMENTS의 연결 문구도 맞췄다. Review Decision: SKIP — 사용자 요청으로 독립 리뷰와 추가 내용 검토를 생략했다. 원문 CSV·로그와 미션 완료 상태는 유지하며 새 실행·테스트·코드 변경·Git 쓰기는 없다. 아래는 이전 편집·검토 이력이다.
 
 2026-10-29 [TASK-009](tasks/TASK-009.md) 후속 가독성 개선·중단 복구: 승인된 일곱 문서의 정리와 [독립 최종 리뷰](reviews/REVIEW-TASK-009.md)를 마쳤다. README와 네 보고서는 합계 401→296줄, 각 보고서는 Description 3문장·네 절·보고서체로 정리했다. OOM 주 비교는 128/256MB·CPU80%·false의 Heap150/275MB와 관측17/33초이며 두 실행 모두 MemoryGuard 종료다. 후속128/300MB·CPU40% 고유 원문, Deadlock 전체 ps, Scheduling 전체 진행 로그는 기존 학습 노트에 보존했다. 리뷰는 Critical 0 / Major 0 / Minor 0, 추가 리뷰 SKIP. GPT-6 Sol 용량 부족 중단 뒤 사용자 일회성 승인으로 GPT-6.1 Sol / Medium Implementer·Reviewer를 사용했고 정책 파일은 바꾸지 않았다. 복구 이후 코드·관측 기능 변경과 새 실행·테스트·Git 쓰기는 없다. 이전 임시 사본과 runs 원본 부재로 전체 편집 전후 바이트 보존·실행 원본 일치를 새로 검증했다고 주장하지 않는다. 사용자 최종 문서 확인은 별도이며 REQ-003/005/006 미완료를 유지한다. 사용자 후속 요청으로 OOM 4절에 300/40/false의 정리·회복(Heap300→25MB, RSS300160→18516KiB)과 60초 생존 뒤 도구 정리를 추가했으며, 별도 후속 리뷰도 Critical/Major/Minor 0건이다. 128/256MB 주 비교는 유지한다. 아래는 직전 편집·검증 이력이다.
@@ -53,6 +55,8 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 
 ## Next
 
+- [TASK-010](tasks/TASK-010.md)의 경고·근거 출력과 기존 기록/정리 동작을 사용자가 확인한다. 실제 앱 실행 결과를 받은 뒤 필요한 수정·최종 학습 정리를 진행한다.
+
 - [TASK-009](tasks/TASK-009.md)의 최종 README·네 보고서를 사용자가 확인한다. 문서 편집·검토는 끝났으며 CPU Watchdog 직접 증거·전체 제출·사용자 학습 확인은 미완료로 남긴다. 추가 실험이나 기능 수정은 이번 작업에서 수행하지 않는다.
 
 ### 이전 Next 이력
@@ -95,6 +99,8 @@ TASK-001·TASK-002 완료. TASK-002 실패 경로 실행 검증은 2026-10-09 �
 - 별도 지정이 없으면 runs의 실행 시각이 최신인 디렉터리를 확인하고 부트 설정·PID와 대조한다.
 
 ## Current Task
+
+[TASK-010](tasks/TASK-010.md) — 경고 출력·README 구현 및 정적 확인 완료, 사용자 실행 검증 대기. 이후 학습 정리로 마감한다. 아래는 이전 TASK 인계 이력이다.
 
 [TASK-009](tasks/TASK-009.md) — 후속 문서 구현·학습 증거 보존·독립 리뷰 완료(Critical/Major/Minor 0). 사용자 최종 문서 확인 대기. 아래 기존 구현·리뷰 및 필수 미충족 기록은 직전 상태 이력이다.
 

@@ -148,10 +148,15 @@ sample_threads() {
 
 # Report one representative log line per signal without turning it into a diagnosis.
 show_log_signal() {
-    local label=$1 pattern=$2 matches grep_result line
+    local label=$1 pattern=$2 warning=${3:-} matches grep_result line
     if matches=$(grep -Eih "$pattern" "${app_logs[@]}" 2>/dev/null); then
         line=$(tail -n 1 <<< "$matches") || return 1
-        printf '%s: observed — %s\n' "$label" "$line" >&3
+        # Keep a failed summary write visible even if terminal output succeeds.
+        printf '%s: observed — %s\n' "$label" "$line" >&3 || return 1
+        if [[ -n $warning ]]; then
+            # Terminal output is informational and must not change collection status.
+            printf '[WARNING] %s\nEvidence: %s\n' "$warning" "$line" || true
+        fi
     else
         grep_result=$?
         if (( grep_result == 1 )); then
@@ -283,11 +288,11 @@ if (( summary_open )); then
     app_logs=("$run_dir/app.log")
     if [[ -e $run_dir/agent_app.log || -L $run_dir/agent_app.log ]]; then app_logs+=("$run_dir/agent_app.log"); fi
     printf 'App log signals:\n' >&3 || result=1
-    show_log_signal 'MemoryGuard limit' 'Memory limit exceeded' || result=1
+    show_log_signal 'MemoryGuard limit' 'Memory limit exceeded' 'MemoryGuard limit exceeded: app memory protection threshold reached' || result=1
     show_log_signal 'MemoryGuard self-termination' 'Self-terminating|SELF-TERMINATED' || result=1
-    show_log_signal 'CpuWorker threshold (internal Load, not OS CPU)' 'CPU Threshold Violated' || result=1
+    show_log_signal 'CpuWorker threshold (internal Load, not OS CPU)' 'CPU Threshold Violated' 'CpuWorker threshold violated: app internal Load exceeded its limit (not OS CPU)' || result=1
     show_log_signal 'Watchdog reference (protection exit unconfirmed)' 'WATCHDOG' || result=1
-    show_log_signal 'Thread WAITING/BLOCKED' 'WAITING.*BLOCKED|BLOCKED.*WAITING' || result=1
+    show_log_signal 'Thread WAITING/BLOCKED' 'WAITING.*BLOCKED|BLOCKED.*WAITING' 'Deadlock suspected: WAITING/BLOCKED shows thread resource waiting; cyclic deadlock unconfirmed' || result=1
     printf 'Last app.log line before cleanup:\n' >&3 || result=1
     tail -n 1 "$run_dir/app.log" >&3 2>/dev/null || result=1
     if (( interrupted )); then printf 'Observation interrupted; evidence is partial.\n' >&3 || result=1; fi
