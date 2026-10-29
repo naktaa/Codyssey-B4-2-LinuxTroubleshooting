@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-29 TASK-009 RSS MB 통일·Scheduling 여섯 후보 복원
+
+- 사용자 “검토하지 말고 바로 수정 시작” 요청에 따라 같은 Implementer가 [OOM](../reports/oom.md)의 RSS 요약을 MB(1,000,000바이트)·정수 반올림으로 통일했다. 기존 CSV·로그의 KiB 원값은 보존했다. [Scheduling](../reports/scheduling.md)은 커밋 aa7de0d의 여섯 후보 정의·관측 구별 한계를 복원하고 요청에 맞춰 여섯 알고리즘의 장점·단점·적합 서비스 표를 정리했다. [학습 노트](../study-note.md)와 [REQUIREMENTS](REQUIREMENTS.md)는 보고서 후보 개수·연결 문구만 조정했다.
+- Review Decision: SKIP — 사용자 명시 지시로 독립 리뷰·PM 추가 내용 검토를 생략했다. Implementer는 환산 계산·기존 원문·네 절·UTF-8/CRLF·네 파일 범위만 자체 확인했다. 새 실험·실행·테스트·코드 변경·Git 쓰기는 없다. 기존 미션 미완료 상태와 사용자 최종 확인은 별도로 남긴다. 앞선 문서 정리와 같은 커밋 범위로 권장: `Docs: README와 장애 분석 보고서 간결화`.
+
+## 2026-10-29 TASK-009 OOM 4절 300MB 관측 보완
+
+- 사용자 구체적 후속 지시에 따라 같은 Implementer가 [OOM 보고서](../reports/oom.md) 4절에 300/40/false의 메모리 정리·회복 사례를 추가했다. 기존 128/256MB·17/33초 주 비교는 유지했다. 실제 권장 문구 `Recommend Over 256MB`와 종료 Heap 275MB를 구분하고, 보존된 앱 로그 네 행·Heap 300→25MB·RSS 300,160→18,516 KiB·60초 생존 뒤 도구 정리를 정리했다. CPU 설정과 앱 경로가 다른 별도 실험이라는 한계를 유지했다.
+- Review Decision: RECOMMENDED. 기존 독립 Reviewer의 [300MB 후속 검토](reviews/REVIEW-TASK-009.md)는 Critical 0 / Major 0 / Minor 0, PM 수용 및 수정 finding 없음. 같은 TASK의 승인된 GPT-6.1 Sol / Medium 일회성 예외를 유지했다. 추가 리뷰 SKIP — 이후 내용 문서 변경 없음.
+- 학습 노트의 기존 발췌를 정적으로 대조했으며 실행 원본 재검증·새 실험·테스트·코드 변경·Git 쓰기는 없었다. 사용자 최종 문서 확인과 기존 미션 미완료 항목은 별도다. 앞선 문서 정리와 이번 보완은 같은 커밋 범위로 권장: `Docs: README와 장애 분석 보고서 간결화`.
+
+## 2026-10-29 TASK-009 후속 가독성 개선·중단 복구 마무리
+
+- 사용자 “계획대로 수정 승인”으로 [README](../../README.md)·[OOM](../reports/oom.md)·[CPU](../reports/cpu.md)·[Deadlock](../reports/deadlock.md)·[Scheduling](../reports/scheduling.md)·[학습 노트](../study-note.md)·[REQUIREMENTS](REQUIREMENTS.md) 일곱 파일 계획을 승인받았다. 설명을 보고서체·짧은 목록·비교 표로 정리하고 네 보고서의 네 절을 유지했다. README와 보고서 합계는 401→280줄이다.
+- OOM은 커밋 d3ef9b9의 CPU80%·false, 128/256MB 동일 작업으로 주 비교를 교체했다. Heap150/275MB에서 모두 MemoryGuard 종료, 첫 RUNNING→EXITED 관측17→33초를 4절에 기록했다. 본문에서 제외한 후속128/300MB·CPU40% 앱/CSV/관측 요약은 학습 노트에 분리 보존했다. CPU 지표·측정 구간과 Watchdog 미확인, Deadlock의 CPU/MEM 정체·락 순환, Scheduling의 FCFS/RR/Priority 가설·장단점·서비스 적합성을 유지했다. Deadlock 전체 ps와 Scheduling 전체 진행 원문도 기존 학습 절에 보존했다.
+- 사용자 “사용량 소진되서 마지막에 하던 작업 끊긴것같은데 확인해보고 마무리” 요청으로 복구했다. 문서 구현은 남아 있었으나 후속 리뷰·기록이 미완료였다. 이전 에이전트와 임시 사본은 현재 없었고 복구 시점 사본을 새로 확보했다. GPT-6 Sol Implementer는 읽기 전용 쓰기 오류 보고 뒤 모델 용량 부족으로 중단됐으며 OOM Description 한 곳은 부분 반영돼 보존했다. 쓰기 오류 원인은 확정하지 않는다.
+- 사용자 “이번만 GPT-6.1 Sol 사용 승인”으로 남은 Implementer·독립 Reviewer의 gpt-6.1-sol / medium / fork_turns="none" 예외 사용을 승인받았다. 요청 수락과 결과 회수는 확인했고 실제 실행 모델 메타데이터는 별도 확인하지 않았다. 모델 정책 파일은 바꾸지 않았다. 복구 마무리에서는 세 장애 보고서의 짧은 OS 원리·CPU 측정 기준을 보완했다.
+- Review Decision: RECOMMENDED. 새 독립 Reviewer의 [후속 최종 검토](reviews/REVIEW-TASK-009.md)를 회수했다. Critical 0 / Major 0 / Minor 0, PM 수용 및 수정 finding 없음. 추가 리뷰 SKIP — 이후 내용 문서 변경 없이 상태 기록만 정리한다. 복구 사본 대비 기존 fenced 증거는 동일하고 복구 이후 코드·스크립트 변경은 없다. 이전 편집 전 사본과 runs 원본이 없어 전체 편집의 바이트 보존·실행 원본 일치를 새로 검증했다고 기록하지 않는다. 앱 실행·테스트·새 실험·Git 쓰기는 수행하지 않았다.
+- 문서 편집·독립 검토와 관련 학습 자료 동기화는 마무리했다. 사용자 최종 문서 확인, 원문 REQ-003 Watchdog 보호 종료 직접 증거·REQ-005 전체 제출·REQ-006 학습 목표 확인은 별도로 남긴다. 커밋 권장 — 이번 문서 정리 및 관련 기록: `Docs: README와 장애 분석 보고서 간결화`. 실제 대상 선정 시 선행 사용자 변경을 구분한다.
+
+## 2026-10-29 TASK-009 README·장애 보고서 정리
+
+- 사용자 “와치독은 앱 자체 종료로 해서 처리. 수정 시작”으로 PM 검토를 마친 다섯 파일 계획을 승인받았다. 같은 Implementer가 [README](../../README.md)를 157→74줄로 줄이고 [OOM](../reports/oom.md)·[CPU](../reports/cpu.md)·[Deadlock](../reports/deadlock.md)에 재현 명령과 미적용 근본 제안을 보완했다. [REQUIREMENTS](REQUIREMENTS.md)는 선택 제안 채택과 증거·제출·학습 상태를 구분했다. CPU는 임계치 위반→EXITED를 앱 자체 보호 종료로 해석하되 Watchdog·종료 신호 발신자는 직접 확인하지 못한 상태로 남겼다. 콜스택 결과는 사용자 후속 지시로 제외했다.
+- Review Decision: RECOMMENDED. 사용자 요청에 따라 새 독립 Reviewer의 [리뷰](reviews/REVIEW-TASK-009.md)를 회수했다. Critical 0 / Major 0 / Minor 1. 요청한 Implementer·Reviewer 설정은 `gpt-6-sol` / `medium` / `fork_turns="none"`으로 수락됐으며 실제 실행 모델 메타데이터는 별도 확인하지 않았다.
+- PM Disposition: Minor-1 ACCEPT. README 절 변경으로 끊긴 학습 노트 두 링크는 사용자 “두 링크 수정 승인” 후 같은 Implementer가 새 실행 방법 절로 연결했다. 추가 Review Decision: SKIP — 링크 대상 두 곳만 수정됐고 본문·CRLF 보존을 정적으로 확인했다.
+- PM은 수정 직전 사본과 비교해 세 보고서의 기존 fenced 증거 블록·네 절·비교 수치, 정확히 두 학습 링크 치환, 코드·관측 기능 무변경을 확인했다. CRLF를 고려한 diff 공백 검사 이상 없음. 현재 `runs/` 원본이 없어 실제 원본 일치는 재검증하지 못했고 앱 실행·테스트는 수행하지 않았다. 기존 사용자 변경·원문·실험 및 학습 기록은 보존했다.
+- 문서 편집·리뷰 수정은 끝났으며 사용자 최종 문서 확인과 이후 기존 학습 노트 내용의 마감 동기화는 대기한다. 원문 REQ-003의 Watchdog 보호 종료 직접 증거, REQ-005 전체 제출, REQ-006 사용자 학습 확인은 미완료다. 커밋 보류 — 사용자 문서 확인 후 이번 문서 정리 범위로 묶음을 판단한다. Git 쓰기 작업 없음.
+
 ## 2026-10-28 TASK-003 CPU 보고서의 0.1초 표본 보강
 
 - 사용자 승인 후 [CPU 보고서](../reports/cpu.md)에 기존 80%·40% 비교와 분리해 새 80% 실행의 앱 로그 45.50%·53.71%, 대상 프로세스 0.1초 CPU 45.94%·54.41%, 1초 CPU 4.19%, 관제 수명평균 0.8% 원문 근거를 추가했다. 0.1초 CPU 사용률의 계산 기준과 구간 차이를 적고 앱 내부 지표 정의·Watchdog/SIGTERM·지속 과점유·시스템 지연은 미확인으로 유지했다. 다른 수집법의 OS 수치를 설정 전후 완화 효과로 비교하지 않는다. 원본 `runs/`와 기능 source는 수정하지 않았다.
