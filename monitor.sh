@@ -146,17 +146,28 @@ sample_threads() {
     fi
 }
 
+# Show the app's startup verdicts once; missing lines must never imply OK.
+show_startup_status() {
+    local line resource
+    local pattern='^[[:space:]]*\[[[:space:]]*(MEMORY|CPU|THREAD)[[:space:]]*\]'
+    (( startup_count < 3 )) || return 0
+    [[ -r $run_dir/app.log ]] || return 0
+    while IFS= read -r line; do
+        [[ $line =~ $pattern ]] || continue
+        resource=${BASH_REMATCH[1]}
+        [[ $startup_shown == *" $resource "* ]] && continue
+        printf '%s\n' "$line" || true
+        startup_shown+="$resource "
+        startup_count=$((startup_count + 1))
+    done < "$run_dir/app.log"
+}
+
 # Report one representative log line per signal without turning it into a diagnosis.
 show_log_signal() {
-    local label=$1 pattern=$2 warning=${3:-} matches grep_result line
+    local label=$1 pattern=$2 matches grep_result line
     if matches=$(grep -Eih "$pattern" "${app_logs[@]}" 2>/dev/null); then
         line=$(tail -n 1 <<< "$matches") || return 1
-        # Keep a failed summary write visible even if terminal output succeeds.
         printf '%s: observed — %s\n' "$label" "$line" >&3 || return 1
-        if [[ -n $warning ]]; then
-            # Terminal output is informational and must not change collection status.
-            printf '[WARNING] %s\nEvidence: %s\n' "$warning" "$line" || true
-        fi
     else
         grep_result=$?
         if (( grep_result == 1 )); then
@@ -188,7 +199,9 @@ cpu_file_1s=$run_dir/cpu-live-1s.csv
 thread_file=$run_dir/thread-observation.txt
 monitor_file=$run_dir/monitor.csv
 cpu_binary=$run_dir/.cpu-precise-collector
-printf 'Started (boot unverified): launcher PID %s; app PID %s\n' "$launcher_pid" "$app_pid"
+printf '\nMeasurement started: launcher PID %s; app PID %s\n\n' "$launcher_pid" "$app_pid"
+startup_shown=' '
+startup_count=0
 result=0
 summary_open=0
 thread_open=0
@@ -215,6 +228,7 @@ if (( result == 0 && interrupted == 0 )); then
     SECONDS=0
     next_thread=0
     while (( SECONDS < duration && interrupted == 0 && result == 0 )); do
+        show_startup_status
         current_state=$(pid_state "$app_pid")
         if [[ $current_state == absent || $current_state == Z* || $current_state == X* ]]; then break; fi
         if [[ $current_state == unknown ]]; then result=1; break; fi
@@ -230,6 +244,8 @@ if (( result == 0 && interrupted == 0 )); then
         fi
         if ! sleep 1; then result=1; break; fi
     done
+    # Pick up startup lines written just before the final tick or an early exit.
+    show_startup_status
 fi
 
 cutoff_state=$(pid_state "$app_pid")
@@ -283,16 +299,17 @@ if [[ $cutoff_state == absent || $cutoff_state == Z* || $cutoff_state == X* ]] &
 if ! grep -Fxq 'All Boot Checks Passed!' "$run_dir/app.log" || ! grep -Fxq 'Agent READY' "$run_dir/app.log"; then result=1; fi
 if [[ ! -s $cpu_file_01 || ! -s $cpu_file_1s ]]; then result=1; fi
 
+printf '\n'
 if (( summary_open )); then
     printf '\nBefore cleanup: %s; app state: %s\nCollection: monitor CSV status=%s; CPU CSV status=%s (0.1s and 1s; nonzero rows only)\n' "$cutoff_time" "$cutoff_state" "$monitor_result" "$cpu_result" >&3 || result=1
     app_logs=("$run_dir/app.log")
     if [[ -e $run_dir/agent_app.log || -L $run_dir/agent_app.log ]]; then app_logs+=("$run_dir/agent_app.log"); fi
     printf 'App log signals:\n' >&3 || result=1
-    show_log_signal 'MemoryGuard limit' 'Memory limit exceeded' 'MemoryGuard limit exceeded: app memory protection threshold reached' || result=1
+    show_log_signal 'MemoryGuard limit' 'Memory limit exceeded' || result=1
     show_log_signal 'MemoryGuard self-termination' 'Self-terminating|SELF-TERMINATED' || result=1
-    show_log_signal 'CpuWorker threshold (internal Load, not OS CPU)' 'CPU Threshold Violated' 'CpuWorker threshold violated: app internal Load exceeded its limit (not OS CPU)' || result=1
+    show_log_signal 'CpuWorker threshold (internal Load, not OS CPU)' 'CPU Threshold Violated' || result=1
     show_log_signal 'Watchdog reference (protection exit unconfirmed)' 'WATCHDOG' || result=1
-    show_log_signal 'Thread WAITING/BLOCKED' 'WAITING.*BLOCKED|BLOCKED.*WAITING' 'Deadlock suspected: WAITING/BLOCKED shows thread resource waiting; cyclic deadlock unconfirmed' || result=1
+    show_log_signal 'Thread WAITING/BLOCKED' 'WAITING.*BLOCKED|BLOCKED.*WAITING' || result=1
     printf 'Last app.log line before cleanup:\n' >&3 || result=1
     tail -n 1 "$run_dir/app.log" >&3 2>/dev/null || result=1
     if (( interrupted )); then printf 'Observation interrupted; evidence is partial.\n' >&3 || result=1; fi
@@ -317,13 +334,12 @@ if (( cleanup_result )); then
 else
     printf 'Cleanup: complete (port 15034 free)\n'
 fi
-printf 'Results: %s\n' "$run_dir"
 if (( interrupted )); then
-    printf 'Result: interrupted; evidence may be partial\n'
+    printf 'Result: interrupted; evidence may be partial\n\n'
     exit "$interrupted"
 fi
 if (( result )); then
-    printf 'Result: failed; inspect the evidence and process state.\n' >&2
+    printf 'Result: failed; inspect the evidence and process state.\n\n' >&2
     exit 1
 fi
-printf 'Result: success; interpret the evidence before deciding the incident cause.\n'
+printf 'Result: success; interpret the evidence before deciding the incident cause.\n\n'
